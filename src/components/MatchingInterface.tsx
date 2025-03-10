@@ -5,7 +5,7 @@ import RecordCard from './RecordCard';
 import { useToast } from '@/components/ui/use-toast';
 import { useMatchingConfig } from '@/contexts/MatchingConfigContext';
 import { Badge } from '@/components/ui/badge';
-import { AlertCircle, CheckCircle2, HelpCircle, ClipboardList, FileText } from 'lucide-react';
+import { AlertCircle, CheckCircle2, HelpCircle, ClipboardList, FileText, Save } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
@@ -24,6 +24,7 @@ const MatchingInterface = ({ matchData, onMatchComplete }: MatchingInterfaceProp
   const [matchNotes, setMatchNotes] = useState('');
   const [consentGiven, setConsentGiven] = useState(false);
   const [activeTab, setActiveTab] = useState('matching');
+  const [selectedMatchId, setSelectedMatchId] = useState<string | null>(null);
   const { toast } = useToast();
   const { config } = useMatchingConfig();
 
@@ -62,6 +63,90 @@ const MatchingInterface = ({ matchData, onMatchComplete }: MatchingInterfaceProp
     }
   };
 
+  const handleSelectMatch = (matchId: string) => {
+    setSelectedMatchId(matchId === selectedMatchId ? null : matchId);
+  };
+
+  const handleSaveSelectedMatch = () => {
+    if (!selectedMatchId) {
+      toast({
+        title: "No Match Selected",
+        description: "Please select a match record before saving.",
+        variant: "destructive",
+        duration: 3000,
+      });
+      return;
+    }
+
+    if (!consentGiven) {
+      toast({
+        title: "Consent Required",
+        description: "Please confirm that the patient has consented to link their records before saving a match.",
+        variant: "destructive",
+        duration: 5000,
+      });
+      setActiveTab('consent');
+      return;
+    }
+    
+    setIsLoading(true);
+    
+    // Get the selected match details
+    const selectedMatch = currentMatch.potentialMatches.find(m => m.record.id === selectedMatchId);
+    
+    if (!selectedMatch) {
+      setIsLoading(false);
+      toast({
+        title: "Error",
+        description: "Could not find the selected match details.",
+        variant: "destructive",
+        duration: 3000,
+      });
+      return;
+    }
+    
+    // Create the match result
+    const result: MatchResult = {
+      sourceId: currentMatch.sourceRecord.id,
+      matchId: selectedMatchId,
+      status: 'matched',
+      confidence: selectedMatch.score,
+      matchedBy: 'user',
+      matchedAt: new Date().toISOString(),
+      notes: matchNotes,
+      fieldScores: selectedMatch.fieldScores,
+      consentObtained: consentGiven,
+      consentDate: new Date().toISOString()
+    };
+    
+    // Save the result
+    setTimeout(() => {
+      setResults([...results, result]);
+      
+      if (onMatchComplete) {
+        onMatchComplete(result);
+      }
+      
+      toast({
+        title: "Match Saved",
+        description: "The selected match has been saved successfully with a " + selectedMatch.score + "% confidence score.",
+        duration: 3000,
+      });
+      
+      // Reset for next match
+      setMatchNotes('');
+      setSelectedMatchId(null);
+      
+      // Move to the next match if available
+      if (currentIndex < matchData.length - 1) {
+        setCurrentIndex(currentIndex + 1);
+      }
+      
+      setIsLoading(false);
+      setActiveTab('matching');
+    }, 600);
+  };
+
   const handleMatch = (matchId: string | null, confidence: number, status: 'matched' | 'rejected' | 'manual-review') => {
     if (!consentGiven && status === 'matched') {
       toast({
@@ -86,7 +171,9 @@ const MatchingInterface = ({ matchData, onMatchComplete }: MatchingInterfaceProp
         matchedBy: 'user',
         matchedAt: new Date().toISOString(),
         notes: matchNotes,
-        fieldScores: matchId ? currentMatch.potentialMatches.find(m => m.record.id === matchId)?.fieldScores : undefined
+        fieldScores: matchId ? currentMatch.potentialMatches.find(m => m.record.id === matchId)?.fieldScores : undefined,
+        consentObtained: consentGiven,
+        consentDate: new Date().toISOString()
       };
       
       setResults([...results, result]);
@@ -107,6 +194,7 @@ const MatchingInterface = ({ matchData, onMatchComplete }: MatchingInterfaceProp
       
       // Reset notes for next match
       setMatchNotes('');
+      setSelectedMatchId(null);
       
       // Move to the next match if available
       if (currentIndex < matchData.length - 1) {
@@ -162,7 +250,7 @@ const MatchingInterface = ({ matchData, onMatchComplete }: MatchingInterfaceProp
               </span>
             </div>
             <p className="text-sm text-muted-foreground mb-3">
-              Select the matching record or reject if no match is found.
+              Select a matching record below and click "Save Selected Match" to save it.
             </p>
             
             <div className="space-y-4 animate-slide-up">
@@ -173,14 +261,21 @@ const MatchingInterface = ({ matchData, onMatchComplete }: MatchingInterfaceProp
                       {renderConfidenceBadge(match.score)}
                     </div>
                     
-                    <RecordCard 
-                      record={match.record}
-                      showActions={!isLoading}
-                      onMatch={() => handleMatch(match.record.id, match.score, 'matched')}
-                      onReject={() => handleMatch(null, 0, 'rejected')}
-                      matchScore={match.score}
-                      matchedOn={match.matchedOn}
-                    />
+                    <div 
+                      className={`border-2 rounded-lg cursor-pointer transition-all ${
+                        selectedMatchId === match.record.id 
+                          ? 'border-primary shadow-md' 
+                          : 'border-border hover:border-primary/50'
+                      }`}
+                      onClick={() => handleSelectMatch(match.record.id)}
+                    >
+                      <RecordCard 
+                        record={match.record}
+                        showActions={false}
+                        matchScore={match.score}
+                        matchedOn={match.matchedOn}
+                      />
+                    </div>
                   </div>
                 ))
               ) : (
@@ -196,6 +291,20 @@ const MatchingInterface = ({ matchData, onMatchComplete }: MatchingInterfaceProp
                 </div>
               )}
             </div>
+            
+            {selectedMatchId && (
+              <div className="mt-4 flex justify-end">
+                <Button
+                  variant="default"
+                  onClick={handleSaveSelectedMatch}
+                  disabled={isLoading}
+                  className="bg-green-600 hover:bg-green-700"
+                >
+                  <Save className="w-4 h-4 mr-2" />
+                  Save Selected Match
+                </Button>
+              </div>
+            )}
           </div>
           
           <div className="bg-muted/20 p-4 rounded-lg border border-border">
