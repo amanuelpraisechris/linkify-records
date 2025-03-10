@@ -170,7 +170,7 @@ const Reports = () => {
                 
                 <div className="space-y-2 mt-4">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">Low Confidence (<60%)</span>
+                    <span className="text-sm font-medium">Low Confidence (&lt;60%)</span>
                     <span className="text-sm font-medium text-destructive">{stats.lowConfidenceMatches}</span>
                   </div>
                   <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
