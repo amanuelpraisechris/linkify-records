@@ -1,4 +1,3 @@
-
 import { Record } from '@/types';
 import { ChevronDown, ChevronRight, Info, CheckCircle, MessageSquareText } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
@@ -47,7 +46,6 @@ const RecordTableView = ({
     }
   };
 
-  // List of keys that should be excluded from name fields
   const nonPatientNameFields = [
     "balozi_first_name", "\"balozi_first_name\"",
     "balozi_middle_name", "\"balozi_middle_name\"", 
@@ -60,30 +58,22 @@ const RecordTableView = ({
   ];
 
   const getDisplayValue = (record: Record, field: string, defaultValue = '-') => {
-    // Check for direct property match first (standard Record properties)
-    if (field === 'firstName' && record.firstName) return record.firstName;
-    if (field === 'lastName' && record.lastName) return record.lastName;
-    if (field === 'middleName' && record.middleName) return record.middleName;
-    if (field === 'village' && record.village) return record.village;
-    if (field === 'district' && record.district) return record.district;
-    if (field === 'subVillage' && record.subVillage) return record.subVillage;
-    if (field === 'birthDate' && record.birthDate) return record.birthDate;
-    
-    // For fields that might be in imported data with varying formats
     if (field === 'firstName') {
-      // Order of priority: standard field -> common variations -> general scan
-      if (record["FirstName"]) return record["FirstName"];
+      if (record.firstName) return record.firstName;
+      if (record.FirstName) return record.FirstName as string;
+      if (record["FirstName"]) return record["FirstName"] as string;
       if (record["\"FirstName\""]) return String(record["\"FirstName\""]).replace(/"/g, '');
-      if (record["first_name"]) return record["first_name"];
+      if (record.first_name) return record.first_name as string;
+      if (record["first_name"]) return record["first_name"] as string;
       if (record["\"first_name\""]) return String(record["\"first_name\""]).replace(/"/g, '');
-      if (record["name"]) return record["name"];
+      if (record.name) return record.name as string;
+      if (record["name"]) return record["name"] as string;
       if (record["\"name\""]) return String(record["\"name\""]).replace(/"/g, '');
       
-      // Scan other fields, but exclude known non-patient name fields
       for (const key in record) {
         if (nonPatientNameFields.includes(key)) continue;
         
-        if ((key.toLowerCase().includes('first') || key.toLowerCase().includes('name')) && 
+        if ((key.toLowerCase().includes('first') || key.toLowerCase() === 'name') && 
             !key.toLowerCase().includes('last') && 
             !key.toLowerCase().includes('middle') && 
             !key.toLowerCase().includes('cell') &&
@@ -98,15 +88,17 @@ const RecordTableView = ({
     }
     
     if (field === 'lastName') {
-      // Order of priority: standard field -> common variations -> general scan
-      if (record["LastName"]) return record["LastName"];
+      if (record.lastName) return record.lastName;
+      if (record.LastName) return record.LastName as string;
+      if (record["LastName"]) return record["LastName"] as string;
       if (record["\"LastName\""]) return String(record["\"LastName\""]).replace(/"/g, '');
-      if (record["last_name"]) return record["last_name"];
+      if (record.last_name) return record.last_name as string;
+      if (record["last_name"]) return record["last_name"] as string;
       if (record["\"last_name\""]) return String(record["\"last_name\""]).replace(/"/g, '');
-      if (record["surname"]) return record["surname"];
+      if (record.surname) return record.surname as string;
+      if (record["surname"]) return record["surname"] as string;
       if (record["\"surname\""]) return String(record["\"surname\""]).replace(/"/g, '');
       
-      // Scan other fields, but exclude known non-patient name fields
       for (const key in record) {
         if (nonPatientNameFields.includes(key)) continue;
         
@@ -122,18 +114,21 @@ const RecordTableView = ({
       return defaultValue;
     }
     
-    // Handle quoted field names like "villagename"
+    if (field === 'middleName' && record.middleName) return record.middleName;
+    if (field === 'village' && record.village) return record.village;
+    if (field === 'district' && record.district) return record.district;
+    if (field === 'subVillage' && record.subVillage) return record.subVillage;
+    if (field === 'birthDate' && record.birthDate) return record.birthDate;
+    
     const quotedField = `"${field}"`;
     if (record[quotedField as keyof Record]) {
       return String(record[quotedField as keyof Record]).replace(/"/g, '');
     }
     
-    // Try to access field directly
     if (record[field as keyof Record] !== undefined) {
       return String(record[field as keyof Record] || defaultValue);
     }
     
-    // Try without quotes for keys that might have quotes in the data
     const unquotedKey = field.replace(/"/g, '');
     if (record[unquotedKey as keyof Record] !== undefined) {
       return String(record[unquotedKey as keyof Record]);

@@ -25,17 +25,18 @@ const nonPatientNameFields = [
   "oldestHouseholdMemberFirstName", "oldestHouseholdMemberMiddleName", "oldestHouseholdMemberLastName"
 ];
 
-// Helper to get name fields correctly
+// Helper to get name fields correctly with improved priority handling
 const getNameField = (record: Record, field: 'firstName' | 'lastName' | 'middleName', defaultValue = '-'): string => {
-  // First check standard property
-  if (record[field]) return record[field] as string;
-  
-  // Check for common variations
+  // Check standard field names with highest priority
   if (field === 'firstName') {
+    if (record.firstName) return record.firstName;
+    if (record.FirstName) return record.FirstName as string;
     if (record["FirstName"]) return record["FirstName"] as string;
     if (record["\"FirstName\""]) return String(record["\"FirstName\""]).replace(/"/g, '');
+    if (record.first_name) return record.first_name as string;
     if (record["first_name"]) return record["first_name"] as string;
     if (record["\"first_name\""]) return String(record["\"first_name\""]).replace(/"/g, '');
+    if (record.name) return record.name as string;
     if (record["name"]) return record["name"] as string;
     if (record["\"name\""]) return String(record["\"name\""]).replace(/"/g, '');
     
@@ -43,7 +44,7 @@ const getNameField = (record: Record, field: 'firstName' | 'lastName' | 'middleN
     for (const key in record) {
       if (nonPatientNameFields.includes(key)) continue;
       
-      if ((key.toLowerCase().includes('first') || key.toLowerCase().includes('name')) && 
+      if ((key.toLowerCase().includes('first') || key.toLowerCase() === 'name') && 
           !key.toLowerCase().includes('last') && 
           !key.toLowerCase().includes('middle') && 
           !key.toLowerCase().includes('cell') &&
@@ -57,10 +58,14 @@ const getNameField = (record: Record, field: 'firstName' | 'lastName' | 'middleN
   }
   
   if (field === 'lastName') {
+    if (record.lastName) return record.lastName;
+    if (record.LastName) return record.LastName as string;
     if (record["LastName"]) return record["LastName"] as string;
     if (record["\"LastName\""]) return String(record["\"LastName\""]).replace(/"/g, '');
+    if (record.last_name) return record.last_name as string;
     if (record["last_name"]) return record["last_name"] as string;
     if (record["\"last_name\""]) return String(record["\"last_name\""]).replace(/"/g, '');
+    if (record.surname) return record.surname as string;
     if (record["surname"]) return record["surname"] as string;
     if (record["\"surname\""]) return String(record["\"surname\""]).replace(/"/g, '');
     
@@ -80,8 +85,11 @@ const getNameField = (record: Record, field: 'firstName' | 'lastName' | 'middleN
   }
   
   if (field === 'middleName') {
+    if (record.middleName) return record.middleName;
+    if (record.MiddleName) return record.MiddleName as string;
     if (record["MiddleName"]) return record["MiddleName"] as string;
     if (record["\"MiddleName\""]) return String(record["\"MiddleName\""]).replace(/"/g, '');
+    if (record.middle_name) return record.middle_name as string;
     if (record["middle_name"]) return record["middle_name"] as string;
     if (record["\"middle_name\""]) return String(record["\"middle_name\""]).replace(/"/g, '');
     
