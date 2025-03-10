@@ -1,4 +1,3 @@
-
 import React, { createContext, useState, useContext, ReactNode } from 'react';
 import { Record, MatchResult, Visit } from '@/types';
 import { calculateMatchScore } from '@/utils/matchingAlgorithms';
@@ -44,7 +43,6 @@ export const RecordDataProvider: React.FC<RecordDataProviderProps> = ({
   const [clinicRecords, setClinicRecords] = useState<Record[]>(initialRecords);
   const [importedRecords, setImportedRecords] = useState<Record[]>([]);
   const [matchResults, setMatchResults] = useState<MatchResult[]>([]);
-  // Fix: Change Record<string, string> to a simple object type
   const [matchNotes, setMatchNotes] = useState<{[key: string]: string}>({});
   const { config } = useMatchingConfig();
 
@@ -86,7 +84,23 @@ export const RecordDataProvider: React.FC<RecordDataProviderProps> = ({
   };
 
   const saveMatchResult = (result: MatchResult) => {
-    setMatchResults(prev => [...prev, result]);
+    const enrichedResult = {
+      ...result,
+      consentObtained: true,
+      consentDate: result.consentDate || new Date().toISOString()
+    };
+    
+    setMatchResults(prev => [...prev, enrichedResult]);
+    
+    if (result.matchId && result.notes) {
+      saveMatchNotes(result.matchId, result.notes);
+    }
+    
+    if (result.sourceId && result.notes) {
+      saveMatchNotes(result.sourceId, result.notes);
+    }
+    
+    console.log('Match result saved:', enrichedResult);
   };
   
   const saveMatchNotes = (recordId: string, notes: string) => {
@@ -114,6 +128,8 @@ export const RecordDataProvider: React.FC<RecordDataProviderProps> = ({
     setRecords(updateRecordWithNotes);
     setClinicRecords(updateRecordWithNotes);
     setCommunityRecords(updateRecordWithNotes);
+    
+    console.log(`Saved notes for record ${recordId}: ${notes.substring(0, 30)}...`);
   };
   
   const addVisitToRecord = (recordId: string, visit: Visit) => {

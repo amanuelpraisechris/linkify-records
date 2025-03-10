@@ -1,15 +1,18 @@
+
 import { useState } from 'react';
 import Navbar from '@/components/Navbar';
 import RecordEntryForm from '@/components/RecordEntryForm';
 import ImportDataForMatching from '@/components/ImportDataForMatching';
 import RecordList from '@/components/RecordList';
-import { Record } from '@/types';
+import { Record, MatchResult } from '@/types';
 import { useToast } from '@/components/ui/use-toast';
 import { RecordDataProvider, useRecordData } from '@/contexts/RecordDataContext';
 import { MatchingConfigProvider } from '@/contexts/MatchingConfigContext';
-import { ArrowLeft, AlertCircle, Database, Info } from 'lucide-react';
+import { ArrowLeft, AlertCircle, Database, Info, FileText, CheckCircle, XCircle, HelpCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Badge } from '@/components/ui/badge';
 
 const initialRecords: Record[] = [
   {
@@ -49,9 +52,10 @@ const initialRecords: Record[] = [
 ];
 
 const RecordEntryContent = () => {
-  const { addRecord, findMatchesForRecord, communityRecords, clinicRecords } = useRecordData();
+  const { addRecord, findMatchesForRecord, communityRecords, clinicRecords, matchResults } = useRecordData();
   const [potentialMatches, setPotentialMatches] = useState<Array<{record: Record; score: number; matchedOn: string[]; fieldScores?: {[key: string]: number};}>>([]);
   const [submittedRecord, setSubmittedRecord] = useState<Record | null>(null);
+  const [activeTab, setActiveTab] = useState('entry');
   const { toast } = useToast();
 
   const handleRecordSubmit = (record: Record) => {
@@ -96,6 +100,11 @@ const RecordEntryContent = () => {
         title: "Record Submitted",
         description: `Found ${matches.length} potential matches in the HDSS database.`,
       });
+      
+      // Switch to the matches tab automatically if matches found
+      if (matches.length > 0) {
+        setActiveTab('matches');
+      }
     } catch (error) {
       console.error("Error in handleRecordSubmit:", error);
       toast({
@@ -103,6 +112,19 @@ const RecordEntryContent = () => {
         description: "An error occurred while processing your record.",
         variant: "destructive"
       });
+    }
+  };
+  
+  const renderMatchStatusBadge = (status: string) => {
+    switch(status) {
+      case 'matched':
+        return <Badge className="bg-green-500"><CheckCircle className="w-3 h-3 mr-1" /> Matched</Badge>;
+      case 'rejected':
+        return <Badge className="bg-red-500"><XCircle className="w-3 h-3 mr-1" /> Rejected</Badge>;
+      case 'manual-review':
+        return <Badge className="bg-amber-500"><HelpCircle className="w-3 h-3 mr-1" /> For Review</Badge>;
+      default:
+        return <Badge className="bg-gray-500">Unknown</Badge>;
     }
   };
 
@@ -134,75 +156,206 @@ const RecordEntryContent = () => {
           </Alert>
         )}
         
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-1">
-            <ImportDataForMatching />
-            <RecordEntryForm onRecordSubmit={handleRecordSubmit} />
-          </div>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="mb-6">
+            <TabsTrigger value="entry">Record Entry</TabsTrigger>
+            <TabsTrigger value="matches">Matches</TabsTrigger>
+            <TabsTrigger value="progress-report">
+              <FileText className="w-4 h-4 mr-2" />
+              Progress Report
+            </TabsTrigger>
+          </TabsList>
           
-          <div className="lg:col-span-2">
-            <div className="bg-white dark:bg-black border rounded-xl shadow-card p-6 mb-6">
-              <h2 className="text-xl font-semibold mb-4">Potential Matches in HDSS Database</h2>
+          <TabsContent value="entry">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              <div className="lg:col-span-1">
+                <ImportDataForMatching />
+                <RecordEntryForm onRecordSubmit={handleRecordSubmit} />
+              </div>
               
-              {submittedRecord && potentialMatches.length > 0 ? (
-                <RecordList 
-                  records={potentialMatches.map(match => ({
-                    ...match.record,
-                    fuzzyScore: match.score,
-                    matchedOn: match.matchedOn,
-                    metadata: {
-                      ...match.record.metadata,
-                      matchScore: match.score
-                    }
-                  }))} 
-                  showMatchDetail={true}
-                  enableMatchAssignment={true}
-                />
-              ) : submittedRecord ? (
-                <div className="bg-muted/30 p-6 rounded-lg border border-muted">
-                  <div className="flex items-center gap-2 mb-2 text-amber-600 dark:text-amber-400">
-                    <AlertCircle className="h-5 w-5" />
-                    <h3 className="text-lg font-medium">No potential matches found</h3>
-                  </div>
-                  <p className="text-muted-foreground mb-4">
-                    No potential matches were found for the submitted record in the HDSS database.
-                  </p>
+              <div className="lg:col-span-2">
+                <div className="bg-white dark:bg-black border rounded-xl shadow-card p-6 mb-6">
+                  <h2 className="text-xl font-semibold mb-4">Recently Added Clinic Records</h2>
+                  <RecordList 
+                    records={clinicRecords} 
+                    showMatchDetail={false} 
+                    emptyMessage="No clinic records have been added yet."
+                  />
+                </div>
+              </div>
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="matches">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              <div className="lg:col-span-3">
+                <div className="bg-white dark:bg-black border rounded-xl shadow-card p-6">
+                  <h2 className="text-xl font-semibold mb-4">Potential Matches in HDSS Database</h2>
                   
-                  {communityRecords.length === 0 ? (
-                    <Alert className="bg-blue-50 border-blue-200 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-900/50">
-                      <Database className="h-4 w-4" />
-                      <AlertTitle>Community Database Required</AlertTitle>
-                      <AlertDescription>
-                        You need to import the community HDSS database first to enable matching functionality.
-                      </AlertDescription>
-                    </Alert>
+                  {submittedRecord && potentialMatches.length > 0 ? (
+                    <RecordList 
+                      records={potentialMatches.map(match => ({
+                        ...match.record,
+                        fuzzyScore: match.score,
+                        matchedOn: match.matchedOn,
+                        metadata: {
+                          ...match.record.metadata,
+                          matchScore: match.score
+                        }
+                      }))} 
+                      showMatchDetail={true}
+                      enableMatchAssignment={true}
+                    />
+                  ) : submittedRecord ? (
+                    <div className="bg-muted/30 p-6 rounded-lg border border-muted">
+                      <div className="flex items-center gap-2 mb-2 text-amber-600 dark:text-amber-400">
+                        <AlertCircle className="h-5 w-5" />
+                        <h3 className="text-lg font-medium">No potential matches found</h3>
+                      </div>
+                      <p className="text-muted-foreground mb-4">
+                        No potential matches were found for the submitted record in the HDSS database.
+                      </p>
+                      
+                      {communityRecords.length === 0 ? (
+                        <Alert className="bg-blue-50 border-blue-200 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-900/50">
+                          <Database className="h-4 w-4" />
+                          <AlertTitle>Community Database Required</AlertTitle>
+                          <AlertDescription>
+                            You need to import the community HDSS database first to enable matching functionality.
+                          </AlertDescription>
+                        </Alert>
+                      ) : (
+                        <Alert className="bg-blue-50 border-blue-200 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-900/50">
+                          <Info className="h-4 w-4" />
+                          <AlertTitle>Try refining your search</AlertTitle>
+                          <AlertDescription>
+                            Consider checking the spelling of names, verify date of birth, or try including additional identifiers such as village or household information.
+                          </AlertDescription>
+                        </Alert>
+                      )}
+                    </div>
                   ) : (
-                    <Alert className="bg-blue-50 border-blue-200 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-900/50">
-                      <Info className="h-4 w-4" />
-                      <AlertTitle>Try refining your search</AlertTitle>
-                      <AlertDescription>
-                        Consider checking the spelling of names, verify date of birth, or try including additional identifiers such as village or household information.
-                      </AlertDescription>
-                    </Alert>
+                    <div className="text-center py-8 text-muted-foreground">
+                      Submit a clinic record to see potential matches in the HDSS database.
+                    </div>
                   )}
                 </div>
+              </div>
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="progress-report">
+            <div className="bg-white dark:bg-black border rounded-xl shadow-card p-6">
+              <h2 className="text-xl font-semibold mb-6">Matching Progress Report</h2>
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-900/40 rounded-lg p-4">
+                  <h3 className="text-sm font-medium text-green-800 dark:text-green-400 mb-1">Matched Records</h3>
+                  <p className="text-2xl font-bold text-green-600 dark:text-green-500">
+                    {matchResults.filter(r => r.status === 'matched').length}
+                  </p>
+                </div>
+                
+                <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-900/40 rounded-lg p-4">
+                  <h3 className="text-sm font-medium text-amber-800 dark:text-amber-400 mb-1">Under Review</h3>
+                  <p className="text-2xl font-bold text-amber-600 dark:text-amber-500">
+                    {matchResults.filter(r => r.status === 'manual-review').length}
+                  </p>
+                </div>
+                
+                <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-900/40 rounded-lg p-4">
+                  <h3 className="text-sm font-medium text-red-800 dark:text-red-400 mb-1">Rejected Matches</h3>
+                  <p className="text-2xl font-bold text-red-600 dark:text-red-500">
+                    {matchResults.filter(r => r.status === 'rejected').length}
+                  </p>
+                </div>
+              </div>
+              
+              {matchResults.length > 0 ? (
+                <div className="border rounded-lg overflow-hidden">
+                  <table className="min-w-full divide-y divide-muted">
+                    <thead className="bg-muted/30">
+                      <tr>
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                          Source Record
+                        </th>
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                          Matched Record
+                        </th>
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                          Status
+                        </th>
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                          Confidence
+                        </th>
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                          Date
+                        </th>
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                          Notes
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white dark:bg-black divide-y divide-muted">
+                      {matchResults.map((result, idx) => {
+                        const sourceRecord = clinicRecords.find(r => r.id === result.sourceId);
+                        const matchedRecord = result.matchId 
+                          ? communityRecords.find(r => r.id === result.matchId) 
+                          : null;
+                          
+                        return (
+                          <tr key={idx} className="hover:bg-muted/10">
+                            <td className="px-6 py-4 whitespace-nowrap text-sm">
+                              {sourceRecord ? (
+                                <div>
+                                  <div className="font-medium">{sourceRecord.firstName} {sourceRecord.lastName}</div>
+                                  <div className="text-xs text-muted-foreground">ID: {sourceRecord.id.substring(0, 8)}</div>
+                                </div>
+                              ) : 'Unknown Record'}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm">
+                              {matchedRecord ? (
+                                <div>
+                                  <div className="font-medium">{matchedRecord.firstName} {matchedRecord.lastName}</div>
+                                  <div className="text-xs text-muted-foreground">ID: {matchedRecord.id.substring(0, 8)}</div>
+                                </div>
+                              ) : 'No Match Assigned'}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm">
+                              {renderMatchStatusBadge(result.status)}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm">
+                              {result.confidence}%
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm">
+                              {new Date(result.matchedAt).toLocaleDateString()}
+                            </td>
+                            <td className="px-6 py-4 text-sm">
+                              {result.notes ? (
+                                <div className="max-w-xs truncate" title={result.notes}>
+                                  {result.notes}
+                                </div>
+                              ) : (
+                                <span className="text-muted-foreground italic">No notes</span>
+                              )}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
               ) : (
-                <div className="text-center py-8 text-muted-foreground">
-                  Submit a clinic record to see potential matches in the HDSS database.
+                <div className="text-center py-12">
+                  <p className="text-muted-foreground">No match history available yet.</p>
+                  <p className="text-sm text-muted-foreground mt-2">
+                    Match records will appear here after you process matches from the Matches tab.
+                  </p>
                 </div>
               )}
             </div>
-            
-            <div className="bg-white dark:bg-black border rounded-xl shadow-card p-6">
-              <h2 className="text-xl font-semibold mb-4">Recently Added Clinic Records</h2>
-              <RecordList 
-                records={clinicRecords} 
-                showMatchDetail={false} 
-                emptyMessage="No clinic records have been added yet."
-              />
-            </div>
-          </div>
-        </div>
+          </TabsContent>
+        </Tabs>
       </main>
     </div>
   );

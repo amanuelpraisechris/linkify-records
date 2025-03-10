@@ -1,3 +1,4 @@
+
 export interface Record {
   id: string;
   patientId?: string;
@@ -21,6 +22,7 @@ export interface Record {
     updatedAt: string;
     source: string;
     matchScore?: number;
+    matchNotes?: string;
   };
   // Residence fields
   village?: string;
@@ -44,6 +46,8 @@ export interface Record {
   householdMembers?: string[];
   visits?: Visit[];
   residencyTimeline?: ResidencyPeriod[];
+  // Support for imported data with varying property names
+  [key: string]: any;
 }
 
 export interface Visit {
@@ -87,7 +91,10 @@ export interface MatchResult {
   confidence: number;
   matchedBy: string;
   matchedAt: string;
+  notes?: string;
   fieldScores?: {[key: string]: number};
+  consentObtained?: boolean;
+  consentDate?: string;
 }
 
 export interface DashboardStats {
