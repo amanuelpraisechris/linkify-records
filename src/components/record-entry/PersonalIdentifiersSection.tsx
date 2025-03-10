@@ -63,8 +63,8 @@ const PersonalIdentifiersSection = ({
         inputLanguage === 'amharic' ? 'የግል መለያዎች' : 'ውልቃዊ መለለይታት'}
       </h4>
       
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div>
+      <div className="grid grid-cols-6 gap-3">
+        <div className="col-span-2">
           <label className="block text-sm font-medium mb-1">
             {inputLanguage === 'latin' ? 'First name' : 
             inputLanguage === 'amharic' ? 'መጠሪያ ስም' : 'ቀዳማይ ሽም'} 
@@ -81,7 +81,7 @@ const PersonalIdentifiersSection = ({
           />
         </div>
         
-        <div>
+        <div className="col-span-2">
           <label className="block text-sm font-medium mb-1">
             {inputLanguage === 'latin' ? 'Middle name' : 
             inputLanguage === 'amharic' ? 'የአባት ስም' : 'ማእከላይ ሽም'}
@@ -96,7 +96,7 @@ const PersonalIdentifiersSection = ({
           />
         </div>
         
-        <div>
+        <div className="col-span-2">
           <label className="block text-sm font-medium mb-1">
             {inputLanguage === 'latin' ? 'Last name' : 
             inputLanguage === 'amharic' ? 'የአያት ስም' : 'ዳሓራይ ሽም'} 
@@ -112,10 +112,8 @@ const PersonalIdentifiersSection = ({
             dir={inputLanguage === 'latin' ? 'ltr' : 'rtl'}
           />
         </div>
-      </div>
-      
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-        <div>
+
+        <div className="col-span-1">
           <label className="block text-sm font-medium mb-1">
             {inputLanguage === 'latin' ? 'Sex' : 
             inputLanguage === 'amharic' ? 'ፆታ' : 'ጾታ'}
@@ -144,13 +142,12 @@ const PersonalIdentifiersSection = ({
           </Select>
         </div>
         
-        <div>
+        <div className="col-span-3">
           <label className="block text-sm font-medium mb-1">
             {inputLanguage === 'latin' ? 'Date of birth' : 
             inputLanguage === 'amharic' ? 'የትውልድ ቀን' : 'ዕለተ ልደት'} 
           </label>
           <div className="grid grid-cols-3 gap-2">
-            {/* Year dropdown - required */}
             <div>
               <Select value={birthYear} onValueChange={setBirthYear}>
                 <SelectTrigger className="w-full text-xs h-9">
@@ -167,7 +164,6 @@ const PersonalIdentifiersSection = ({
               </Select>
             </div>
             
-            {/* Month dropdown - optional */}
             <div>
               <Select value={birthMonth} onValueChange={setBirthMonth}>
                 <SelectTrigger className="w-full text-xs h-9">
@@ -184,7 +180,6 @@ const PersonalIdentifiersSection = ({
               </Select>
             </div>
             
-            {/* Day dropdown - optional */}
             <div>
               <Select value={birthDay} onValueChange={setBirthDay} disabled={!birthMonth}>
                 <SelectTrigger className="w-full text-xs h-9">
@@ -203,7 +198,7 @@ const PersonalIdentifiersSection = ({
           </div>
         </div>
         
-        <div>
+        <div className="col-span-2">
           <label className="block text-sm font-medium mb-1">
             {inputLanguage === 'latin' ? 'Telephone' : 
             inputLanguage === 'amharic' ? 'ስልክ' : 'ተሌፎን'}

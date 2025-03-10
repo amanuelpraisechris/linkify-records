@@ -1,3 +1,4 @@
+
 import { Record } from '@/types';
 import { SupportedLanguage } from '@/utils/languageUtils';
 import { Input } from '@/components/ui/input';
@@ -35,8 +36,8 @@ const ResidenceDetailsSection = ({
         inputLanguage === 'amharic' ? 'የመኖሪያ ዝርዝሮች' : 'ዝርዝር ናይ መንበሪ'}
       </h4>
       
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div>
+      <div className="grid grid-cols-6 gap-3 mb-4">
+        <div className="col-span-2">
           <label className="block text-sm font-medium mb-1">
             {inputLanguage === 'latin' ? 'Village' : 
             inputLanguage === 'amharic' ? 'መንደር' : 'ዓዲ'}
@@ -55,7 +56,7 @@ const ResidenceDetailsSection = ({
           />
         </div>
         
-        <div>
+        <div className="col-span-2">
           <label className="block text-sm font-medium mb-1">
             {inputLanguage === 'latin' ? 'Subvillage' : 
             inputLanguage === 'amharic' ? 'ንዑስ መንደር' : 'ንኡስ ዓዲ'}
@@ -74,51 +75,60 @@ const ResidenceDetailsSection = ({
           />
         </div>
         
-        <div className="flex items-end space-x-3">
-          <div className="flex-1">
+        <div className="col-span-2">
+          <div className="flex flex-col h-full">
             <label className="block text-sm font-medium mb-1">
               {inputLanguage === 'latin' ? 'Year moved in' : 
               inputLanguage === 'amharic' ? 'የገቡበት ዓመት' : 'ዓመት ምምጻእ'}
             </label>
-            <Select value={formData.yearMovedIn} onValueChange={(value) => handleChange({ target: { name: 'yearMovedIn', value } } as React.ChangeEvent<HTMLSelectElement>)}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder={
-                  inputLanguage === 'latin' ? 'Select Year' : 
-                  inputLanguage === 'amharic' ? 'ዓመት ይምረጡ' : 'ዓመት ምረጽ'
-                } />
-              </SelectTrigger>
-              <SelectContent>
-                {movedInYears.map(year => (
-                  <SelectItem key={year} value={year}>{year}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          
-          <div className="flex items-center space-x-2 pb-2">
-            <div className="text-sm font-medium">OR</div>
-            <div className="flex items-center space-x-2">
-              <Checkbox 
-                id="neverInDSS" 
-                checked={formData.neverInDSS as boolean} 
-                onCheckedChange={(checked) => 
-                  handleCheckboxChange('neverInDSS', checked as boolean)
-                }
-              />
-              <Label htmlFor="neverInDSS" className="text-sm font-normal">
-                {inputLanguage === 'latin' ? 'Never in DSS Area' : 
-                inputLanguage === 'amharic' ? 'በDSS አካባቢ አልነበረም' : 'ኣብ DSS ከባቢ ፈጺሙ የለን'}
-              </Label>
+            <div className="flex items-center space-x-2 h-full">
+              <div className="w-1/2">
+                <Select value={formData.yearMovedIn} onValueChange={(value) => handleChange({ target: { name: 'yearMovedIn', value } } as React.ChangeEvent<HTMLSelectElement>)}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder={
+                      inputLanguage === 'latin' ? 'Select Year' : 
+                      inputLanguage === 'amharic' ? 'ዓመት ይምረጡ' : 'ዓመት ምረጽ'
+                    } />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {movedInYears.map(year => (
+                      <SelectItem key={year} value={year}>{year}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="flex items-center space-x-2">
+                <div className="text-sm font-medium">OR</div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox 
+                    id="neverInDSS" 
+                    checked={formData.neverInDSS as boolean} 
+                    onCheckedChange={(checked) => 
+                      handleCheckboxChange('neverInDSS', checked as boolean)
+                    }
+                  />
+                  <Label htmlFor="neverInDSS" className="text-sm font-normal">
+                    {inputLanguage === 'latin' ? 'Never in DSS Area' : 
+                    inputLanguage === 'amharic' ? 'በDSS አካባቢ አልነበረም' : 'ኣብ DSS ከባቢ ፈጺሙ የለን'}
+                  </Label>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+      <h5 className="text-sm font-medium mb-2 text-muted-foreground">
+        {inputLanguage === 'latin' ? 'Ten Cell Leader Information' : 
+        inputLanguage === 'amharic' ? 'የአስር ቤት መሪ መረጃ' : 'ሓበሬታ መራሒ ዓሰርተ ስድራ'}
+      </h5>
+      
+      <div className="grid grid-cols-3 gap-3 mb-4">
         <div>
           <label className="block text-sm font-medium mb-1">
-            {inputLanguage === 'latin' ? 'Ten Cell Leader First Name' : 
-            inputLanguage === 'amharic' ? 'የአስር ቤት መሪ መጠሪያ ስም' : 'ዓሰርተ ስድራ መራሒ ቀዳማይ ሽም'}
+            {inputLanguage === 'latin' ? 'First Name' : 
+            inputLanguage === 'amharic' ? 'መጠሪያ ስም' : 'ቀዳማይ ሽም'}
           </label>
           <Input
             type="text"
@@ -132,8 +142,8 @@ const ResidenceDetailsSection = ({
         
         <div>
           <label className="block text-sm font-medium mb-1">
-            {inputLanguage === 'latin' ? 'Ten Cell Leader Middle Name' : 
-            inputLanguage === 'amharic' ? 'የአስር ቤት መሪ የአባት ስም' : 'ዓሰርተ ስድራ መራሒ ማእከላይ ሽም'}
+            {inputLanguage === 'latin' ? 'Middle Name' : 
+            inputLanguage === 'amharic' ? 'የአባት ስም' : 'ማእከላይ ሽም'}
           </label>
           <Input
             type="text"
@@ -147,8 +157,8 @@ const ResidenceDetailsSection = ({
         
         <div>
           <label className="block text-sm font-medium mb-1">
-            {inputLanguage === 'latin' ? 'Ten Cell Leader Last Name' : 
-            inputLanguage === 'amharic' ? 'የአስር ቤት መሪ የአያት ስም' : 'ዓሰርተ ስድራ መራሒ ዳሓራይ ሽም'}
+            {inputLanguage === 'latin' ? 'Last Name' : 
+            inputLanguage === 'amharic' ? 'የአያት ስም' : 'ዳሓራይ ሽም'}
           </label>
           <Input
             type="text"
@@ -161,11 +171,16 @@ const ResidenceDetailsSection = ({
         </div>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+      <h5 className="text-sm font-medium mb-2 text-muted-foreground">
+        {inputLanguage === 'latin' ? 'Oldest Household Member' : 
+        inputLanguage === 'amharic' ? 'የቤተሰብ ታላቅ አባል' : 'ዓበይ ኣባል ስድራ'}
+      </h5>
+      
+      <div className="grid grid-cols-3 gap-3">
         <div>
           <label className="block text-sm font-medium mb-1">
-            {inputLanguage === 'latin' ? 'Oldest Household Member First Name' : 
-            inputLanguage === 'amharic' ? 'የቤተሰብ ታላቅ አባል መጠሪያ ስም' : 'ዓበይ ኣባል ስድራ ቀዳማይ ሽም'}
+            {inputLanguage === 'latin' ? 'First Name' : 
+            inputLanguage === 'amharic' ? 'መጠሪያ ስም' : 'ቀዳማይ ሽም'}
           </label>
           <Input
             type="text"
@@ -179,8 +194,8 @@ const ResidenceDetailsSection = ({
         
         <div>
           <label className="block text-sm font-medium mb-1">
-            {inputLanguage === 'latin' ? 'Oldest Household Member Middle Name' : 
-            inputLanguage === 'amharic' ? 'የቤተሰብ ታላቅ አባል የአባት ስም' : 'ዓበይ ኣባል ስድራ ማእከላይ ሽም'}
+            {inputLanguage === 'latin' ? 'Middle Name' : 
+            inputLanguage === 'amharic' ? 'የአባት ስም' : 'ማእከላይ ሽም'}
           </label>
           <Input
             type="text"
@@ -194,8 +209,8 @@ const ResidenceDetailsSection = ({
         
         <div>
           <label className="block text-sm font-medium mb-1">
-            {inputLanguage === 'latin' ? 'Oldest Household Member Last Name' : 
-            inputLanguage === 'amharic' ? 'የቤተሰብ ታላቅ አባል የአያት ስም' : 'ዓበይ ኣባል ስድራ ዳሓራይ ሽም'}
+            {inputLanguage === 'latin' ? 'Last Name' : 
+            inputLanguage === 'amharic' ? 'የአያት ስም' : 'ዳሓራይ ሽም'}
           </label>
           <Input
             type="text"

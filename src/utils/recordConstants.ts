@@ -13,3 +13,10 @@ export const nonPatientNameFields = [
   "Ten Cell Leader Middle Name", "\"Ten Cell Leader Middle Name\"",
   "Ten Cell Leader Last Name", "\"Ten Cell Leader Last Name\""
 ];
+
+// Layout constants for the form
+export const recordEntryGridLayout = {
+  personal: "grid-cols-6 gap-3",
+  residence: "grid-cols-6 gap-3",
+  identifiers: "grid-cols-1 gap-2"
+};
