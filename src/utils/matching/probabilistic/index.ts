@@ -6,6 +6,18 @@ import { namesMatch, findBestNameMatch, birthYearMatches } from './fieldMatching
 import { containsEthiopicScript, SupportedLanguage } from '../../languageUtils';
 import { ProbabilisticMatchResult } from './types';
 
+/**
+ * Calculate probabilistic match score between two records using Fellegi-Sunter model
+ * 
+ * This implementation is based on probabilistic record linkage principles where:
+ * - m-probability: probability that a field matches for true matches
+ * - u-probability: probability that a field matches by chance for non-matches
+ * - Weight calculation: log2(m/u) for matches, log2((1-m)/(1-u)) for non-matches
+ * 
+ * @param record1 Source record
+ * @param record2 Target record
+ * @returns Match result with score, matched fields, and field-level scores
+ */
 export const calculateProbabilisticMatch = (
   record1: Record,
   record2: Record
@@ -40,13 +52,13 @@ export const calculateProbabilisticMatch = (
     if (middleNameMatch) matchedOn.push('Middle Name');
   }
   
-  // Birth Date components
+  // Birth Date components - Handling year separately for flexible matching
   if (record1.birthDate && record2.birthDate) {
     const [year1, month1, day1] = record1.birthDate.split('-');
     const [year2, month2, day2] = record2.birthDate.split('-');
     
-    // Year comparison
-    const yearMatch = birthYearMatches(year1, year2, 3);
+    // Year comparison - allowing up to 10 years difference as mentioned in the sample
+    const yearMatch = birthYearMatches(year1, year2, 10); // Updated to 10 years as per sample
     const yearWeight = calculateFieldWeight(DEFAULT_MATCH_PROBABILITIES.birthYear, DEFAULT_UNMATCH_PROBABILITIES.birthYear, yearMatch);
     totalWeight += yearWeight;
     fieldScores['birthYear'] = yearWeight;
@@ -96,7 +108,40 @@ export const calculateProbabilisticMatch = (
     if (subVillageMatch) matchedOn.push('Sub-Village');
   }
   
-  // Normalize score to percentage
+  // Ten Cell Leader comparison (as mentioned in the sample)
+  // Using oldest_member fields as a proxy for ten-cell leader
+  if ((record1.oldest_member_first_name || record1.oldest_member_last_name) && 
+      (record2.oldest_member_first_name || record2.oldest_member_last_name)) {
+    
+    // Compare first names
+    const tenCellLeaderFirstNameMatch = namesMatch(
+      record1.oldest_member_first_name, 
+      record2.oldest_member_first_name,
+      language
+    );
+    
+    // Compare last names
+    const tenCellLeaderLastNameMatch = namesMatch(
+      record1.oldest_member_last_name,
+      record2.oldest_member_last_name,
+      language
+    );
+    
+    const householdMemberMatch = tenCellLeaderFirstNameMatch || tenCellLeaderLastNameMatch;
+    const householdMemberWeight = calculateFieldWeight(
+      DEFAULT_MATCH_PROBABILITIES.householdMember,
+      DEFAULT_UNMATCH_PROBABILITIES.householdMember,
+      householdMemberMatch
+    );
+    
+    totalWeight += householdMemberWeight;
+    fieldScores['householdMember'] = householdMemberWeight;
+    if (householdMemberMatch) matchedOn.push('Household Member/Ten-Cell Leader');
+  }
+  
+  // Normalize score to percentage using the approach mentioned in the sample
+  // Convert logarithmic weights to a 0-100 probability scale
+  // Adding 12 and multiplying by 5 is a scaling factor to convert log weights to a reasonable percentage
   const normalizedScore = Math.min(100, Math.max(0, Math.round((totalWeight + 12) * 5)));
   
   return {
@@ -107,6 +152,18 @@ export const calculateProbabilisticMatch = (
   };
 };
 
+/**
+ * Find potential matches for a source record using probabilistic matching
+ * 
+ * This function implements a thresholding approach similar to the sample:
+ * - Creates multiple thresholds based on match score distribution
+ * - Returns all matches above the specified minimum threshold
+ * 
+ * @param sourceRecord Source record to find matches for
+ * @param targetRecords Pool of records to search for matches
+ * @param minScore Minimum score threshold (default: 40)
+ * @returns Array of potential matches with scores
+ */
 export const findProbabilisticMatches = (
   sourceRecord: Record,
   targetRecords: Record[],
