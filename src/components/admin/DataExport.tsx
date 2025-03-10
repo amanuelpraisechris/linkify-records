@@ -16,16 +16,15 @@ const generateMockVisits = (count: number): Visit[] => {
     const randomDate = new Date();
     randomDate.setDate(randomDate.getDate() - Math.floor(Math.random() * 365));
     
-    const visitByOption = visitByOptions[Math.floor(Math.random() * visitByOptions.length)];
+    // Ensure we use the correct type for visitBy
+    const visitByOption = Math.random() > 0.5 ? 'PATIENT' : 'TREATMENT SUPPORTER';
     
     return {
       id: `visit-${index}`,
-      patientId: `patient-${Math.floor(Math.random() * 100)}`,
       date: randomDate.toISOString().split('T')[0],
-      type: Math.random() > 0.7 ? 'follow-up' : 'initial',
-      visitBy: visitByOption.value,
-      location: Math.random() > 0.5 ? 'Clinic A' : 'Clinic B',
-      createdAt: new Date().toISOString()
+      visitBy: visitByOption as 'PATIENT' | 'TREATMENT SUPPORTER',
+      clinicId: `clinic-${Math.floor(Math.random() * 100)}`,
+      facility: Math.random() > 0.5 ? 'Clinic A' : 'Clinic B'
     };
   });
 };

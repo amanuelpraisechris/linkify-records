@@ -157,9 +157,9 @@ export const formatVisitsData = (visits: Visit[], sessionId: string): string => 
     'SessionID',
     'RecordNumber',
     'VisitDate',
-    'VisitType',
     'VisitBy',
-    'VisitLocation'
+    'ClinicId',
+    'Facility'
   ].join(',');
   
   const machineName = getMachineName();
@@ -172,9 +172,9 @@ export const formatVisitsData = (visits: Visit[], sessionId: string): string => 
       sessionId,
       recordNumber,
       visit.date || new Date().toISOString().split('T')[0],
-      visit.type || 'regular',
       visit.visitBy || 'PATIENT',
-      visit.location || ''
+      visit.clinicId || '',
+      visit.facility || ''
     ].map(value => `"${String(value).replace(/"/g, '""')}"`).join(',');
   });
   
