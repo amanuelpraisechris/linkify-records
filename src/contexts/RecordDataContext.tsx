@@ -1,6 +1,6 @@
 
 import React, { createContext, useState, useContext, ReactNode } from 'react';
-import { Record, MatchResult } from '@/types';
+import { Record, MatchResult, Visit } from '@/types';
 import { calculateMatchScore } from '@/utils/matchingAlgorithms';
 import { findProbabilisticMatches } from '@/utils/probabilisticMatching';
 import { useMatchingConfig } from './MatchingConfigContext';
@@ -16,6 +16,8 @@ interface RecordDataContextType {
   clearImportedRecords: () => void;
   saveMatchResult: (result: MatchResult) => void;
   matchResults: MatchResult[];
+  addVisitToRecord: (recordId: string, visit: Visit) => void;
+  saveMatchNotes: (recordId: string, notes: string) => void;
 }
 
 const RecordDataContext = createContext<RecordDataContextType | undefined>(undefined);
@@ -42,6 +44,7 @@ export const RecordDataProvider: React.FC<RecordDataProviderProps> = ({
   const [clinicRecords, setClinicRecords] = useState<Record[]>(initialRecords);
   const [importedRecords, setImportedRecords] = useState<Record[]>([]);
   const [matchResults, setMatchResults] = useState<MatchResult[]>([]);
+  const [matchNotes, setMatchNotes] = useState<Record<string, string>>({});
   const { config } = useMatchingConfig();
 
   const addRecord = (record: Record, recordType: 'clinic' | 'community' = 'clinic') => {
@@ -90,6 +93,59 @@ export const RecordDataProvider: React.FC<RecordDataProviderProps> = ({
   const saveMatchResult = (result: MatchResult) => {
     setMatchResults(prev => [...prev, result]);
   };
+  
+  const saveMatchNotes = (recordId: string, notes: string) => {
+    setMatchNotes(prev => ({
+      ...prev,
+      [recordId]: notes
+    }));
+    
+    // Also update the record with these notes in all collections
+    const updateRecordWithNotes = (recordsArray: Record[]) => {
+      return recordsArray.map(record => {
+        if (record.id === recordId) {
+          return {
+            ...record,
+            metadata: {
+              ...record.metadata,
+              matchNotes: notes,
+              updatedAt: new Date().toISOString()
+            }
+          };
+        }
+        return record;
+      });
+    };
+    
+    setRecords(updateRecordWithNotes);
+    setClinicRecords(updateRecordWithNotes);
+    setCommunityRecords(updateRecordWithNotes);
+  };
+  
+  const addVisitToRecord = (recordId: string, visit: Visit) => {
+    // Helper function to update a record with a new visit
+    const updateRecordWithVisit = (recordsArray: Record[]) => {
+      return recordsArray.map(record => {
+        if (record.id === recordId) {
+          const visits = record.visits || [];
+          return {
+            ...record,
+            visits: [...visits, visit],
+            lastVisit: visit.date,
+            metadata: {
+              ...record.metadata,
+              updatedAt: new Date().toISOString()
+            }
+          };
+        }
+        return record;
+      });
+    };
+    
+    // Update in all collections
+    setRecords(updateRecordWithVisit);
+    setClinicRecords(updateRecordWithVisit);
+  };
 
   const findMatchesForRecord = (sourceRecord: Record) => {
     try {
@@ -132,8 +188,22 @@ export const RecordDataProvider: React.FC<RecordDataProviderProps> = ({
         
         console.log(`Found ${matches.length} probabilistic matches`);
         
+        // Add household members data to match results
+        const enrichedMatches = matches.map(match => {
+          // Extract household members from matching record (could be inferred from other records)
+          const householdMembers = match.record.householdMembers || [];
+          
+          return {
+            ...match,
+            record: {
+              ...match.record,
+              householdMembers
+            }
+          };
+        });
+        
         // Log match details for debugging
-        const allMatches = matches.map(match => ({
+        const allMatches = enrichedMatches.map(match => ({
           score: match.score,
           matchedOn: match.matchedOn,
           fieldScores: match.fieldScores,
@@ -149,9 +219,9 @@ export const RecordDataProvider: React.FC<RecordDataProviderProps> = ({
         console.log('All potential matches:', JSON.stringify(allMatches, null, 2));
         
         // If we found any matches at all, even low probability ones, return them
-        if (matches.length > 0) {
+        if (enrichedMatches.length > 0) {
           // Return all matches sorted by score for review, even ones below threshold
-          return matches.sort((a, b) => b.score - a.score);
+          return enrichedMatches.sort((a, b) => b.score - a.score);
         }
       } catch (error) {
         console.error("Error in probabilistic matching:", error);
@@ -163,7 +233,15 @@ export const RecordDataProvider: React.FC<RecordDataProviderProps> = ({
         const matches = searchPool
           .map(record => {
             const { score, matchedOn } = calculateMatchScore(sourceRecord, record, config);
-            return { record, score, matchedOn };
+            return { 
+              record: {
+                ...record, 
+                // Extract household members (could be inferred in a real implementation)
+                householdMembers: record.householdMembers || []
+              }, 
+              score, 
+              matchedOn 
+            };
           })
           // Include even very low scores for examination
           .filter(match => match.score > 0)
@@ -201,7 +279,9 @@ export const RecordDataProvider: React.FC<RecordDataProviderProps> = ({
         findMatchesForRecord,
         clearImportedRecords,
         saveMatchResult,
-        matchResults
+        matchResults,
+        addVisitToRecord,
+        saveMatchNotes
       }}
     >
       {children}

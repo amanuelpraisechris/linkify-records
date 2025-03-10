@@ -42,6 +42,32 @@ export interface Record {
   fieldScores?: {[key: string]: number};
   sourceId?: string;
   householdMembers?: string[];
+  visits?: Visit[];
+  residencyTimeline?: ResidencyPeriod[];
+}
+
+export interface Visit {
+  date: string;
+  visitBy: 'PATIENT' | 'TREATMENT SUPPORTER';
+  clinicId?: string;
+  facility?: string;
+}
+
+export interface ResidencyPeriod {
+  village: string;
+  subVillage: string;
+  startYear: string;
+  endYear?: string;
+  balozi?: {
+    firstName?: string;
+    middleName?: string;
+    lastName?: string;
+  };
+  oldestMember?: {
+    firstName?: string;
+    middleName?: string;
+    lastName?: string;
+  };
 }
 
 export interface RecordMatch {
