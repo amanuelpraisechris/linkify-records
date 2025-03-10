@@ -6,6 +6,8 @@ import FormHeader from './record-entry/FormHeader';
 import PatientRegistryTab from './record-entry/PatientRegistryTab';
 import SearchDSSTab from './record-entry/SearchDSSTab';
 import { SupportedLanguage } from '@/utils/languageUtils';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { InfoIcon } from 'lucide-react';
 
 interface RecordEntryFormProps {
   onRecordSubmit: (record: Record) => void;
@@ -55,6 +57,13 @@ const RecordEntryForm = ({ onRecordSubmit, onSaveForSearch }: RecordEntryFormPro
         inputLanguage={inputLanguage}
         onLanguageChange={(lang: SupportedLanguage) => setInputLanguage(lang)}
       />
+      
+      <Alert className="mb-4 bg-amber-50 border-amber-300 dark:bg-amber-950/20">
+        <InfoIcon className="h-4 w-4 text-amber-600" />
+        <AlertDescription className="text-amber-700">
+          <strong>Data Use Notice:</strong> All personal identifiers are used for matching except Balozi information, which is collected for administrative purposes only.
+        </AlertDescription>
+      </Alert>
       
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="mb-4">

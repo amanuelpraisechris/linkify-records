@@ -5,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Sliders, BarChart, Save, RotateCcw, AlertCircle } from 'lucide-react';
+import { Sliders, BarChart, Save, RotateCcw, AlertCircle, XCircle } from 'lucide-react';
 import { useMatchingConfig, AlgorithmType } from '@/contexts/MatchingConfigContext';
 import { useToast } from '@/components/ui/use-toast';
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -108,11 +108,12 @@ const AlgorithmConfiguration = () => {
         {/* Field Weights Tab */}
         <TabsContent value="weights" className="space-y-4">
           <CardContent className="space-y-4 pt-4">
-            <Alert>
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription>
+            <Alert className="border-amber-300 bg-amber-50 dark:bg-amber-950/20">
+              <XCircle className="h-4 w-4 text-amber-600" />
+              <AlertDescription className="text-amber-700 font-medium">
+                <span className="block font-bold mb-1">Balozi Information Explicitly Excluded</span>
                 FirstName and LastName are set as primary matching attributes with highest weights.
-                Balozi information is excluded from matching criteria.
+                Balozi information is completely excluded from matching criteria.
               </AlertDescription>
             </Alert>
             

@@ -1,9 +1,12 @@
-
 // List of keys that should be excluded from name fields
 export const nonPatientNameFields = [
+  // Balozi information (explicitly excluded from matching)
   "balozi_first_name", "\"balozi_first_name\"",
   "balozi_middle_name", "\"balozi_middle_name\"", 
   "balozi_last_name", "\"balozi_last_name\"",
+  "baloziFirstName", "baloziMiddleName", "baloziLastName",
+  
+  // Other non-patient names that should be excluded from matching
   "oldest_member_first_name", "\"oldest_member_first_name\"",
   "oldest_member_middle_name", "\"oldest_member_middle_name\"",
   "oldest_member_last_name", "\"oldest_member_last_name\"",
