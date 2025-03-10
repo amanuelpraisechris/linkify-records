@@ -1,3 +1,4 @@
+
 import React, { createContext, useState, useContext, ReactNode } from 'react';
 import { Record, MatchResult, Visit } from '@/types';
 import { calculateMatchScore } from '@/utils/matchingAlgorithms';
@@ -43,7 +44,8 @@ export const RecordDataProvider: React.FC<RecordDataProviderProps> = ({
   const [clinicRecords, setClinicRecords] = useState<Record[]>(initialRecords);
   const [importedRecords, setImportedRecords] = useState<Record[]>([]);
   const [matchResults, setMatchResults] = useState<MatchResult[]>([]);
-  const [matchNotes, setMatchNotes] = useState<Record<string, string>>({});
+  // Fix: Change Record<string, string> to a simple object type
+  const [matchNotes, setMatchNotes] = useState<{[key: string]: string}>({});
   const { config } = useMatchingConfig();
 
   const addRecord = (record: Record, recordType: 'clinic' | 'community' = 'clinic') => {
