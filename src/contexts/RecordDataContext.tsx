@@ -1,8 +1,15 @@
-import React, { createContext, useState, useContext, ReactNode } from 'react';
+import React, { createContext, useState, useContext, ReactNode, useEffect } from 'react';
 import { Record, MatchResult, Visit } from '@/types';
 import { calculateMatchScore } from '@/utils/matchingAlgorithms';
 import { findProbabilisticMatches } from '@/utils/probabilisticMatching';
 import { useMatchingConfig } from './MatchingConfigContext';
+
+const STORAGE_KEYS = {
+  COMMUNITY_RECORDS: 'community_records',
+  IMPORTED_RECORDS: 'imported_records',
+  CLINIC_RECORDS: 'clinic_records',
+  MATCH_RESULTS: 'match_results'
+};
 
 interface RecordDataContextType {
   records: Record[];
@@ -38,13 +45,58 @@ export const RecordDataProvider: React.FC<RecordDataProviderProps> = ({
   children, 
   initialRecords = [] 
 }) => {
-  const [records, setRecords] = useState<Record[]>(initialRecords);
-  const [communityRecords, setCommunityRecords] = useState<Record[]>([]);
-  const [clinicRecords, setClinicRecords] = useState<Record[]>(initialRecords);
-  const [importedRecords, setImportedRecords] = useState<Record[]>([]);
-  const [matchResults, setMatchResults] = useState<MatchResult[]>([]);
+  const getInitialState = <T extends unknown>(key: string, defaultValue: T): T => {
+    try {
+      const saved = localStorage.getItem(key);
+      if (saved) {
+        return JSON.parse(saved) as T;
+      }
+    } catch (err) {
+      console.error(`Error retrieving ${key} from localStorage:`, err);
+    }
+    return defaultValue;
+  };
+
+  const [records, setRecords] = useState<Record[]>(getInitialState(STORAGE_KEYS.CLINIC_RECORDS, initialRecords));
+  const [communityRecords, setCommunityRecords] = useState<Record[]>(getInitialState(STORAGE_KEYS.COMMUNITY_RECORDS, []));
+  const [clinicRecords, setClinicRecords] = useState<Record[]>(getInitialState(STORAGE_KEYS.CLINIC_RECORDS, initialRecords));
+  const [importedRecords, setImportedRecords] = useState<Record[]>(getInitialState(STORAGE_KEYS.IMPORTED_RECORDS, []));
+  const [matchResults, setMatchResults] = useState<MatchResult[]>(getInitialState(STORAGE_KEYS.MATCH_RESULTS, []));
   const [matchNotes, setMatchNotes] = useState<{[key: string]: string}>({});
   const { config } = useMatchingConfig();
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEYS.COMMUNITY_RECORDS, JSON.stringify(communityRecords));
+      console.log(`Saved ${communityRecords.length} community records to localStorage`);
+    } catch (err) {
+      console.error('Error saving community records to localStorage:', err);
+    }
+  }, [communityRecords]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEYS.IMPORTED_RECORDS, JSON.stringify(importedRecords));
+    } catch (err) {
+      console.error('Error saving imported records to localStorage:', err);
+    }
+  }, [importedRecords]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEYS.CLINIC_RECORDS, JSON.stringify(clinicRecords));
+    } catch (err) {
+      console.error('Error saving clinic records to localStorage:', err);
+    }
+  }, [clinicRecords]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEYS.MATCH_RESULTS, JSON.stringify(matchResults));
+    } catch (err) {
+      console.error('Error saving match results to localStorage:', err);
+    }
+  }, [matchResults]);
 
   const addRecord = (record: Record, recordType: 'clinic' | 'community' = 'clinic') => {
     setRecords(prevRecords => [...prevRecords, record]);
@@ -70,9 +122,22 @@ export const RecordDataProvider: React.FC<RecordDataProviderProps> = ({
           );
           return [...nonCommunityRecords, ...newRecords];
         });
+
+        try {
+          localStorage.setItem(STORAGE_KEYS.COMMUNITY_RECORDS, JSON.stringify(newRecords));
+          console.log(`Immediately saved ${newRecords.length} community records to localStorage`);
+        } catch (err) {
+          console.error('Error immediately saving community records to localStorage:', err);
+        }
       } else {
         setImportedRecords(newRecords);
         console.log(`Added ${newRecords.length} records to imported data`);
+        
+        try {
+          localStorage.setItem(STORAGE_KEYS.IMPORTED_RECORDS, JSON.stringify(newRecords));
+        } catch (err) {
+          console.error('Error immediately saving imported records to localStorage:', err);
+        }
       }
     } catch (error) {
       console.error("Error in addImportedRecords:", error);
@@ -81,6 +146,10 @@ export const RecordDataProvider: React.FC<RecordDataProviderProps> = ({
 
   const clearImportedRecords = () => {
     setImportedRecords([]);
+    setCommunityRecords([]);
+    localStorage.removeItem(STORAGE_KEYS.IMPORTED_RECORDS);
+    localStorage.removeItem(STORAGE_KEYS.COMMUNITY_RECORDS);
+    console.log('Cleared all imported records from state and localStorage');
   };
 
   const saveMatchResult = (result: MatchResult) => {

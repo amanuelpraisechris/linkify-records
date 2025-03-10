@@ -1,18 +1,28 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Navbar from '@/components/Navbar';
 import DataLoader from '@/components/DataLoader';
 import { Record, DataSource } from '@/types';
 import { useToast } from '@/components/ui/use-toast';
-import { Database, FileUp, Users, ArrowLeft } from 'lucide-react';
+import { Database, FileUp, Users, ArrowLeft, CheckCircle, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { RecordDataProvider, useRecordData } from '@/contexts/RecordDataContext';
 import { MatchingConfigProvider } from '@/contexts/MatchingConfigContext';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
 
 const DataManagementContent = () => {
   const { addImportedRecords, communityRecords, importedRecords } = useRecordData();
+  const [dataImported, setDataImported] = useState(false);
   const { toast } = useToast();
+  
+  // Check if data is already loaded
+  useEffect(() => {
+    if (communityRecords.length > 0) {
+      setDataImported(true);
+      console.log(`Data already loaded: ${communityRecords.length} community records`);
+    }
+  }, [communityRecords.length]);
   
   const handleDataLoaded = (data: Record[], sourceId?: string) => {
     console.log('Data loaded:', data.length, 'records');
@@ -20,10 +30,11 @@ const DataManagementContent = () => {
     // Add to record data context for matching - set as community database
     const isCommunityDb = true; // Always set imported data as community database
     addImportedRecords(data, isCommunityDb);
+    setDataImported(true);
     
     toast({
       title: "Data Imported Successfully",
-      description: `${data.length} records have been imported as the main HDSS community database.`,
+      description: `${data.length} records have been imported as the main HDSS community database and will persist between pages.`,
     });
   };
   
@@ -59,10 +70,11 @@ const DataManagementContent = () => {
               
               {communityRecords.length > 0 && (
                 <Alert className="mb-6 bg-green-50 text-green-800 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-900/50">
-                  <Users className="h-4 w-4" />
+                  <CheckCircle className="h-4 w-4" />
                   <AlertTitle>Community Database Loaded</AlertTitle>
                   <AlertDescription>
-                    {communityRecords.length} records have been imported as the main HDSS community database and are ready for matching.
+                    {communityRecords.length} records have been imported as the main HDSS community database and are ready for matching. 
+                    This data will persist as you navigate between pages.
                   </AlertDescription>
                 </Alert>
               )}
@@ -79,12 +91,13 @@ const DataManagementContent = () => {
                 
                 <p className="text-sm text-muted-foreground mb-4">
                   Your HDSS community database has been successfully imported with {communityRecords.length} records.
+                  This data is now stored and will be available when you navigate to the Record Entry page.
                 </p>
                 
                 <div className="p-4 bg-muted/30 rounded-lg mb-4">
                   <h3 className="font-medium mb-2">What to do next:</h3>
                   <ol className="list-decimal list-inside text-muted-foreground text-sm space-y-2">
-                    <li>Go to the <Link to="/record-entry" className="text-primary hover:underline">Search</Link> page</li>
+                    <li>Go to the <Link to="/record-entry" className="text-primary hover:underline">Record Entry</Link> page</li>
                     <li>Enter patient information to search for in the HDSS database</li>
                     <li>Review potential matches that are found</li>
                   </ol>
@@ -92,9 +105,10 @@ const DataManagementContent = () => {
                 
                 <Link 
                   to="/record-entry" 
-                  className="w-full bg-primary text-white py-2 px-4 rounded-md inline-block text-center hover:bg-primary/90"
+                  className="w-full bg-primary text-white py-2 px-4 rounded-md inline-flex items-center justify-center hover:bg-primary/90"
                 >
-                  Go to Search Page
+                  Go to Record Entry Page
+                  <ArrowRight className="w-4 h-4 ml-2" />
                 </Link>
               </div>
             )}

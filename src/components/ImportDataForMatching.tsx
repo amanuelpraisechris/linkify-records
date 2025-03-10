@@ -1,17 +1,26 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 import { Button } from '@/components/ui/button';
 import DataLoader from './DataLoader';
 import { Record } from '@/types';
 import { useRecordData } from '@/contexts/RecordDataContext';
-import { Database, FileUp, RefreshCw, X, Users, Building } from 'lucide-react';
+import { Database, FileUp, RefreshCw, X, Users, Building, CheckCircle } from 'lucide-react';
 
 const ImportDataForMatching = () => {
   const { importedRecords, communityRecords, addImportedRecords, clearImportedRecords } = useRecordData();
   const [showDataLoader, setShowDataLoader] = useState(false);
   const [importMode, setImportMode] = useState<'matching' | 'community'>('matching');
+  const [dataLoaded, setDataLoaded] = useState(false);
   const { toast } = useToast();
+
+  // Check if data is already loaded
+  useEffect(() => {
+    if (communityRecords.length > 0 || importedRecords.length > 0) {
+      setDataLoaded(true);
+      console.log(`Data already loaded: ${communityRecords.length} community records, ${importedRecords.length} imported records`);
+    }
+  }, [communityRecords.length, importedRecords.length]);
 
   const handleDataLoaded = (data: Record[]) => {
     if (data.length > 0) {
@@ -28,12 +37,14 @@ const ImportDataForMatching = () => {
       addImportedRecords(markedData, importMode === 'community');
       
       setShowDataLoader(false);
+      setDataLoaded(true);
+      
       toast({
         title: importMode === 'community' 
           ? "Community Database Imported" 
           : "Data Imported for Matching",
         description: importMode === 'community'
-          ? `${data.length} records have been imported as the main community database.`
+          ? `${data.length} records have been imported as the main community database and will persist between pages.`
           : `${data.length} records have been imported and are now available for matching.`,
       });
     }
@@ -65,11 +76,11 @@ const ImportDataForMatching = () => {
           <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg flex items-center justify-between border border-green-200 dark:border-green-900">
             <div>
               <div className="font-medium text-green-800 dark:text-green-300 flex items-center">
-                <Users className="w-4 h-4 mr-2" />
+                <CheckCircle className="w-4 h-4 mr-2" />
                 Community Database Loaded
               </div>
               <div className="text-sm text-green-700 dark:text-green-400">
-                {communityRecords.length} records available for matching
+                {communityRecords.length} records available for matching (persisted between pages)
               </div>
             </div>
             <Button 

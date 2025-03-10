@@ -16,7 +16,15 @@ export const nonPatientNameFields = [
 
 // Layout constants for the form
 export const recordEntryGridLayout = {
-  personal: "grid-cols-6 gap-3",
-  residence: "grid-cols-6 gap-3",
+  personal: "grid-cols-3 gap-3",
+  residence: "grid-cols-3 gap-3",
   identifiers: "grid-cols-1 gap-2"
+};
+
+// Storage keys for localStorage data persistence
+export const STORAGE_KEYS = {
+  COMMUNITY_RECORDS: 'community_records',
+  IMPORTED_RECORDS: 'imported_records', 
+  CLINIC_RECORDS: 'clinic_records',
+  MATCH_RESULTS: 'match_results'
 };
