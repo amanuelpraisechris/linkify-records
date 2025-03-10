@@ -12,6 +12,9 @@ interface MatchingConfigContextType {
   updateConfig: (config: Partial<MatchingConfig>) => void;
   updateFieldWeights: (weights: Partial<FieldWeights>) => void;
   resetConfig: () => void;
+  saveConfigProfile: (name: string) => void;
+  loadConfigProfile: (name: string) => void;
+  availableProfiles: string[];
 }
 
 const MatchingConfigContext = createContext<MatchingConfigContextType | undefined>(undefined);
@@ -30,6 +33,26 @@ interface MatchingConfigProviderProps {
 
 export const MatchingConfigProvider: React.FC<MatchingConfigProviderProps> = ({ children }) => {
   const [config, setConfig] = useState<MatchingConfig>(DEFAULT_MATCHING_CONFIG);
+  const [savedProfiles, setSavedProfiles] = useState<Record<string, MatchingConfig>>({
+    'Default': DEFAULT_MATCHING_CONFIG,
+    'DSS Linkage': {
+      ...DEFAULT_MATCHING_CONFIG,
+      fieldWeights: {
+        ...DEFAULT_FIELD_WEIGHTS,
+        firstName: 30,
+        lastName: 30,
+        tclFirstName: 15,
+        tclLastName: 15,
+        village: 20,
+        subvillage: 15
+      },
+      threshold: {
+        high: 85,
+        medium: 70,
+        low: 50
+      }
+    }
+  });
 
   const updateConfig = (newConfig: Partial<MatchingConfig>) => {
     setConfig(prevConfig => ({
@@ -52,8 +75,29 @@ export const MatchingConfigProvider: React.FC<MatchingConfigProviderProps> = ({ 
     setConfig(DEFAULT_MATCHING_CONFIG);
   };
 
+  const saveConfigProfile = (name: string) => {
+    setSavedProfiles(prev => ({
+      ...prev,
+      [name]: { ...config }
+    }));
+  };
+
+  const loadConfigProfile = (name: string) => {
+    if (savedProfiles[name]) {
+      setConfig(savedProfiles[name]);
+    }
+  };
+
   return (
-    <MatchingConfigContext.Provider value={{ config, updateConfig, updateFieldWeights, resetConfig }}>
+    <MatchingConfigContext.Provider value={{ 
+      config, 
+      updateConfig, 
+      updateFieldWeights, 
+      resetConfig,
+      saveConfigProfile,
+      loadConfigProfile,
+      availableProfiles: Object.keys(savedProfiles)
+    }}>
       {children}
     </MatchingConfigContext.Provider>
   );
