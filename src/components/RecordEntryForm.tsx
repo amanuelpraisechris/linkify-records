@@ -15,9 +15,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 interface RecordEntryFormProps {
   onRecordSubmit: (record: Record) => void;
+  onSaveForSearch?: (record: Record) => void;
 }
 
-const RecordEntryForm = ({ onRecordSubmit }: RecordEntryFormProps) => {
+const RecordEntryForm = ({ onRecordSubmit, onSaveForSearch }: RecordEntryFormProps) => {
   const [formData, setFormData] = useState<Partial<Record>>({
     firstName: '',
     lastName: '',
@@ -37,7 +38,6 @@ const RecordEntryForm = ({ onRecordSubmit }: RecordEntryFormProps) => {
     oldestHouseholdMemberLastName: '',
   });
   
-  // Separate state for birth date components
   const [birthYear, setBirthYear] = useState<string>('');
   const [birthMonth, setBirthMonth] = useState<string>('');
   const [birthDay, setBirthDay] = useState<string>('');
@@ -113,12 +113,10 @@ const RecordEntryForm = ({ onRecordSubmit }: RecordEntryFormProps) => {
   };
   
   const handlePatientFound = (record: Record) => {
-    // Set form data with the found patient information
     setFormData({
       ...record,
     });
     
-    // Set birth date components
     if (record.birthDate) {
       const parts = record.birthDate.split('-');
       if (parts.length >= 1) setBirthYear(parts[0]);
@@ -126,12 +124,10 @@ const RecordEntryForm = ({ onRecordSubmit }: RecordEntryFormProps) => {
       if (parts.length >= 3) setBirthDay(parts[2]);
     }
     
-    // Set identifiers
     if (record.identifiers && record.identifiers.length > 0) {
       setIdentifiers(record.identifiers);
     }
     
-    // Mark as repeat patient
     setIsRepeatPatient(true);
     
     toast({
@@ -141,13 +137,56 @@ const RecordEntryForm = ({ onRecordSubmit }: RecordEntryFormProps) => {
   };
   
   const handleNextToLinkage = () => {
+    if (!formData.firstName || !formData.lastName || !birthYear) {
+      toast({
+        title: "Missing Information",
+        description: "Please fill in at least first name, last name, and birth year before saving for search.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    let birthDateStr = birthYear;
+    if (birthMonth) {
+      birthDateStr = `${birthDateStr}-${birthMonth}`;
+      if (birthDay) {
+        birthDateStr = `${birthDateStr}-${birthDay}`;
+      } else {
+        birthDateStr = `${birthDateStr}-01`;
+      }
+    } else {
+      birthDateStr = `${birthDateStr}-01-01`;
+    }
+    
+    const searchRecord: Record = {
+      id: `search-${Date.now()}`,
+      ...formData as Record,
+      birthDate: birthDateStr,
+      identifiers: [...clinicIds, ...identifiers].filter(id => id.type && id.value),
+      metadata: {
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        source: 'Health Facility Entry'
+      }
+    };
+    
+    console.log("Saving record for search:", searchRecord);
+    
+    if (onSaveForSearch) {
+      onSaveForSearch(searchRecord);
+    }
+    
     setActiveTab('linkage-with-dss');
+    
+    toast({
+      title: "Record Saved for Search",
+      description: "The record has been saved. You can now search for matches in the DSS database.",
+    });
   };
   
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validate required fields
     if (!formData.firstName || !formData.lastName || !birthYear) {
       toast({
         title: "Missing Information",
@@ -157,20 +196,18 @@ const RecordEntryForm = ({ onRecordSubmit }: RecordEntryFormProps) => {
       return;
     }
     
-    // Construct birthDate string based on available components
     let birthDateStr = birthYear;
     if (birthMonth) {
       birthDateStr = `${birthDateStr}-${birthMonth}`;
       if (birthDay) {
         birthDateStr = `${birthDateStr}-${birthDay}`;
       } else {
-        birthDateStr = `${birthDateStr}-01`; // Default to first day if only month is provided
+        birthDateStr = `${birthDateStr}-01`;
       }
     } else {
-      birthDateStr = `${birthDateStr}-01-01`; // Default to January 1st if only year is provided
+      birthDateStr = `${birthDateStr}-01-01`;
     }
     
-    // Create a new record
     const newRecord: Record = {
       id: `new-${Date.now()}`,
       ...formData as Record,
@@ -187,7 +224,6 @@ const RecordEntryForm = ({ onRecordSubmit }: RecordEntryFormProps) => {
     
     onRecordSubmit(newRecord);
     
-    // Reset form
     setFormData({
       firstName: '',
       lastName: '',
@@ -264,7 +300,6 @@ const RecordEntryForm = ({ onRecordSubmit }: RecordEntryFormProps) => {
         
         <TabsContent value="patient-registry">
           <form className="space-y-6">
-            {/* Clinic IDs Section */}
             <ClinicIdEntrySection 
               clinicIds={clinicIds}
               handleClinicIdChange={handleClinicIdChange}
@@ -274,7 +309,6 @@ const RecordEntryForm = ({ onRecordSubmit }: RecordEntryFormProps) => {
               inputLanguage={inputLanguage}
             />
             
-            {/* Visit Details Section */}
             <VisitDetailsSection
               visit={visit}
               onVisitChange={handleVisitChange}
@@ -282,7 +316,6 @@ const RecordEntryForm = ({ onRecordSubmit }: RecordEntryFormProps) => {
               inputLanguage={inputLanguage}
             />
             
-            {/* Personal Identifiers Section */}
             <IdentifierTypeSelector 
               identifierType={identifierType}
               onValueChange={setIdentifierType}
@@ -301,14 +334,12 @@ const RecordEntryForm = ({ onRecordSubmit }: RecordEntryFormProps) => {
               inputLanguage={inputLanguage}
             />
             
-            {/* Residency Timeline Section */}
             <ResidencyTimelineSection
               residencyPeriods={residencyPeriods}
               onResidencyPeriodsChange={setResidencyPeriods}
               inputLanguage={inputLanguage}
             />
             
-            {/* Residence Details Section (for current residence) */}
             <ResidenceDetailsSection
               formData={formData}
               handleChange={handleChange}
@@ -316,7 +347,6 @@ const RecordEntryForm = ({ onRecordSubmit }: RecordEntryFormProps) => {
               inputLanguage={inputLanguage}
             />
             
-            {/* Other Identifiers Section */}
             <IdentifiersSection
               identifiers={identifiers}
               handleIdentifierChange={handleIdentifierChange}
@@ -360,7 +390,22 @@ const RecordEntryForm = ({ onRecordSubmit }: RecordEntryFormProps) => {
               
               <Button
                 type="button"
-                onClick={() => {/* Implement search DSS functionality */}}
+                onClick={() => {
+                  if (onSaveForSearch) {
+                    const searchRecord: Record = {
+                      id: `search-${Date.now()}`,
+                      ...formData as Record,
+                      birthDate: birthYear ? `${birthYear}-${birthMonth || '01'}-${birthDay || '01'}` : '',
+                      identifiers: [...clinicIds, ...identifiers].filter(id => id.type && id.value),
+                      metadata: {
+                        createdAt: new Date().toISOString(),
+                        updatedAt: new Date().toISOString(),
+                        source: 'Health Facility Entry'
+                      }
+                    };
+                    onSaveForSearch(searchRecord);
+                  }
+                }}
                 className="inline-flex items-center"
               >
                 <Search className="w-4 h-4 mr-2" />

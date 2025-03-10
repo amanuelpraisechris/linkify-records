@@ -324,7 +324,7 @@ const MatchingInterface = ({ matchData, onMatchComplete }: MatchingInterfaceProp
                 <Button
                   variant="default"
                   onClick={handleSaveSelectedMatch}
-                  disabled={isLoading}
+                  disabled={isLoading || !selectedMatchId}
                   className="bg-green-600 hover:bg-green-700"
                 >
                   <Save className="w-4 h-4 mr-2" />

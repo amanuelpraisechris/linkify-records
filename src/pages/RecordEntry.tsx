@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import Navbar from '@/components/Navbar';
 import RecordEntryForm from '@/components/RecordEntryForm';
@@ -13,6 +12,7 @@ import { Link } from 'react-router-dom';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
+import MatchingInterface from '@/components/MatchingInterface';
 
 const initialRecords: Record[] = [
   {
@@ -52,10 +52,11 @@ const initialRecords: Record[] = [
 ];
 
 const RecordEntryContent = () => {
-  const { addRecord, findMatchesForRecord, communityRecords, clinicRecords, matchResults } = useRecordData();
+  const { addRecord, findMatchesForRecord, communityRecords, clinicRecords, matchResults, saveMatchResult } = useRecordData();
   const [potentialMatches, setPotentialMatches] = useState<Array<{record: Record; score: number; matchedOn: string[]; fieldScores?: {[key: string]: number};}>>([]);
   const [submittedRecord, setSubmittedRecord] = useState<Record | null>(null);
   const [activeTab, setActiveTab] = useState('entry');
+  const [searchTabActive, setSearchTabActive] = useState<'patient-registry' | 'linkage-with-dss'>('patient-registry');
   const { toast } = useToast();
 
   const handleRecordSubmit = (record: Record) => {
@@ -115,6 +116,68 @@ const RecordEntryContent = () => {
     }
   };
   
+  const handleSaveForSearch = (record: Record) => {
+    try {
+      console.log("Save for search called with record:", record);
+      
+      // Check if community database is loaded
+      if (communityRecords.length === 0) {
+        setPotentialMatches([]);
+        setSubmittedRecord(record);
+        
+        toast({
+          title: "No Community Database",
+          description: "Please import the HDSS community database to enable matching.",
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      // Find potential matches in the community database
+      const matches = findMatchesForRecord(record);
+      
+      // Add source ID to potential matches
+      const matchesWithSource = matches.map(match => ({
+        ...match,
+        record: {
+          ...match.record,
+          sourceId: record.id
+        }
+      }));
+      
+      setPotentialMatches(matchesWithSource);
+      setSubmittedRecord(record);
+      
+      toast({
+        title: "Search Complete",
+        description: `Found ${matches.length} potential matches in the HDSS database.`,
+      });
+      
+      // Make sure we're in the matches tab
+      setActiveTab('matches');
+      
+      console.log("Search results:", matchesWithSource);
+    } catch (error) {
+      console.error("Error in handleSaveForSearch:", error);
+      toast({
+        title: "Error Processing Search",
+        description: "An error occurred while searching for matches.",
+        variant: "destructive"
+      });
+    }
+  };
+  
+  const handleMatchComplete = (result: MatchResult) => {
+    console.log("Match complete callback with result:", result);
+    saveMatchResult(result);
+    
+    toast({
+      title: "Match Saved",
+      description: "The match has been saved successfully and added to your progress report.",
+      duration: 3000,
+    });
+  };
+  
   const renderMatchStatusBadge = (status: string) => {
     switch(status) {
       case 'matched':
@@ -170,7 +233,10 @@ const RecordEntryContent = () => {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               <div className="lg:col-span-1">
                 <ImportDataForMatching />
-                <RecordEntryForm onRecordSubmit={handleRecordSubmit} />
+                <RecordEntryForm 
+                  onRecordSubmit={handleRecordSubmit} 
+                  onSaveForSearch={handleSaveForSearch}
+                />
               </div>
               
               <div className="lg:col-span-2">
@@ -193,18 +259,12 @@ const RecordEntryContent = () => {
                   <h2 className="text-xl font-semibold mb-4">Potential Matches in HDSS Database</h2>
                   
                   {submittedRecord && potentialMatches.length > 0 ? (
-                    <RecordList 
-                      records={potentialMatches.map(match => ({
-                        ...match.record,
-                        fuzzyScore: match.score,
-                        matchedOn: match.matchedOn,
-                        metadata: {
-                          ...match.record.metadata,
-                          matchScore: match.score
-                        }
-                      }))} 
-                      showMatchDetail={true}
-                      enableMatchAssignment={true}
+                    <MatchingInterface 
+                      matchData={[{
+                        sourceRecord: submittedRecord,
+                        potentialMatches: potentialMatches
+                      }]}
+                      onMatchComplete={handleMatchComplete}
                     />
                   ) : submittedRecord ? (
                     <div className="bg-muted/30 p-6 rounded-lg border border-muted">
