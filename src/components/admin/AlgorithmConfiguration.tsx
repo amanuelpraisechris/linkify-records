@@ -5,11 +5,56 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Sliders, BarChart, Save, RotateCcw, AlertCircle, XCircle } from 'lucide-react';
+import { Sliders, BarChart, Save, RotateCcw, AlertCircle, XCircle, HelpCircle } from 'lucide-react';
 import { useMatchingConfig, AlgorithmType } from '@/contexts/MatchingConfigContext';
 import { useToast } from '@/components/ui/use-toast';
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+
+// Structure that maps weight field keys to meaningful descriptions
+const fieldDescriptions: {[key: string]: {label: string, description: string}} = {
+  firstName: {
+    label: "First Name",
+    description: "Patient's first name (given name) - Exact or fuzzy matching"
+  },
+  lastName: {
+    label: "Last Name", 
+    description: "Patient's last name (family name) - Exact or fuzzy matching"
+  },
+  middleName: {
+    label: "Middle Name",
+    description: "Patient's middle name - Exact or fuzzy matching"
+  },
+  birthDate: {
+    label: "Complete Birth Date",
+    description: "Full birth date (YYYY-MM-DD) - Exact match gives highest score"
+  },
+  gender: {
+    label: "Gender",
+    description: "Patient's gender (Male/Female) - Exact matching only"
+  },
+  village: {
+    label: "Village/Ward Name",
+    description: "Patient's residential village or ward - Exact or fuzzy matching"
+  },
+  district: {
+    label: "District Name",
+    description: "District of residence - Exact or fuzzy matching"
+  },
+  motherName: {
+    label: "Mother's Full Name",
+    description: "Patient's mother's name - Exact or fuzzy matching"
+  },
+  householdHead: {
+    label: "Household Head Name",
+    description: "Name of the head of household - Exact or fuzzy matching"
+  },
+  phoneNumber: {
+    label: "Phone Number",
+    description: "Patient's phone contact - Exact matching only"
+  }
+};
 
 const AlgorithmConfiguration = () => {
   const { config, updateFieldWeights, resetConfig, saveConfigProfile, setAlgorithmType } = useMatchingConfig();
@@ -118,32 +163,51 @@ const AlgorithmConfiguration = () => {
             </Alert>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {Object.entries(fieldWeights).map(([field, weight]) => (
-                <div key={field} className="space-y-2">
-                  <Label htmlFor={`weight-${field}`} className="capitalize">
-                    {field.replace(/([A-Z])/g, ' $1').trim()} Weight
-                  </Label>
-                  <div className="flex items-center gap-2">
-                    <Input 
-                      id={`weight-${field}`}
-                      type="number" 
-                      min="0" 
-                      max="100" 
-                      value={weight}
-                      onChange={(e) => handleWeightChange(field, e.target.value)}
-                      className="w-20"
-                    />
-                    <input
-                      type="range"
-                      min="0"
-                      max="100"
-                      value={weight}
-                      onChange={(e) => handleWeightChange(field, e.target.value)}
-                      className="flex-1"
-                    />
+              {Object.entries(fieldWeights).map(([field, weight]) => {
+                const fieldInfo = fieldDescriptions[field] || {
+                  label: field.replace(/([A-Z])/g, ' $1').trim(),
+                  description: "Weight for this attribute"
+                };
+                
+                return (
+                  <div key={field} className="space-y-2">
+                    <div className="flex items-center gap-1.5">
+                      <Label htmlFor={`weight-${field}`} className="font-medium">
+                        {fieldInfo.label} Weight
+                      </Label>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <HelpCircle className="h-3.5 w-3.5 text-muted-foreground" />
+                          </TooltipTrigger>
+                          <TooltipContent side="right" className="w-72">
+                            <p className="text-sm">{fieldInfo.description}</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Input 
+                        id={`weight-${field}`}
+                        type="number" 
+                        min="0" 
+                        max="100" 
+                        value={weight}
+                        onChange={(e) => handleWeightChange(field, e.target.value)}
+                        className="w-20"
+                      />
+                      <input
+                        type="range"
+                        min="0"
+                        max="100"
+                        value={weight}
+                        onChange={(e) => handleWeightChange(field, e.target.value)}
+                        className="flex-1"
+                      />
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
             
             <div className="flex items-center gap-2 pt-4">

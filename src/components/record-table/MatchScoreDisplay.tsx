@@ -5,6 +5,23 @@ import { Info, BarChart3 } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Progress } from '@/components/ui/progress';
 
+// Maps field keys to user-friendly display names
+const fieldDisplayNames: {[key: string]: string} = {
+  firstName: "First Name",
+  lastName: "Last Name",
+  middleName: "Middle Name",
+  birthYear: "Birth Year",
+  birthMonth: "Birth Month",
+  birthDay: "Birth Day", 
+  gender: "Gender",
+  village: "Village/Ward",
+  district: "District",
+  motherName: "Mother's Name",
+  householdHead: "Household Head",
+  phoneNumber: "Phone Number",
+  householdMember: "Oldest Household Member"
+};
+
 interface MatchScoreDisplayProps {
   score?: number;
   matchedOn?: string[];
@@ -23,11 +40,11 @@ const MatchScoreDisplay = ({ score, matchedOn = [], fieldScores = {} }: MatchSco
     field.includes('Birth')
   );
   
-  // Format field scores for display
+  // Format field scores for display with better field names
   const formattedFieldScores = Object.entries(fieldScores)
     .sort(([, a], [, b]) => b - a)
     .map(([field, value]) => ({
-      field: field.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase()),
+      field: fieldDisplayNames[field] || field.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase()),
       value: parseFloat(value.toFixed(2))
     }));
   
