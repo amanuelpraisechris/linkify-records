@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
-import { LogOut, Settings, UserCog } from 'lucide-react';
+import { LogOut, Settings, UserCog, FileText } from 'lucide-react';
 import ChangePasswordForm from './ChangePasswordForm';
 
 const AdminDashboard = () => {
@@ -104,6 +104,16 @@ const AdminDashboard = () => {
                 </p>
                 <Button className="mt-3" size="sm" disabled>
                   View Logs
+                </Button>
+              </div>
+
+              <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-4">
+                <h3 className="font-medium">Match Reports</h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                  View detailed match statistics and reports
+                </p>
+                <Button className="mt-3" size="sm" onClick={() => navigate('/reports')}>
+                  View Reports
                 </Button>
               </div>
             </div>

@@ -11,6 +11,7 @@ import NotFound from "./pages/NotFound";
 import AdminLogin from "./components/admin/AdminLogin";
 import AdminDashboard from "./components/admin/AdminDashboard";
 import ProtectedRoute from "./components/admin/ProtectedRoute";
+import Reports from "./pages/Reports";
 
 // Create a new QueryClient with default error handling
 const queryClient = new QueryClient({
@@ -32,6 +33,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/data-management" element={<DataManagement />} />
           <Route path="/record-entry" element={<RecordEntry />} />
+          <Route path="/reports" element={<Reports />} />
           
           {/* Admin Routes */}
           <Route path="/admin-login" element={<AdminLogin />} />
