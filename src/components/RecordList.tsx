@@ -157,7 +157,7 @@ const RecordList = ({
                 <tbody className="divide-y">
                   {filteredRecords.map((record, index) => {
                     // Calculate match score if we're in a matching context
-                    const matchScore = record.metadata?.matchScore;
+                    const matchScore = record.metadata?.matchScore || record.fuzzyScore;
                     
                     // Format the date nicely
                     const formatDate = (dateString: string) => {
@@ -177,9 +177,9 @@ const RecordList = ({
                         <td className="px-4 py-3">{record.gender}</td>
                         <td className="px-4 py-3">{formatDate(record.birthDate)}</td>
                         <td className="px-4 py-3">{record.village || '-'}</td>
-                        <td className="px-4 py-3">{record.subvillage || '-'}</td>
-                        <td className="px-4 py-3">{record.tclFirstName || '-'}</td>
-                        <td className="px-4 py-3">{record.tclLastName || '-'}</td>
+                        <td className="px-4 py-3">{record.subVillage || '-'}</td>
+                        <td className="px-4 py-3">{record.cellLeaderFirstName || '-'}</td>
+                        <td className="px-4 py-3">{record.cellLeaderLastName || '-'}</td>
                         <td className="px-4 py-3">
                           {matchScore ? (
                             <span className={`px-2 py-1 rounded-full text-xs ${

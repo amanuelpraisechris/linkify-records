@@ -21,6 +21,7 @@ export interface Record {
     createdAt: string;
     updatedAt: string;
     source: string;
+    matchScore?: number;
   };
   // Residence fields
   village?: string;
