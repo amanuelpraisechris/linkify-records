@@ -32,7 +32,11 @@ const SearchBar = ({
   }, [initialValue, onSearch]);
 
   useEffect(() => {
+    // Add console log to debug when search is triggered
+    console.log(`Search query changed: "${query}"`);
+    
     const timer = setTimeout(() => {
+      console.log(`Executing search for: "${query}"`);
       onSearch(query);
     }, debounceTime);
 

@@ -1,5 +1,4 @@
-
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Record } from '@/types';
 import RecordCard from './RecordCard';
 import SearchBar from './SearchBar';
@@ -28,20 +27,47 @@ const RecordList = ({
   const [viewMode, setViewMode] = useState<'card' | 'table'>('card');
   const [expandedRecord, setExpandedRecord] = useState<string | null>(null);
   const { config } = useMatchingConfig();
+  
+  useEffect(() => {
+    console.log(`RecordList received ${records.length} records`);
+    if (records.length > 0) {
+      console.log('Sample record:', records[0]);
+    }
+  }, [records]);
 
   const filteredRecords = records.filter(record => {
     if (!searchQuery) return true;
     
-    // Use language-aware comparison for search
-    return (
+    console.log(`Filtering record: ${record.firstName} ${record.lastName}`);
+    
+    const fields = Object.entries(record).reduce((acc, [key, value]) => {
+      if (key.startsWith('"') && typeof value === 'string') {
+        const cleanKey = key.replace(/"/g, '');
+        acc[cleanKey] = value;
+      } else {
+        acc[key] = value;
+      }
+      return acc;
+    }, {} as Record<string, any>);
+    
+    const matches = 
       compareStrings(record.firstName, searchQuery, searchLanguage) ||
       compareStrings(record.lastName, searchQuery, searchLanguage) ||
       compareStrings(record.patientId || '', searchQuery, searchLanguage) ||
       compareStrings(record.healthFacility || '', searchQuery, searchLanguage) ||
       compareStrings(record.village || '', searchQuery, searchLanguage) ||
       compareStrings(record.district || '', searchQuery, searchLanguage) ||
-      record.identifiers?.some(id => compareStrings(id.value, searchQuery, searchLanguage))
-    );
+      record.identifiers?.some(id => compareStrings(id.value, searchQuery, searchLanguage)) ||
+      compareStrings(fields.FirstName || '', searchQuery, searchLanguage) ||
+      compareStrings(fields.LastName || '', searchQuery, searchLanguage) ||
+      compareStrings(fields.villagename || '', searchQuery, searchLanguage) ||
+      compareStrings(fields.subvillagename || '', searchQuery, searchLanguage);
+    
+    if (matches) {
+      console.log(`Match found for "${searchQuery}": ${record.firstName || fields.FirstName} ${record.lastName || fields.LastName}`);
+    }
+    
+    return matches;
   });
 
   const toggleRecordDetails = (recordId: string) => {
@@ -50,6 +76,49 @@ const RecordList = ({
     } else {
       setExpandedRecord(recordId);
     }
+  };
+
+  const getDisplayName = (record: Record) => {
+    if (record["\"FirstName\""] && record["\"LastName\""]) {
+      const firstName = record["\"FirstName\""].replace(/"/g, '');
+      const lastName = record["\"LastName\""].replace(/"/g, '');
+      return `${firstName} ${lastName}`;
+    }
+    
+    return `${record.firstName || ''} ${record.lastName || ''}`.trim() || 'Unknown';
+  };
+
+  const getVillageName = (record: Record) => {
+    if (record["\"villagename\""]) {
+      return record["\"villagename\""].replace(/"/g, '');
+    }
+    
+    return record.village || '-';
+  };
+
+  const getSubVillageName = (record: Record) => {
+    if (record["\"subvillagename\""]) {
+      return record["\"subvillagename\""].replace(/"/g, '');
+    }
+    
+    return record.subVillage || '-';
+  };
+
+  const getGender = (record: Record) => {
+    if (record["\"Sex\""]) {
+      const sex = record["\"Sex\""].replace(/"/g, '');
+      return sex === 'M' ? 'Male' : sex === 'F' ? 'Female' : sex;
+    }
+    
+    return record.gender || '-';
+  };
+
+  const getBirthDate = (record: Record) => {
+    if (record["\"dob\""]) {
+      return record["\"dob\""].replace(/"/g, '');
+    }
+    
+    return record.birthDate || '';
   };
 
   return (
@@ -145,7 +214,15 @@ const RecordList = ({
         viewMode === 'card' ? (
           <div className="grid gap-4 animate-fade-in">
             {filteredRecords.map((record) => (
-              <RecordCard key={record.id} record={record} />
+              <RecordCard key={record.id} record={{
+                ...record,
+                firstName: record.firstName || (record["\"FirstName\""] ? record["\"FirstName\""].replace(/"/g, '') : ''),
+                lastName: record.lastName || (record["\"LastName\""] ? record["\"LastName\""].replace(/"/g, '') : ''),
+                gender: getGender(record),
+                birthDate: getBirthDate(record),
+                village: getVillageName(record),
+                subVillage: getSubVillageName(record),
+              }} />
             ))}
           </div>
         ) : (
@@ -172,15 +249,21 @@ const RecordList = ({
                 </thead>
                 <tbody className="divide-y">
                   {filteredRecords.map((record, index) => {
-                    // Calculate match score if we're in a matching context
                     const matchScore = record.metadata?.matchScore || record.fuzzyScore;
                     
-                    // Format the date nicely
                     const formatDate = (dateString: string) => {
                       if (!dateString) return '';
-                      const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'short', day: 'numeric' };
-                      return new Date(dateString).toLocaleDateString(undefined, options);
+                      const cleanDate = dateString.replace(/"/g, '');
+                      try {
+                        const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'short', day: 'numeric' };
+                        return new Date(cleanDate).toLocaleDateString(undefined, options);
+                      } catch (e) {
+                        return cleanDate;
+                      }
                     };
+                    
+                    const firstName = record.firstName || (record["\"FirstName\""] ? record["\"FirstName\""].replace(/"/g, '') : '');
+                    const lastName = record.lastName || (record["\"LastName\""] ? record["\"LastName\""].replace(/"/g, '') : '');
                     
                     return (
                       <>
@@ -189,12 +272,12 @@ const RecordList = ({
                           className="hover:bg-muted/30 transition-colors"
                         >
                           <td className="px-4 py-3 text-center">{index + 1}</td>
-                          <td className="px-4 py-3">{record.firstName}</td>
-                          <td className="px-4 py-3">{record.lastName}</td>
-                          <td className="px-4 py-3">{record.gender}</td>
-                          <td className="px-4 py-3">{formatDate(record.birthDate)}</td>
-                          <td className="px-4 py-3">{record.village || '-'}</td>
-                          <td className="px-4 py-3">{record.subVillage || '-'}</td>
+                          <td className="px-4 py-3">{firstName}</td>
+                          <td className="px-4 py-3">{lastName}</td>
+                          <td className="px-4 py-3">{getGender(record)}</td>
+                          <td className="px-4 py-3">{formatDate(getBirthDate(record))}</td>
+                          <td className="px-4 py-3">{getVillageName(record)}</td>
+                          <td className="px-4 py-3">{getSubVillageName(record)}</td>
                           
                           {showMatchDetail && (
                             <>
@@ -256,7 +339,6 @@ const RecordList = ({
                           </td>
                         </tr>
                         
-                        {/* Expanded record details */}
                         {expandedRecord === record.id && showMatchDetail && (
                           <tr>
                             <td colSpan={showMatchDetail ? 10 : 8} className="px-0 py-0">
