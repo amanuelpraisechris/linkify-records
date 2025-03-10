@@ -1,4 +1,3 @@
-
 import { Record } from '@/types';
 import { containsEthiopicScript, normalizeText, SupportedLanguage } from './languageUtils';
 
@@ -15,6 +14,7 @@ export interface FieldWeights {
   motherName: number;
   householdHead: number;
   phoneNumber: number;
+  middleName: number;
   [key: string]: number; // Allow for additional custom fields
 }
 
@@ -22,15 +22,16 @@ export interface FieldWeights {
  * Default field weights with adjusted priorities
  */
 export const DEFAULT_FIELD_WEIGHTS: FieldWeights = {
-  firstName: 35, // Increased from 30
-  lastName: 35,  // Increased from 30
-  birthDate: 30, // Increased from 25
-  gender: 15,    // Increased from 10
-  village: 20,   // Increased from 15
-  district: 15,  // Increased from 10
-  motherName: 20, // Increased from 15
-  householdHead: 15, // Increased from 12
-  phoneNumber: 20,   // Increased from 15
+  firstName: 40, // Increased priority for firstName
+  lastName: 40,  // Increased priority for lastName
+  middleName: 15, // Added middleName as secondary attribute
+  birthDate: 30,
+  gender: 15,
+  village: 20,
+  district: 15,
+  motherName: 20,
+  householdHead: 15,
+  phoneNumber: 20,
 };
 
 /**
@@ -210,6 +211,16 @@ export const calculateMatchScore = (
   totalWeight += lastNameWeight;
   if (lastNameScore > 80) matchedOn.push('Last Name');
   else if (lastNameScore > 50) matchedOn.push('Last Name (partial)');
+  
+  // Compare middle name (secondary identifier)
+  if (record1.middleName && record2.middleName) {
+    const middleNameWeight = config.fieldWeights.middleName || 15; // Default to 15 if not specified
+    const middleNameScore = calculateStringSimilarity(record1.middleName, record2.middleName, config);
+    totalScore += middleNameScore * middleNameWeight;
+    totalWeight += middleNameWeight;
+    if (middleNameScore > 80) matchedOn.push('Middle Name');
+    else if (middleNameScore > 50) matchedOn.push('Middle Name (partial)');
+  }
   
   // Compare birth date (high importance)
   const birthDateWeight = config.fieldWeights.birthDate;

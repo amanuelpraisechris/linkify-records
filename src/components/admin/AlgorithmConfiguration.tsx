@@ -5,12 +5,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Sliders, BarChart, Save, RotateCcw } from 'lucide-react';
-import { useMatchingConfig } from '@/contexts/MatchingConfigContext';
+import { Sliders, BarChart, Save, RotateCcw, AlertCircle } from 'lucide-react';
+import { useMatchingConfig, AlgorithmType } from '@/contexts/MatchingConfigContext';
 import { useToast } from '@/components/ui/use-toast';
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const AlgorithmConfiguration = () => {
-  const { config, updateFieldWeights, resetConfig, saveConfigProfile } = useMatchingConfig();
+  const { config, updateFieldWeights, resetConfig, saveConfigProfile, setAlgorithmType } = useMatchingConfig();
   const { toast } = useToast();
   
   // Local state for field weights
@@ -75,6 +77,11 @@ const AlgorithmConfiguration = () => {
     });
   };
   
+  // Handle algorithm type change
+  const handleAlgorithmTypeChange = (value: string) => {
+    setAlgorithmType(value as AlgorithmType);
+  };
+  
   const algorithmTypes = [
     { id: 'deterministic', name: 'Deterministic Matching', description: 'Rule-based matching using weighted fields' },
     { id: 'probabilistic', name: 'Probabilistic Matching', description: 'Statistical matching using Fellegi-Sunter model' }
@@ -101,6 +108,14 @@ const AlgorithmConfiguration = () => {
         {/* Field Weights Tab */}
         <TabsContent value="weights" className="space-y-4">
           <CardContent className="space-y-4 pt-4">
+            <Alert>
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>
+                FirstName and LastName are set as primary matching attributes with highest weights.
+                Balozi information is excluded from matching criteria.
+              </AlertDescription>
+            </Alert>
+            
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {Object.entries(fieldWeights).map(([field, weight]) => (
                 <div key={field} className="space-y-2">
@@ -158,24 +173,22 @@ const AlgorithmConfiguration = () => {
         <TabsContent value="algorithm">
           <CardContent className="space-y-4 pt-4">
             <div className="space-y-4">
-              {algorithmTypes.map(algorithm => (
-                <div key={algorithm.id} className="flex items-start gap-2">
-                  <input
-                    type="radio"
-                    id={`alg-${algorithm.id}`}
-                    name="algorithm-type"
-                    value={algorithm.id}
-                    defaultChecked={algorithm.id === 'deterministic'}
-                    className="mt-1"
-                  />
-                  <div>
-                    <Label htmlFor={`alg-${algorithm.id}`} className="font-medium">
-                      {algorithm.name}
-                    </Label>
-                    <p className="text-sm text-gray-500">{algorithm.description}</p>
+              <RadioGroup 
+                defaultValue={config.algorithmType}
+                onValueChange={handleAlgorithmTypeChange}
+              >
+                {algorithmTypes.map(algorithm => (
+                  <div key={algorithm.id} className="flex items-start space-x-2">
+                    <RadioGroupItem value={algorithm.id} id={`alg-${algorithm.id}`} />
+                    <div className="grid gap-1.5">
+                      <Label htmlFor={`alg-${algorithm.id}`} className="font-medium">
+                        {algorithm.name}
+                      </Label>
+                      <p className="text-sm text-gray-500">{algorithm.description}</p>
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </RadioGroup>
             </div>
             
             <div className="pt-4 border-t mt-4">
@@ -187,6 +200,7 @@ const AlgorithmConfiguration = () => {
                 <p><strong>Fuzzy Matching:</strong> {config.fuzzyMatching ? 'Enabled' : 'Disabled'}</p>
                 <p><strong>Default Language:</strong> {config.languageConfig.defaultLanguage}</p>
                 <p><strong>Script Detection:</strong> {config.languageConfig.enableScriptDetection ? 'Enabled' : 'Disabled'}</p>
+                <p><strong>Algorithm Type:</strong> {config.algorithmType}</p>
               </div>
             </div>
           </CardContent>

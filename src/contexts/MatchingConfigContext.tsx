@@ -64,8 +64,9 @@ export const MatchingConfigProvider: React.FC<MatchingConfigProviderProps> = ({ 
       ...EXTENDED_DEFAULT_CONFIG,
       fieldWeights: {
         ...DEFAULT_FIELD_WEIGHTS,
-        firstName: 35,
-        lastName: 35,
+        firstName: 40,
+        lastName: 40,
+        middleName: 15,
         birthDate: 25,
         village: 20,
         district: 15,
@@ -82,8 +83,9 @@ export const MatchingConfigProvider: React.FC<MatchingConfigProviderProps> = ({ 
       ...EXTENDED_DEFAULT_CONFIG,
       fieldWeights: {
         ...DEFAULT_FIELD_WEIGHTS,
-        firstName: 40,
-        lastName: 40,
+        firstName: 45, // Further increased for name priority profile
+        lastName: 45,  // Further increased for name priority profile
+        middleName: 20, // Added middleName with good weight
         birthDate: 25,
         gender: 15,
         village: 20,
