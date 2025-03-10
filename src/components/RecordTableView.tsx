@@ -23,13 +23,13 @@ const RecordTableView = ({
     if (score === undefined) return '--';
     
     // Format the score based on thresholds
-    if (score >= config.scoreThresholds.high) {
+    if (score >= config.threshold.high) {
       return (
-        <Badge variant="success" className="font-normal">High Match ({score}%)</Badge>
+        <Badge variant="default" className="bg-green-500 text-white font-normal">High Match ({score}%)</Badge>
       );
-    } else if (score >= config.scoreThresholds.medium) {
+    } else if (score >= config.threshold.medium) {
       return (
-        <Badge variant="warning" className="font-normal">Medium Match ({score}%)</Badge>
+        <Badge variant="default" className="bg-amber-500 text-white font-normal">Medium Match ({score}%)</Badge>
       );
     } else {
       return (
