@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import Navbar from '@/components/Navbar';
 import RecordEntryForm from '@/components/RecordEntryForm';
@@ -19,7 +20,7 @@ const initialRecords: Record[] = [
     id: '1',
     firstName: 'John',
     lastName: 'Doe',
-    gender: 'Male',
+    sex: 'Male', // Changed from gender to sex
     birthDate: '1985-03-15',
     village: 'Central',
     subVillage: 'Downtown',
@@ -36,7 +37,7 @@ const initialRecords: Record[] = [
     id: '2',
     firstName: 'Jane',
     lastName: 'Smith',
-    gender: 'Female',
+    sex: 'Female', // Changed from gender to sex
     birthDate: '1990-07-22',
     village: 'Eastern',
     subVillage: 'Riverside',
