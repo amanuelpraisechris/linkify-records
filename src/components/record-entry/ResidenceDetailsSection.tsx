@@ -120,8 +120,8 @@ const ResidenceDetailsSection = ({
       </div>
       
       <h5 className="text-sm font-medium mb-2 text-muted-foreground">
-        {inputLanguage === 'latin' ? 'Ten Cell Leader Information' : 
-        inputLanguage === 'amharic' ? 'የአስር ቤት መሪ መረጃ' : 'ሓበሬታ መራሒ ዓሰርተ ስድራ'}
+        {inputLanguage === 'latin' ? 'Balozi Information' : 
+        inputLanguage === 'amharic' ? 'የባሎዚ መረጃ' : 'ሓበሬታ ባሎዚ'}
       </h5>
       
       <div className="grid grid-cols-3 gap-3 mb-4">
@@ -132,8 +132,8 @@ const ResidenceDetailsSection = ({
           </label>
           <Input
             type="text"
-            name="cellLeaderFirstName"
-            value={formData.cellLeaderFirstName || ''}
+            name="balozi_first_name"
+            value={formData.balozi_first_name || ''}
             onChange={handleChange}
             className="w-full"
             dir={inputLanguage === 'latin' ? 'ltr' : 'rtl'}
@@ -147,8 +147,8 @@ const ResidenceDetailsSection = ({
           </label>
           <Input
             type="text"
-            name="cellLeaderMiddleName"
-            value={formData.cellLeaderMiddleName || ''}
+            name="balozi_middle_name"
+            value={formData.balozi_middle_name || ''}
             onChange={handleChange}
             className="w-full"
             dir={inputLanguage === 'latin' ? 'ltr' : 'rtl'}
@@ -162,8 +162,8 @@ const ResidenceDetailsSection = ({
           </label>
           <Input
             type="text"
-            name="cellLeaderLastName"
-            value={formData.cellLeaderLastName || ''}
+            name="balozi_last_name"
+            value={formData.balozi_last_name || ''}
             onChange={handleChange}
             className="w-full"
             dir={inputLanguage === 'latin' ? 'ltr' : 'rtl'}
@@ -184,8 +184,8 @@ const ResidenceDetailsSection = ({
           </label>
           <Input
             type="text"
-            name="oldestHouseholdMemberFirstName"
-            value={formData.oldestHouseholdMemberFirstName || ''}
+            name="oldest_member_first_name"
+            value={formData.oldest_member_first_name || ''}
             onChange={handleChange}
             className="w-full"
             dir={inputLanguage === 'latin' ? 'ltr' : 'rtl'}
@@ -199,8 +199,8 @@ const ResidenceDetailsSection = ({
           </label>
           <Input
             type="text"
-            name="oldestHouseholdMemberMiddleName"
-            value={formData.oldestHouseholdMemberMiddleName || ''}
+            name="oldest_member_middle_name"
+            value={formData.oldest_member_middle_name || ''}
             onChange={handleChange}
             className="w-full"
             dir={inputLanguage === 'latin' ? 'ltr' : 'rtl'}
@@ -214,8 +214,8 @@ const ResidenceDetailsSection = ({
           </label>
           <Input
             type="text"
-            name="oldestHouseholdMemberLastName"
-            value={formData.oldestHouseholdMemberLastName || ''}
+            name="oldest_member_last_name"
+            value={formData.oldest_member_last_name || ''}
             onChange={handleChange}
             className="w-full"
             dir={inputLanguage === 'latin' ? 'ltr' : 'rtl'}

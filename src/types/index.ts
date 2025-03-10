@@ -1,4 +1,3 @@
-
 export interface Record {
   id: string;
   patientId?: string;
@@ -32,12 +31,12 @@ export interface Record {
   motherName?: string;
   yearMovedIn?: string;
   neverInDSS?: boolean;
-  cellLeaderFirstName?: string;
-  cellLeaderMiddleName?: string;
-  cellLeaderLastName?: string;
-  oldestHouseholdMemberFirstName?: string;
-  oldestHouseholdMemberMiddleName?: string;
-  oldestHouseholdMemberLastName?: string;
+  balozi_first_name?: string;
+  balozi_middle_name?: string;
+  balozi_last_name?: string;
+  oldest_member_first_name?: string;
+  oldest_member_middle_name?: string;
+  oldest_member_last_name?: string;
   telephone?: string;
   fuzzyScore?: number;
   matchedOn?: string[];

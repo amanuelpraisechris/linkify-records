@@ -1,4 +1,3 @@
-
 // List of keys that should be excluded from name fields
 export const nonPatientNameFields = [
   "balozi_first_name", "\"balozi_first_name\"",

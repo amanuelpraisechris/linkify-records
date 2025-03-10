@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Record, Visit, ResidencyPeriod } from '@/types';
 import { useToast } from '@/hooks/use-toast';
@@ -21,12 +20,12 @@ export const useRecordForm = ({ onRecordSubmit, onSaveForSearch }: UseRecordForm
     telephone: '',
     yearMovedIn: '',
     neverInDSS: false,
-    cellLeaderFirstName: '',
-    cellLeaderMiddleName: '',
-    cellLeaderLastName: '',
-    oldestHouseholdMemberFirstName: '',
-    oldestHouseholdMemberMiddleName: '',
-    oldestHouseholdMemberLastName: '',
+    balozi_first_name: '',
+    balozi_middle_name: '',
+    balozi_last_name: '',
+    oldest_member_first_name: '',
+    oldest_member_middle_name: '',
+    oldest_member_last_name: '',
   });
   
   const [birthYear, setBirthYear] = useState<string>('');
@@ -222,12 +221,12 @@ export const useRecordForm = ({ onRecordSubmit, onSaveForSearch }: UseRecordForm
       telephone: '',
       yearMovedIn: '',
       neverInDSS: false,
-      cellLeaderFirstName: '',
-      cellLeaderMiddleName: '',
-      cellLeaderLastName: '',
-      oldestHouseholdMemberFirstName: '',
-      oldestHouseholdMemberMiddleName: '',
-      oldestHouseholdMemberLastName: '',
+      balozi_first_name: '',
+      balozi_middle_name: '',
+      balozi_last_name: '',
+      oldest_member_first_name: '',
+      oldest_member_middle_name: '',
+      oldest_member_last_name: '',
     });
     setBirthYear('');
     setBirthMonth('');
