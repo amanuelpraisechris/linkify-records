@@ -61,6 +61,9 @@ export const RecordDataProvider: React.FC<RecordDataProviderProps> = ({
       if (isMainCommunityData) {
         // Replace community records with new records
         setCommunityRecords(newRecords);
+        console.log(`Set ${newRecords.length} records as main community data source (HDSS Database)`);
+        console.log('Sample community record:', newRecords.length > 0 ? JSON.stringify(newRecords[0], null, 2) : 'No records');
+        
         // Update general records to include new community records
         setRecords(prevRecords => {
           // Filter out old community records (if any way to identify them)
@@ -70,7 +73,6 @@ export const RecordDataProvider: React.FC<RecordDataProviderProps> = ({
           );
           return [...nonCommunityRecords, ...newRecords];
         });
-        console.log(`Set ${newRecords.length} records as main community data source (HDSS Database)`);
       } else {
         // Add to imported records
         setImportedRecords(newRecords);
@@ -113,16 +115,34 @@ export const RecordDataProvider: React.FC<RecordDataProviderProps> = ({
       
       // Use probabilistic matching with community records
       if (communityRecords.length > 0) {
-        console.log('Using probabilistic matching algorithm');
+        console.log('Using probabilistic matching algorithm with threshold:', config.threshold.low);
+        
         try {
-          const matches = findProbabilisticMatches(sourceRecord, searchPool, config.threshold.low);
+          // Set a very low threshold to catch all potential matches
+          const lowThreshold = 10; // Very low threshold to see any potential matches
+          const matches = findProbabilisticMatches(sourceRecord, searchPool, lowThreshold);
+          
           console.log(`Found ${matches.length} probabilistic matches`);
-          return matches.map(match => ({
-            record: match.record,
-            score: match.score,
-            matchedOn: match.matchedOn,
-            fieldScores: match.fieldScores
-          }));
+          
+          // Log match details for the top 3 matches or all if fewer
+          const topMatches = matches.slice(0, Math.min(3, matches.length));
+          topMatches.forEach((match, index) => {
+            console.log(`Match ${index + 1}:`, {
+              score: match.score,
+              matchedOn: match.matchedOn,
+              fieldScores: match.fieldScores,
+              record: {
+                id: match.record.id,
+                firstName: match.record.firstName,
+                lastName: match.record.lastName,
+                birthDate: match.record.birthDate,
+                village: match.record.village
+              }
+            });
+          });
+          
+          // Return matches that meet our threshold
+          return matches.filter(match => match.score >= config.threshold.low);
         } catch (error) {
           console.error("Error in probabilistic matching:", error);
           return [];

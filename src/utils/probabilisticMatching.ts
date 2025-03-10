@@ -1,4 +1,3 @@
-
 import { Record } from '@/types';
 import { containsEthiopicScript, normalizeText, SupportedLanguage } from './languageUtils';
 
@@ -79,9 +78,13 @@ export const jaroWinkler = (s1: string, s2: string): number => {
   if (!s1 || !s2) return 0;
   if (s1 === s2) return 1;
 
+  // Convert strings to lowercase to make comparison case-insensitive
+  const str1 = s1.toLowerCase();
+  const str2 = s2.toLowerCase();
+  
   // Calculate Jaro similarity first
-  const s1Length = s1.length;
-  const s2Length = s2.length;
+  const s1Length = str1.length;
+  const s2Length = str2.length;
   
   // Maximum distance for matching characters
   const matchDistance = Math.floor(Math.max(s1Length, s2Length) / 2) - 1;
@@ -99,7 +102,7 @@ export const jaroWinkler = (s1: string, s2: string): number => {
     const end = Math.min(i + matchDistance + 1, s2Length);
 
     for (let j = start; j < end; j++) {
-      if (!s2Matches[j] && s1[i] === s2[j]) {
+      if (!s2Matches[j] && str1[i] === str2[j]) {
         s1Matches[i] = true;
         s2Matches[j] = true;
         matchingChars++;
@@ -120,7 +123,7 @@ export const jaroWinkler = (s1: string, s2: string): number => {
       while (!s2Matches[k]) {
         k++;
       }
-      if (s1[i] !== s2[k]) {
+      if (str1[i] !== str2[k]) {
         transpositions++;
       }
       k++;
@@ -139,7 +142,7 @@ export const jaroWinkler = (s1: string, s2: string): number => {
   const prefixLength = Math.min(4, Math.min(s1Length, s2Length));
   let prefixMatch = 0;
   for (let i = 0; i < prefixLength; i++) {
-    if (s1[i] === s2[i]) {
+    if (str1[i] === str2[i]) {
       prefixMatch++;
     } else {
       break;
@@ -191,8 +194,8 @@ export const namesMatch = (
   // Calculate Jaro-Winkler similarity
   const similarity = jaroWinkler(normalized1, normalized2);
   
-  // Match if similarity exceeds threshold (0.8 as per requirements)
-  return similarity >= 0.8;
+  // Match if similarity exceeds threshold (lowered to 0.7 from 0.8)
+  return similarity >= 0.7;
 };
 
 /**
@@ -233,13 +236,13 @@ export const findBestNameMatch = (
  * 
  * @param year1 First year
  * @param year2 Second year
- * @param allowableDiff Maximum allowable difference (default 2)
+ * @param allowableDiff Maximum allowable difference (increased to 3)
  * @returns True if years match within allowable difference
  */
 export const birthYearMatches = (
   year1: string | undefined,
   year2: string | undefined,
-  allowableDiff: number = 2
+  allowableDiff: number = 3
 ): boolean => {
   if (!year1 || !year2) return false;
   
@@ -308,8 +311,8 @@ export const calculateProbabilisticMatch = (
     const [year1, month1, day1] = record1.birthDate.split('-');
     const [year2, month2, day2] = record2.birthDate.split('-');
     
-    // Year comparison (allow 2 year difference)
-    const yearMatch = birthYearMatches(year1, year2, 2);
+    // Year comparison (allow 3 year difference)
+    const yearMatch = birthYearMatches(year1, year2, 3);
     const yearWeight = calculateFieldWeight(matchProbs.birthYear, unmatchProbs.birthYear, yearMatch);
     totalWeight += yearWeight;
     fieldScores['birthYear'] = yearWeight;
@@ -335,24 +338,26 @@ export const calculateProbabilisticMatch = (
   }
   
   // Gender comparison (exact match required)
-  const genderMatch = record1.gender === record2.gender;
+  const genderMatch = record1.gender?.toLowerCase() === record2.gender?.toLowerCase();
   const genderWeight = calculateFieldWeight(matchProbs.gender, unmatchProbs.gender, genderMatch);
   totalWeight += genderWeight;
   fieldScores['gender'] = genderWeight;
   if (genderMatch) matchedOn.push('Gender');
   
-  // Village comparison (exact match required)
+  // Village comparison (more lenient matching)
   if (record1.village && record2.village) {
-    const villageMatch = record1.village.toLowerCase() === record2.village.toLowerCase();
+    // Use namesMatch for fuzzy village matching since it's now free text
+    const villageMatch = namesMatch(record1.village, record2.village, language);
     const villageWeight = calculateFieldWeight(matchProbs.village, unmatchProbs.village, villageMatch);
     totalWeight += villageWeight;
     fieldScores['village'] = villageWeight;
     if (villageMatch) matchedOn.push('Village');
   }
   
-  // Sub-village comparison (exact match required)
+  // Sub-village comparison (more lenient matching)
   if (record1.subVillage && record2.subVillage) {
-    const subVillageMatch = record1.subVillage.toLowerCase() === record2.subVillage.toLowerCase();
+    // Use namesMatch for fuzzy sub-village matching
+    const subVillageMatch = namesMatch(record1.subVillage, record2.subVillage, language);
     const subVillageWeight = calculateFieldWeight(matchProbs.subVillage, unmatchProbs.subVillage, subVillageMatch);
     totalWeight += subVillageWeight;
     fieldScores['subVillage'] = subVillageWeight;
@@ -435,9 +440,8 @@ export const calculateProbabilisticMatch = (
   }
   
   // Convert to percentage (0-100)
-  // Score is relative - the absolute value doesn't have a direct probabilistic interpretation,
-  // but higher scores represent greater likelihood of a match
-  const normalizedScore = Math.min(100, Math.max(0, Math.round((totalWeight + 10) * 5)));
+  // Adjust the normalization to be more lenient
+  const normalizedScore = Math.min(100, Math.max(0, Math.round((totalWeight + 12) * 5)));
   
   return {
     score: normalizedScore,
@@ -460,11 +464,34 @@ export const findProbabilisticMatches = (
   targetRecords: Record[],
   minScore: number = 40
 ): Array<{ record: Record; score: number; matchedOn: string[]; fieldScores: {[key: string]: number}; }> => {
-  return targetRecords
+  console.log(`Running probabilistic match for ${sourceRecord.firstName} ${sourceRecord.lastName} against ${targetRecords.length} records with min score ${minScore}`);
+  
+  const matches = targetRecords
     .map(record => {
       const { score, matchedOn, fieldScores, totalWeight } = calculateProbabilisticMatch(sourceRecord, record);
       return { record, score, matchedOn, fieldScores, totalWeight };
     })
     .filter(match => match.score >= minScore)
     .sort((a, b) => b.score - a.score);
+  
+  // Debug: Log the number of matches found
+  console.log(`Found ${matches.length} probabilistic matches with score >= ${minScore}`);
+  
+  if (matches.length === 0) {
+    // If no matches found, log a few potential matches that were close but didn't meet threshold
+    const nearMatches = targetRecords
+      .map(record => {
+        const { score, matchedOn, fieldScores, totalWeight } = calculateProbabilisticMatch(sourceRecord, record);
+        return { record, score, matchedOn, fieldScores, totalWeight };
+      })
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 3);
+    
+    console.log("Top 3 near matches that didn't meet threshold:");
+    nearMatches.forEach((match, i) => {
+      console.log(`Near match ${i+1}: ${match.record.firstName} ${match.record.lastName}, Score: ${match.score}, Matched fields:`, match.matchedOn);
+    });
+  }
+  
+  return matches;
 };

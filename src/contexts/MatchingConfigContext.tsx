@@ -32,7 +32,16 @@ interface MatchingConfigProviderProps {
 }
 
 export const MatchingConfigProvider: React.FC<MatchingConfigProviderProps> = ({ children }) => {
-  const [config, setConfig] = useState<MatchingConfig>(DEFAULT_MATCHING_CONFIG);
+  // Modified the default config to have lower thresholds
+  const [config, setConfig] = useState<MatchingConfig>({
+    ...DEFAULT_MATCHING_CONFIG,
+    threshold: {
+      high: 70,  // Lowered from 80
+      medium: 50, // Lowered from 60
+      low: 30     // Lowered from 40
+    }
+  });
+  
   const [savedProfiles, setSavedProfiles] = useState<Record<string, MatchingConfig>>({
     'Default': DEFAULT_MATCHING_CONFIG,
     'DSS Linkage': {
@@ -50,6 +59,14 @@ export const MatchingConfigProvider: React.FC<MatchingConfigProviderProps> = ({ 
         high: 85,
         medium: 70,
         low: 50
+      }
+    },
+    'Lenient Matching': {
+      ...DEFAULT_MATCHING_CONFIG,
+      threshold: {
+        high: 70,
+        medium: 50,
+        low: 30
       }
     }
   });
