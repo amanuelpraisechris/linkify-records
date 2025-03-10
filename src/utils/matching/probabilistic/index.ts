@@ -3,7 +3,7 @@ import { Record } from '@/types';
 import { DEFAULT_MATCH_PROBABILITIES, DEFAULT_UNMATCH_PROBABILITIES } from './defaultProbabilities';
 import { calculateFieldWeight } from './stringComparison';
 import { namesMatch, findBestNameMatch, birthYearMatches } from './fieldMatching';
-import { containsEthiopicScript } from '../../languageUtils';
+import { containsEthiopicScript, SupportedLanguage } from '../../languageUtils';
 import { ProbabilisticMatchResult } from './types';
 
 export const calculateProbabilisticMatch = (
@@ -14,7 +14,8 @@ export const calculateProbabilisticMatch = (
   const fieldScores: {[key: string]: number} = {};
   let totalWeight = 0;
   
-  let language = containsEthiopicScript(record1.firstName) || containsEthiopicScript(record2.firstName) ? 'amharic' : 'latin';
+  // Determine language based on script detection
+  let language: SupportedLanguage = containsEthiopicScript(record1.firstName) || containsEthiopicScript(record2.firstName) ? 'amharic' : 'latin';
   
   // First Name comparison
   const firstNameMatch = namesMatch(record1.firstName, record2.firstName, language);
