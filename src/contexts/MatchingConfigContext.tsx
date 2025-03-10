@@ -1,4 +1,3 @@
-
 import React, { createContext, useState, useContext, ReactNode, useEffect } from 'react';
 import { 
   MatchingConfig, 
@@ -16,9 +15,26 @@ export interface ExtendedMatchingConfig extends MatchingConfig {
   algorithmType: AlgorithmType;
 }
 
+// Modified field weights to exclude Balozi information and prioritize FirstName and LastName
+const UPDATED_FIELD_WEIGHTS: FieldWeights = {
+  ...DEFAULT_FIELD_WEIGHTS,
+  firstName: 45,
+  lastName: 45,
+  middleName: 20,
+  birthDate: 30,
+  gender: 15,
+  village: 25,
+  district: 20,
+  motherName: 25,
+  householdHead: 25,
+  phoneNumber: 20
+  // Note: baloziFirstName, baloziMiddleName, and baloziLastName are intentionally omitted
+};
+
 // Extended default config
 const EXTENDED_DEFAULT_CONFIG: ExtendedMatchingConfig = {
   ...DEFAULT_MATCHING_CONFIG,
+  fieldWeights: UPDATED_FIELD_WEIGHTS,
   algorithmType: 'deterministic'
 };
 
@@ -63,7 +79,7 @@ export const MatchingConfigProvider: React.FC<MatchingConfigProviderProps> = ({ 
     'DSS Linkage': {
       ...EXTENDED_DEFAULT_CONFIG,
       fieldWeights: {
-        ...DEFAULT_FIELD_WEIGHTS,
+        ...UPDATED_FIELD_WEIGHTS,
         firstName: 40,
         lastName: 40,
         middleName: 15,
@@ -82,7 +98,7 @@ export const MatchingConfigProvider: React.FC<MatchingConfigProviderProps> = ({ 
     'Name Priority': {
       ...EXTENDED_DEFAULT_CONFIG,
       fieldWeights: {
-        ...DEFAULT_FIELD_WEIGHTS,
+        ...UPDATED_FIELD_WEIGHTS,
         firstName: 45, // Further increased for name priority profile
         lastName: 45,  // Further increased for name priority profile
         middleName: 20, // Added middleName with good weight

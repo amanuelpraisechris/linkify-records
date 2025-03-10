@@ -15,7 +15,6 @@ export interface MatchProbabilities {
   village: number;
   subVillage: number;
   householdMember: number; // Oldest household member
-  balozi: number; // Balozi leader (formerly Ten-cell leader)
 }
 
 /**
@@ -33,7 +32,6 @@ export const DEFAULT_MATCH_PROBABILITIES: MatchProbabilities = {
   village: 0.85,    // Slightly reduced from 0.90
   subVillage: 0.75, // Slightly reduced from 0.80
   householdMember: 0.70, // Slightly reduced from 0.75
-  balozi: 0.65      // Renamed from cellLeader and reduced from 0.70
 };
 
 /**
@@ -50,7 +48,6 @@ export interface UnmatchProbabilities {
   village: number;
   subVillage: number;
   householdMember: number;
-  balozi: number;
 }
 
 /**
@@ -67,7 +64,6 @@ export const DEFAULT_UNMATCH_PROBABILITIES: UnmatchProbabilities = {
   village: 0.1, // Depends on number of villages in region
   subVillage: 0.03, // Depends on number of sub-villages
   householdMember: 0.01,
-  balozi: 0.01 // Renamed from cellLeader
 };
 
 /**
@@ -363,43 +359,6 @@ export const calculateProbabilisticMatch = (
     totalWeight += subVillageWeight;
     fieldScores['subVillage'] = subVillageWeight;
     if (subVillageMatch) matchedOn.push('Sub-Village');
-  }
-  
-  // Balozi leader comparison (lower priority)
-  if ((record1.baloziFirstName || record1.baloziLastName) && 
-      (record2.baloziFirstName || record2.baloziLastName)) {
-    
-    const sourceNames = [
-      record1.baloziFirstName, 
-      record1.baloziMiddleName, 
-      record1.baloziLastName
-    ].filter(Boolean) as string[];
-    
-    const targetNames = [
-      record2.baloziFirstName, 
-      record2.baloziMiddleName, 
-      record2.baloziLastName
-    ].filter(Boolean) as string[];
-    
-    let anyNameMatches = false;
-    
-    // Cross-compare all names to find matches
-    for (const sourceName of sourceNames) {
-      if (!sourceName) continue;
-      for (const targetName of targetNames) {
-        if (!targetName) continue;
-        if (namesMatch(sourceName, targetName, language)) {
-          anyNameMatches = true;
-          break;
-        }
-      }
-      if (anyNameMatches) break;
-    }
-    
-    const baloziWeight = calculateFieldWeight(matchProbs.balozi, unmatchProbs.balozi, anyNameMatches);
-    totalWeight += baloziWeight;
-    fieldScores['balozi'] = baloziWeight;
-    if (anyNameMatches) matchedOn.push('Balozi');
   }
   
   // Oldest household member comparison
