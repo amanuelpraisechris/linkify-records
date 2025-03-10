@@ -1,6 +1,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { Search, X } from 'lucide-react';
+import { containsEthiopicScript } from '@/utils/languageUtils';
 
 interface SearchBarProps {
   placeholder?: string;
@@ -35,13 +36,6 @@ const SearchBar = ({
     if (inputRef.current) {
       inputRef.current.focus();
     }
-  };
-
-  // Determine if text contains any Amharic or Tigrinya characters
-  const containsEthiopicScript = (text: string): boolean => {
-    // Ethiopic Unicode range: \u1200-\u137F (Ethiopic) and \u1380-\u139F (Ethiopic Supplement)
-    const ethiopicPattern = /[\u1200-\u137F\u1380-\u139F]/;
-    return ethiopicPattern.test(text);
   };
 
   // Dynamically set direction based on input content

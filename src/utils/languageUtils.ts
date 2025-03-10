@@ -8,6 +8,17 @@
 export type SupportedLanguage = 'latin' | 'amharic' | 'tigrinya';
 
 /**
+ * Checks if text contains any Amharic or Tigrinya characters
+ * @param text The text to check
+ * @returns True if the text contains Ethiopic script
+ */
+export const containsEthiopicScript = (text: string): boolean => {
+  // Ethiopic Unicode range: \u1200-\u137F (Ethiopic) and \u1380-\u139F (Ethiopic Supplement)
+  const ethiopicPattern = /[\u1200-\u137F\u1380-\u139F]/;
+  return ethiopicPattern.test(text);
+};
+
+/**
  * Normalizes text for consistent comparison across different scripts
  * @param text The text to normalize
  * @param language The language of the text
