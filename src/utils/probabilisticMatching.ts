@@ -15,24 +15,25 @@ export interface MatchProbabilities {
   village: number;
   subVillage: number;
   householdMember: number; // Oldest household member
-  cellLeader: number; // Ten-cell leader
+  balozi: number; // Balozi leader (formerly Ten-cell leader)
 }
 
 /**
- * Default match probabilities based on previous research
+ * Default match probabilities based on previous research with adjusted weights
+ * to prioritize first name and last name
  */
 export const DEFAULT_MATCH_PROBABILITIES: MatchProbabilities = {
-  firstName: 0.90, // 90% chance a first name matches if records truly match
-  lastName: 0.85,
+  firstName: 0.95, // Increased from 0.90 to 0.95 to prioritize first name
+  lastName: 0.92,  // Increased from 0.85 to 0.92 to prioritize last name
   middleName: 0.80,
-  birthYear: 0.85,
-  birthMonth: 0.70,
-  birthDay: 0.60,
-  gender: 0.99, // Gender is almost always correctly recorded
-  village: 0.90,
-  subVillage: 0.80,
-  householdMember: 0.75,
-  cellLeader: 0.70
+  birthYear: 0.88,  // Increased weight for birth year
+  birthMonth: 0.75, // Increased weight for birth month
+  birthDay: 0.65,   // Increased weight for birth day
+  gender: 0.99,     // Gender is almost always correctly recorded
+  village: 0.85,    // Slightly reduced from 0.90
+  subVillage: 0.75, // Slightly reduced from 0.80
+  householdMember: 0.70, // Slightly reduced from 0.75
+  balozi: 0.65      // Renamed from cellLeader and reduced from 0.70
 };
 
 /**
@@ -49,7 +50,7 @@ export interface UnmatchProbabilities {
   village: number;
   subVillage: number;
   householdMember: number;
-  cellLeader: number;
+  balozi: number;
 }
 
 /**
@@ -66,7 +67,7 @@ export const DEFAULT_UNMATCH_PROBABILITIES: UnmatchProbabilities = {
   village: 0.1, // Depends on number of villages in region
   subVillage: 0.03, // Depends on number of sub-villages
   householdMember: 0.01,
-  cellLeader: 0.01
+  balozi: 0.01 // Renamed from cellLeader
 };
 
 /**
@@ -282,14 +283,14 @@ export const calculateProbabilisticMatch = (
     language = 'amharic'; // Default to Amharic for Ethiopic script
   }
   
-  // First Name comparison (allowing for multiple name pairwise comparison)
+  // First Name comparison (primary identifier)
   const firstNameMatch = namesMatch(record1.firstName, record2.firstName, language);
   const firstNameWeight = calculateFieldWeight(matchProbs.firstName, unmatchProbs.firstName, firstNameMatch);
   totalWeight += firstNameWeight;
   fieldScores['firstName'] = firstNameWeight;
   if (firstNameMatch) matchedOn.push('First Name');
   
-  // Last Name comparison
+  // Last Name comparison (primary identifier)
   const lastNameMatch = namesMatch(record1.lastName, record2.lastName, language);
   const lastNameWeight = calculateFieldWeight(matchProbs.lastName, unmatchProbs.lastName, lastNameMatch);
   totalWeight += lastNameWeight;
@@ -305,7 +306,7 @@ export const calculateProbabilisticMatch = (
     if (middleNameMatch) matchedOn.push('Middle Name');
   }
   
-  // Birth Date components
+  // Birth Date components (high importance)
   if (record1.birthDate && record2.birthDate) {
     // Extract year, month, day from dates (assuming YYYY-MM-DD format)
     const [year1, month1, day1] = record1.birthDate.split('-');
@@ -364,21 +365,20 @@ export const calculateProbabilisticMatch = (
     if (subVillageMatch) matchedOn.push('Sub-Village');
   }
   
-  // Ten-cell leader comparison (cell leader)
-  // Taking the best match from first/middle/last name
-  if ((record1.cellLeaderFirstName || record1.cellLeaderLastName) && 
-      (record2.cellLeaderFirstName || record2.cellLeaderLastName)) {
+  // Balozi leader comparison (lower priority)
+  if ((record1.baloziFirstName || record1.baloziLastName) && 
+      (record2.baloziFirstName || record2.baloziLastName)) {
     
     const sourceNames = [
-      record1.cellLeaderFirstName, 
-      record1.cellLeaderMiddleName, 
-      record1.cellLeaderLastName
+      record1.baloziFirstName, 
+      record1.baloziMiddleName, 
+      record1.baloziLastName
     ].filter(Boolean) as string[];
     
     const targetNames = [
-      record2.cellLeaderFirstName, 
-      record2.cellLeaderMiddleName, 
-      record2.cellLeaderLastName
+      record2.baloziFirstName, 
+      record2.baloziMiddleName, 
+      record2.baloziLastName
     ].filter(Boolean) as string[];
     
     let anyNameMatches = false;
@@ -396,10 +396,10 @@ export const calculateProbabilisticMatch = (
       if (anyNameMatches) break;
     }
     
-    const cellLeaderWeight = calculateFieldWeight(matchProbs.cellLeader, unmatchProbs.cellLeader, anyNameMatches);
-    totalWeight += cellLeaderWeight;
-    fieldScores['cellLeader'] = cellLeaderWeight;
-    if (anyNameMatches) matchedOn.push('Ten-Cell Leader');
+    const baloziWeight = calculateFieldWeight(matchProbs.balozi, unmatchProbs.balozi, anyNameMatches);
+    totalWeight += baloziWeight;
+    fieldScores['balozi'] = baloziWeight;
+    if (anyNameMatches) matchedOn.push('Balozi');
   }
   
   // Oldest household member comparison

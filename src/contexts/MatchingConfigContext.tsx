@@ -48,17 +48,34 @@ export const MatchingConfigProvider: React.FC<MatchingConfigProviderProps> = ({ 
       ...DEFAULT_MATCHING_CONFIG,
       fieldWeights: {
         ...DEFAULT_FIELD_WEIGHTS,
-        firstName: 30,
-        lastName: 30,
-        tclFirstName: 15,
-        tclLastName: 15,
-        village: 20,
-        subvillage: 15
+        firstName: 35,
+        lastName: 35,
+        birthDate: 25,
+        balozi: 10,
+        village: 15,
+        district: 10
       },
       threshold: {
         high: 85,
         medium: 70,
         low: 50
+      }
+    },
+    'Name Priority': {
+      ...DEFAULT_MATCHING_CONFIG,
+      fieldWeights: {
+        ...DEFAULT_FIELD_WEIGHTS,
+        firstName: 40,
+        lastName: 40,
+        birthDate: 25,
+        gender: 10,
+        village: 15,
+        balozi: 5
+      },
+      threshold: {
+        high: 70,
+        medium: 45,
+        low: 25
       }
     },
     'Lenient Matching': {

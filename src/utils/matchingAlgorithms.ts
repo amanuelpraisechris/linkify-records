@@ -1,4 +1,3 @@
-
 import { Record } from '@/types';
 import { containsEthiopicScript, normalizeText, SupportedLanguage } from './languageUtils';
 
@@ -15,22 +14,24 @@ export interface FieldWeights {
   motherName: number;
   householdHead: number;
   phoneNumber: number;
+  balozi: number; // Added for Balozi field
   [key: string]: number; // Allow for additional custom fields
 }
 
 /**
- * Default field weights
+ * Default field weights with adjusted priorities
  */
 export const DEFAULT_FIELD_WEIGHTS: FieldWeights = {
-  firstName: 25,
-  lastName: 25,
-  birthDate: 20,
+  firstName: 30, // Increased from 25
+  lastName: 30,  // Increased from 25
+  birthDate: 25, // Increased from 20
   gender: 10,
   village: 15,
   district: 10,
-  motherName: 20,
-  householdHead: 15,
+  motherName: 15, // Reduced from 20
+  householdHead: 12, // Reduced from 15
   phoneNumber: 15,
+  balozi: 10, // Added with lower weight
 };
 
 /**
@@ -195,7 +196,7 @@ export const calculateMatchScore = (
   let totalScore = 0;
   let totalWeight = 0;
   
-  // Compare first name
+  // Compare first name (primary identifier)
   const firstNameWeight = config.fieldWeights.firstName;
   const firstNameScore = calculateStringSimilarity(record1.firstName, record2.firstName, config);
   totalScore += firstNameScore * firstNameWeight;
@@ -203,7 +204,7 @@ export const calculateMatchScore = (
   if (firstNameScore > 80) matchedOn.push('First Name');
   else if (firstNameScore > 50) matchedOn.push('First Name (partial)');
   
-  // Compare last name
+  // Compare last name (primary identifier)
   const lastNameWeight = config.fieldWeights.lastName;
   const lastNameScore = calculateStringSimilarity(record1.lastName, record2.lastName, config);
   totalScore += lastNameScore * lastNameWeight;
@@ -211,7 +212,7 @@ export const calculateMatchScore = (
   if (lastNameScore > 80) matchedOn.push('Last Name');
   else if (lastNameScore > 50) matchedOn.push('Last Name (partial)');
   
-  // Compare birth date
+  // Compare birth date (high importance)
   const birthDateWeight = config.fieldWeights.birthDate;
   const birthDateScore = calculateDateSimilarity(record1.birthDate, record2.birthDate);
   totalScore += birthDateScore * birthDateWeight;
@@ -265,6 +266,24 @@ export const calculateMatchScore = (
     totalWeight += householdHeadWeight;
     if (householdHeadScore > 80) matchedOn.push('Household Head');
     else if (householdHeadScore > 50) matchedOn.push('Household Head (partial)');
+  }
+  
+  // Compare Balozi information
+  if ((record1.baloziFirstName || record1.baloziLastName) && 
+      (record2.baloziFirstName || record2.baloziLastName)) {
+    // Try matching any of the Balozi names
+    const baloziFirstNameScore = calculateStringSimilarity(record1.baloziFirstName, record2.baloziFirstName, config);
+    const baloziLastNameScore = calculateStringSimilarity(record1.baloziLastName, record2.baloziLastName, config);
+    
+    // Use the best match score
+    const baloziScore = Math.max(baloziFirstNameScore, baloziLastNameScore);
+    const baloziWeight = config.fieldWeights.balozi;
+    
+    totalScore += baloziScore * baloziWeight;
+    totalWeight += baloziWeight;
+    
+    if (baloziScore > 80) matchedOn.push('Balozi');
+    else if (baloziScore > 50) matchedOn.push('Balozi (partial)');
   }
   
   // Compare phone number
