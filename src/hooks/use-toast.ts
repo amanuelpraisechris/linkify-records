@@ -9,6 +9,7 @@ export type ToastProps = {
   description?: string;
   action?: ToastActionElement;
   variant?: "default" | "destructive";
+  duration?: number;
 };
 
 export type ToastState = {
@@ -56,6 +57,7 @@ interface ToastContextType extends ToastState {
   updateToast: (id: string, props: Partial<ToastProps>) => void;
   dismissToast: (id: string) => void;
   removeToast: (id: string) => void;
+  toast: (props: Omit<ToastProps, "id">) => string;
 }
 
 export function useToast(): ToastContextType {
@@ -85,7 +87,7 @@ export function useToast(): ToastContextType {
         if (toastId) {
           setState((prevState) => {
             const updatedToasts = prevState.toasts.map((t) =>
-              t.id === toastId ? { ...t, open: false } : t
+              t.id === toastId ? { ...t } : t
             );
             return { ...prevState, toasts: updatedToasts };
           });
@@ -93,7 +95,6 @@ export function useToast(): ToastContextType {
           setState((prevState) => {
             const updatedToasts = prevState.toasts.map((t) => ({
               ...t,
-              open: false,
             }));
             return { ...prevState, toasts: updatedToasts };
           });
@@ -109,8 +110,7 @@ export function useToast(): ToastContextType {
           });
         } else {
           setState((prevState) => {
-            const updatedToasts = prevState.toasts.filter((t) => t.open !== false);
-            return { ...prevState, toasts: updatedToasts };
+            return { ...prevState, toasts: [] };
           });
         }
         return;
@@ -136,12 +136,15 @@ export function useToast(): ToastContextType {
     dispatch({ type: actionTypes.REMOVE_TOAST, toastId: id });
   }
 
+  const toast = addToast;
+
   return {
     ...state,
     addToast,
     updateToast,
     dismissToast,
     removeToast,
+    toast,
   };
 }
 
@@ -152,4 +155,3 @@ export const toast = (props: Omit<ToastProps, "id">) => {
   document.dispatchEvent(event);
   return "";
 };
-
