@@ -51,37 +51,46 @@ const initialRecords: Record[] = [
 ];
 
 const RecordEntryContent = () => {
-  const { addRecord, findMatchesForRecord, communityRecords } = useRecordData();
+  const { addRecord, findMatchesForRecord, communityRecords, clinicRecords } = useRecordData();
   const [potentialMatches, setPotentialMatches] = useState<Array<{record: Record; score: number; matchedOn: string[]; fieldScores?: {[key: string]: number};}>>([]);
   const [submittedRecord, setSubmittedRecord] = useState<Record | null>(null);
   const { toast } = useToast();
 
   const handleRecordSubmit = (record: Record) => {
-    // Add the clinic record
-    addRecord(record, 'clinic');
-    
-    // Check if community database is loaded
-    if (communityRecords.length === 0) {
-      setPotentialMatches([]);
+    try {
+      // Add the clinic record
+      addRecord(record, 'clinic');
+      
+      // Check if community database is loaded
+      if (communityRecords.length === 0) {
+        setPotentialMatches([]);
+        setSubmittedRecord(record);
+        
+        toast({
+          title: "No Community Database",
+          description: "Please import the HDSS community database to enable matching.",
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      // Find potential matches in the community database
+      const matches = findMatchesForRecord(record);
+      setPotentialMatches(matches);
       setSubmittedRecord(record);
       
       toast({
-        title: "No Community Database",
-        description: "Please import the HDSS community database to enable matching.",
+        title: "Record Submitted",
+        description: `Found ${matches.length} potential matches in the HDSS database.`,
+      });
+    } catch (error) {
+      console.error("Error in handleRecordSubmit:", error);
+      toast({
+        title: "Error Processing Record",
+        description: "An error occurred while processing your record.",
         variant: "destructive"
       });
-      return;
     }
-    
-    // Find potential matches in the community database
-    const matches = findMatchesForRecord(record);
-    setPotentialMatches(matches);
-    setSubmittedRecord(record);
-    
-    toast({
-      title: "Record Submitted",
-      description: `Found ${matches.length} potential matches in the HDSS database.`,
-    });
   };
 
   return (
@@ -173,7 +182,7 @@ const RecordEntryContent = () => {
             <div className="bg-white dark:bg-black border rounded-xl shadow-card p-6">
               <h2 className="text-xl font-semibold mb-4">Recently Added Clinic Records</h2>
               <RecordList 
-                records={initialRecords} 
+                records={clinicRecords} 
                 showMatchDetail={false} 
                 emptyMessage="No clinic records have been added yet."
               />
