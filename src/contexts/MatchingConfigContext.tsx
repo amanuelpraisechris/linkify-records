@@ -32,13 +32,13 @@ interface MatchingConfigProviderProps {
 }
 
 export const MatchingConfigProvider: React.FC<MatchingConfigProviderProps> = ({ children }) => {
-  // Modified the default config to have lower thresholds
+  // Modified the default config to have very low thresholds for better match detection
   const [config, setConfig] = useState<MatchingConfig>({
     ...DEFAULT_MATCHING_CONFIG,
     threshold: {
-      high: 70,  // Lowered from 80
-      medium: 50, // Lowered from 60
-      low: 30     // Lowered from 40
+      high: 65,  // Lowered from 70
+      medium: 40, // Lowered from 50
+      low: 20     // Lowered from 30
     }
   });
   
@@ -64,9 +64,9 @@ export const MatchingConfigProvider: React.FC<MatchingConfigProviderProps> = ({ 
     'Lenient Matching': {
       ...DEFAULT_MATCHING_CONFIG,
       threshold: {
-        high: 70,
-        medium: 50,
-        low: 30
+        high: 65,
+        medium: 40,
+        low: 20
       }
     }
   });

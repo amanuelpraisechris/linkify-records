@@ -8,13 +8,15 @@ interface SearchBarProps {
   onSearch: (query: string) => void;
   className?: string;
   dir?: 'ltr' | 'rtl';
+  debounceTime?: number;
 }
 
 const SearchBar = ({ 
   placeholder = "Search records...", 
   onSearch, 
   className = "",
-  dir = "ltr"
+  dir = "ltr",
+  debounceTime = 300
 }: SearchBarProps) => {
   const [query, setQuery] = useState('');
   const [isFocused, setIsFocused] = useState(false);
@@ -25,10 +27,10 @@ const SearchBar = ({
       if (query) {
         onSearch(query);
       }
-    }, 500);
+    }, debounceTime);
 
     return () => clearTimeout(timer);
-  }, [query, onSearch]);
+  }, [query, onSearch, debounceTime]);
 
   const handleClear = () => {
     setQuery('');

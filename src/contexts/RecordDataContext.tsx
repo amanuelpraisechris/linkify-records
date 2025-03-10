@@ -94,18 +94,28 @@ export const RecordDataProvider: React.FC<RecordDataProviderProps> = ({
   const findMatchesForRecord = (sourceRecord: Record) => {
     try {
       // Debug information about available records
+      console.log(`Finding matches for record:`, JSON.stringify(sourceRecord, null, 2));
       console.log(`Total records: ${records.length}`);
       console.log(`Community records: ${communityRecords.length}`);
       console.log(`Clinic records: ${clinicRecords.length}`);
       console.log(`Imported records: ${importedRecords.length}`);
       
-      // Use community records as the main database to search in
-      const searchPool = communityRecords.length > 0 
-        ? communityRecords 
-        : [...records, ...importedRecords].filter(record => record.id !== sourceRecord.id);
+      // First search in community records as the primary database
+      let searchPool = communityRecords.length > 0 ? [...communityRecords] : [];
+      
+      // If no community records, fall back to imported records
+      if (searchPool.length === 0 && importedRecords.length > 0) {
+        console.log('No community records found, using imported records as search pool');
+        searchPool = [...importedRecords];
+      }
+      
+      // If still no records to search in, use all available records excluding the source record
+      if (searchPool.length === 0) {
+        console.log('No community or imported records, using all records as search pool');
+        searchPool = records.filter(record => record.id !== sourceRecord.id);
+      }
       
       console.log(`Searching for matches in ${searchPool.length} records`);
-      console.log('Search source record:', JSON.stringify(sourceRecord, null, 2));
       
       // If we have no records to search in, return empty results
       if (searchPool.length === 0) {
@@ -113,58 +123,65 @@ export const RecordDataProvider: React.FC<RecordDataProviderProps> = ({
         return [];
       }
       
-      // Use probabilistic matching with community records
-      if (communityRecords.length > 0) {
-        console.log('Using probabilistic matching algorithm with threshold:', config.threshold.low);
+      // Try using probabilistic matching first
+      console.log('Using probabilistic matching with lower threshold for initial search');
+      try {
+        // Set a very low threshold to catch all potential matches
+        const lowThreshold = 10; // Very low threshold to see any potential matches
+        const matches = findProbabilisticMatches(sourceRecord, searchPool, lowThreshold);
         
-        try {
-          // Set a very low threshold to catch all potential matches
-          const lowThreshold = 10; // Very low threshold to see any potential matches
-          const matches = findProbabilisticMatches(sourceRecord, searchPool, lowThreshold);
-          
-          console.log(`Found ${matches.length} probabilistic matches`);
-          
-          // Log match details for the top 3 matches or all if fewer
-          const topMatches = matches.slice(0, Math.min(3, matches.length));
-          topMatches.forEach((match, index) => {
-            console.log(`Match ${index + 1}:`, {
-              score: match.score,
-              matchedOn: match.matchedOn,
-              fieldScores: match.fieldScores,
-              record: {
-                id: match.record.id,
-                firstName: match.record.firstName,
-                lastName: match.record.lastName,
-                birthDate: match.record.birthDate,
-                village: match.record.village
-              }
-            });
-          });
-          
-          // Return matches that meet our threshold
-          return matches.filter(match => match.score >= config.threshold.low);
-        } catch (error) {
-          console.error("Error in probabilistic matching:", error);
-          return [];
+        console.log(`Found ${matches.length} probabilistic matches`);
+        
+        // Log match details for debugging
+        const allMatches = matches.map(match => ({
+          score: match.score,
+          matchedOn: match.matchedOn,
+          fieldScores: match.fieldScores,
+          recordInfo: {
+            id: match.record.id,
+            firstName: match.record.firstName,
+            lastName: match.record.lastName,
+            birthDate: match.record.birthDate,
+            village: match.record.village
+          }
+        }));
+        
+        console.log('All potential matches:', JSON.stringify(allMatches, null, 2));
+        
+        // If we found any matches at all, even low probability ones, return them
+        if (matches.length > 0) {
+          // Return all matches sorted by score for review, even ones below threshold
+          return matches.sort((a, b) => b.score - a.score);
         }
-      } else {
-        // Fall back to existing algorithm if no community records
-        console.log('Using fallback deterministic matching algorithm');
-        try {
-          const matches = searchPool
-            .map(record => {
-              const { score, matchedOn } = calculateMatchScore(sourceRecord, record, config);
-              return { record, score, matchedOn };
-            })
-            .filter(match => match.score >= config.threshold.low)
-            .sort((a, b) => b.score - a.score);
-          
-          console.log(`Found ${matches.length} deterministic matches`);
-          return matches;
-        } catch (error) {
-          console.error("Error in deterministic matching:", error);
-          return [];
-        }
+      } catch (error) {
+        console.error("Error in probabilistic matching:", error);
+      }
+      
+      // Fall back to deterministic matching if probabilistic matching found nothing
+      console.log('Probabilistic matching failed or found no matches, trying deterministic matching');
+      try {
+        const matches = searchPool
+          .map(record => {
+            const { score, matchedOn } = calculateMatchScore(sourceRecord, record, config);
+            return { record, score, matchedOn };
+          })
+          // Include even very low scores for examination
+          .filter(match => match.score > 0)
+          .sort((a, b) => b.score - a.score);
+        
+        console.log(`Found ${matches.length} deterministic matches`);
+        console.log('Deterministic match scores:', 
+          matches.slice(0, 10).map(m => ({ 
+            score: m.score, 
+            name: `${m.record.firstName} ${m.record.lastName}` 
+          }))
+        );
+        
+        // Return all matches, even low probability ones for debugging
+        return matches;
+      } catch (error) {
+        console.error("Error in deterministic matching:", error);
+        return [];
       }
     } catch (error) {
       console.error("Error in findMatchesForRecord:", error);
