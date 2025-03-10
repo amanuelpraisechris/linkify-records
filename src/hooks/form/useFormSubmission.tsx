@@ -1,10 +1,13 @@
 
 import { Record, Visit, ResidencyPeriod } from '@/types';
 import { useToast } from '@/hooks/use-toast';
+import { buildDateString } from '@/utils/dateUtils';
 
 interface UseFormSubmissionProps {
   formData: Partial<Record>;
   birthYear: string;
+  birthMonth: string;
+  birthDay: string;
   setFormData: React.Dispatch<React.SetStateAction<Partial<Record>>>;
   setBirthYear: React.Dispatch<React.SetStateAction<string>>;
   setBirthMonth: React.Dispatch<React.SetStateAction<string>>;
@@ -21,12 +24,13 @@ interface UseFormSubmissionProps {
   residencyPeriods: ResidencyPeriod[];
   onRecordSubmit: (record: Record) => void;
   onSaveForSearch?: (record: Record) => void;
-  buildDateString: () => string;
 }
 
 export const useFormSubmission = ({
   formData,
   birthYear,
+  birthMonth,
+  birthDay,
   setFormData,
   setBirthYear,
   setBirthMonth,
@@ -42,8 +46,7 @@ export const useFormSubmission = ({
   clinicIds,
   residencyPeriods,
   onRecordSubmit,
-  onSaveForSearch,
-  buildDateString
+  onSaveForSearch
 }: UseFormSubmissionProps) => {
   const { toast } = useToast();
   
@@ -57,7 +60,8 @@ export const useFormSubmission = ({
       return;
     }
     
-    const birthDateStr = buildDateString();
+    const birthDateStr = buildDateString(birthYear, birthMonth, birthDay);
+    console.log("Generated birth date string:", birthDateStr);
     
     const searchRecord: Record = {
       id: `search-${Date.now()}`,
@@ -97,7 +101,8 @@ export const useFormSubmission = ({
       return;
     }
     
-    const birthDateStr = buildDateString();
+    const birthDateStr = buildDateString(birthYear, birthMonth, birthDay);
+    console.log("Generated birth date string for submission:", birthDateStr);
     
     const newRecord: Record = {
       id: `new-${Date.now()}`,

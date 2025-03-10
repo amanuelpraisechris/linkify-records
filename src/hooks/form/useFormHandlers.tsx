@@ -1,6 +1,7 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Record } from '@/types';
+import { buildDateString } from '@/utils/dateUtils';
 
 interface UseFormHandlersProps {
   formData: Partial<Record>;
@@ -49,10 +50,13 @@ export const useFormHandlers = ({
     setIsRepeatPatient(true);
     
     if (onSaveForSearch) {
+      const dateStr = buildDateString(birthYear, birthMonth, birthDay);
+      console.log("Generated birth date string for patient found:", dateStr);
+      
       const searchRecord: Record = {
         id: `search-${Date.now()}`,
         ...formData as Record,
-        birthDate: buildDateString(),
+        birthDate: dateStr,
         metadata: {
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
@@ -66,19 +70,9 @@ export const useFormHandlers = ({
     setActiveTab('linkage-with-dss');
   };
   
-  const buildDateString = () => {
-    if (!birthYear) return '';
-    
-    const month = birthMonth || '01';
-    const day = birthDay || '01';
-    
-    return `${birthYear}-${month}-${day}`;
-  };
-  
   return {
     handleChange,
     handleCheckboxChange,
-    handlePatientFound,
-    buildDateString
+    handlePatientFound
   };
 };

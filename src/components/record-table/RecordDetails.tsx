@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Info } from 'lucide-react';
 import { getDisplayValue } from '@/utils/recordDisplayUtils';
 import { getFullName } from '@/utils/nameFieldUtils';
+import { formatDate } from '@/utils/dateUtils';
 
 interface RecordDetailsProps {
   record: Record;
@@ -26,7 +27,7 @@ const RecordDetails = ({ record, showMatchDetail = false }: RecordDetailsProps) 
           <dd>{getDisplayValue(record, 'gender', '-')}</dd>
           
           <dt className="text-muted-foreground">Birth Date</dt>
-          <dd>{getDisplayValue(record, 'birthDate', '-')}</dd>
+          <dd>{formatDate(record.birthDate, '-')}</dd>
           
           <dt className="text-muted-foreground">Phone</dt>
           <dd>{getDisplayValue(record, 'phoneNumber', '-')}</dd>

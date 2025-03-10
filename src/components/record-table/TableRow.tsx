@@ -5,6 +5,7 @@ import { getFullName } from '../../utils/nameFieldUtils';
 import { getDisplayValue, getGender } from '@/utils/recordDisplayUtils';
 import MatchScoreDisplay from './MatchScoreDisplay';
 import RecordActions from './RecordActions';
+import { formatDate } from '@/utils/dateUtils';
 
 interface TableRowProps {
   record: Record;
@@ -49,7 +50,7 @@ const TableRow = ({
         {getGender(record)}
       </td>
       <td className="px-4 py-4 whitespace-nowrap">
-        {getDisplayValue(record, 'birthDate', '-')}
+        {formatDate(record.birthDate, '-')}
       </td>
       <td className="px-4 py-4 whitespace-nowrap">
         {getDisplayValue(record, 'village', '-')}

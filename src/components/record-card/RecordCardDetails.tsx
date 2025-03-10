@@ -1,6 +1,7 @@
 
 import { Record } from '@/types';
 import { Calendar, Phone, MapPin, Tag, User, RefreshCw, Home } from 'lucide-react';
+import { formatDate } from '@/utils/dateUtils';
 
 interface RecordCardDetailsProps {
   record: Record;
@@ -8,11 +9,6 @@ interface RecordCardDetailsProps {
 }
 
 const RecordCardDetails = ({ record, matchedOn }: RecordCardDetailsProps) => {
-  const formatDate = (dateString: string) => {
-    const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'short', day: 'numeric' };
-    return new Date(dateString).toLocaleDateString(undefined, options);
-  };
-  
   return (
     <div className="mt-4 space-y-2 animate-fade-in">
       {(record.village || record.district) && (

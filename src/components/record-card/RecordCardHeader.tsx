@@ -2,6 +2,7 @@
 import { Record } from '@/types';
 import { getFullName } from '@/utils/nameFieldUtils';
 import { AlertTriangle } from 'lucide-react';
+import { formatDate } from '@/utils/dateUtils';
 
 interface RecordCardHeaderProps {
   record: Record;
@@ -21,19 +22,10 @@ const RecordCardHeader = ({ record, matchScore }: RecordCardHeaderProps) => {
   const fullName = getFullName(record, 'firstMiddleLast');
   const confidenceLevel = getConfidenceLevel(matchScore);
   
-  const formatDate = (dateString: string) => {
-    if (!dateString) return 'Unknown';
-    try {
-      const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'short', day: 'numeric' };
-      return new Date(dateString).toLocaleDateString(undefined, options);
-    } catch (error) {
-      return dateString;
-    }
-  };
-  
   // For debugging
   if (process.env.NODE_ENV !== 'production') {
     console.log('Record in RecordCardHeader:', record);
+    console.log('Birth date value:', record.birthDate);
     console.log('Extracted name:', fullName);
   }
   
