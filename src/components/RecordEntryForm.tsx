@@ -11,6 +11,11 @@ import {
   SelectTrigger,
   SelectValue
 } from '@/components/ui/select';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Input } from '@/components/ui/input';
+import { Separator } from '@/components/ui/separator';
 
 interface RecordEntryFormProps {
   onRecordSubmit: (record: Record) => void;
@@ -20,12 +25,20 @@ const RecordEntryForm = ({ onRecordSubmit }: RecordEntryFormProps) => {
   const [formData, setFormData] = useState<Partial<Record>>({
     firstName: '',
     lastName: '',
+    middleName: '',
     gender: '',
     birthDate: '',
     village: '',
-    district: '',
-    householdHead: '',
-    motherName: '',
+    subVillage: '',
+    telephone: '',
+    yearMovedIn: '',
+    neverInDSS: false,
+    cellLeaderFirstName: '',
+    cellLeaderMiddleName: '',
+    cellLeaderLastName: '',
+    oldestHouseholdMemberFirstName: '',
+    oldestHouseholdMemberMiddleName: '',
+    oldestHouseholdMemberLastName: '',
   });
   
   // Separate state for birth date components
@@ -37,12 +50,17 @@ const RecordEntryForm = ({ onRecordSubmit }: RecordEntryFormProps) => {
     { type: 'Health ID', value: '' }
   ]);
   
+  const [identifierType, setIdentifierType] = useState<'patient' | 'otherPerson'>('patient');
   const [inputLanguage, setInputLanguage] = useState<SupportedLanguage>('latin');
   const { toast } = useToast();
   
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
+  };
+  
+  const handleCheckboxChange = (name: string, checked: boolean) => {
+    setFormData({ ...formData, [name]: checked });
   };
   
   const handleIdentifierChange = (index: number, field: 'type' | 'value', value: string) => {
@@ -68,6 +86,9 @@ const RecordEntryForm = ({ onRecordSubmit }: RecordEntryFormProps) => {
   
   // Generate days 1-31
   const days = Array.from({ length: 31 }, (_, i) => (i + 1).toString().padStart(2, '0'));
+
+  // Generate years for "Year moved in" (from current year back to 30 years ago)
+  const movedInYears = Array.from({ length: 30 }, (_, i) => (currentYear - i).toString());
   
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -114,17 +135,26 @@ const RecordEntryForm = ({ onRecordSubmit }: RecordEntryFormProps) => {
     setFormData({
       firstName: '',
       lastName: '',
+      middleName: '',
       gender: '',
       birthDate: '',
       village: '',
-      district: '',
-      householdHead: '',
-      motherName: '',
+      subVillage: '',
+      telephone: '',
+      yearMovedIn: '',
+      neverInDSS: false,
+      cellLeaderFirstName: '',
+      cellLeaderMiddleName: '',
+      cellLeaderLastName: '',
+      oldestHouseholdMemberFirstName: '',
+      oldestHouseholdMemberMiddleName: '',
+      oldestHouseholdMemberLastName: '',
     });
     setBirthYear('');
     setBirthMonth('');
     setBirthDay('');
     setIdentifiers([{ type: 'Health ID', value: '' }]);
+    setIdentifierType('patient');
     
     toast({
       title: "Record Submitted",
@@ -154,230 +184,387 @@ const RecordEntryForm = ({ onRecordSubmit }: RecordEntryFormProps) => {
         </div>
       </div>
       
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium mb-1">
-              {inputLanguage === 'latin' ? 'First Name' : 
-               inputLanguage === 'amharic' ? 'መጠሪያ ስም' : 'ቀዳማይ ሽም'} 
-              <span className="text-destructive">*</span>
-            </label>
-            <input
-              type="text"
-              name="firstName"
-              value={formData.firstName}
-              onChange={handleChange}
-              className="w-full p-2 border rounded-md focus:ring-2 focus:ring-primary/30"
-              required
-              dir={inputLanguage === 'latin' ? 'ltr' : 'rtl'}
-            />
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Personal Identifiers Section */}
+        <div className="bg-muted/20 p-4 rounded-lg">
+          <h4 className="text-md font-medium mb-3 text-primary">
+            {inputLanguage === 'latin' ? 'Personal Identifiers' : 
+            inputLanguage === 'amharic' ? 'የግል መለያዎች' : 'ውልቃዊ መለለይታት'}
+          </h4>
+          
+          <div className="mb-4">
+            <RadioGroup 
+              defaultValue="patient" 
+              className="flex space-x-4"
+              onValueChange={(value) => setIdentifierType(value as 'patient' | 'otherPerson')}
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="patient" id="patient" />
+                <Label htmlFor="patient">
+                  {inputLanguage === 'latin' ? 'Patient' : 
+                  inputLanguage === 'amharic' ? 'ታካሚ' : 'ሕሙም'}
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="otherPerson" id="otherPerson" />
+                <Label htmlFor="otherPerson">
+                  {inputLanguage === 'latin' ? 'Other Person' : 
+                  inputLanguage === 'amharic' ? 'ሌላ ሰው' : 'ካልእ ሰብ'}
+                </Label>
+              </div>
+            </RadioGroup>
           </div>
           
-          <div>
-            <label className="block text-sm font-medium mb-1">
-              {inputLanguage === 'latin' ? 'Last Name' : 
-               inputLanguage === 'amharic' ? 'የአባት ስም' : 'ዳሓራይ ሽም'} 
-              <span className="text-destructive">*</span>
-            </label>
-            <input
-              type="text"
-              name="lastName"
-              value={formData.lastName}
-              onChange={handleChange}
-              className="w-full p-2 border rounded-md focus:ring-2 focus:ring-primary/30"
-              required
-              dir={inputLanguage === 'latin' ? 'ltr' : 'rtl'}
-            />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm font-medium mb-1">
+                {inputLanguage === 'latin' ? 'First name' : 
+                inputLanguage === 'amharic' ? 'መጠሪያ ስም' : 'ቀዳማይ ሽም'} 
+                <span className="text-destructive">*</span>
+              </label>
+              <Input
+                type="text"
+                name="firstName"
+                value={formData.firstName || ''}
+                onChange={handleChange}
+                className="w-full"
+                required
+                dir={inputLanguage === 'latin' ? 'ltr' : 'rtl'}
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium mb-1">
+                {inputLanguage === 'latin' ? 'Middle name' : 
+                inputLanguage === 'amharic' ? 'የአባት ስም' : 'ማእከላይ ሽም'}
+              </label>
+              <Input
+                type="text"
+                name="middleName"
+                value={formData.middleName || ''}
+                onChange={handleChange}
+                className="w-full"
+                dir={inputLanguage === 'latin' ? 'ltr' : 'rtl'}
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium mb-1">
+                {inputLanguage === 'latin' ? 'Last name' : 
+                inputLanguage === 'amharic' ? 'የአያት ስም' : 'ዳሓራይ ሽም'} 
+                <span className="text-destructive">*</span>
+              </label>
+              <Input
+                type="text"
+                name="lastName"
+                value={formData.lastName || ''}
+                onChange={handleChange}
+                className="w-full"
+                required
+                dir={inputLanguage === 'latin' ? 'ltr' : 'rtl'}
+              />
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+            <div>
+              <label className="block text-sm font-medium mb-1">
+                {inputLanguage === 'latin' ? 'Sex' : 
+                inputLanguage === 'amharic' ? 'ፆታ' : 'ጾታ'}
+              </label>
+              <Select value={formData.gender} onValueChange={(value) => setFormData({ ...formData, gender: value })}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder={
+                    inputLanguage === 'latin' ? 'Select Gender' : 
+                    inputLanguage === 'amharic' ? 'ፆታ ይምረጡ' : 'ጾታ ምረጽ'
+                  } />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Male">
+                    {inputLanguage === 'latin' ? 'Male' : 
+                    inputLanguage === 'amharic' ? 'ወንድ' : 'ተባዕታይ'}
+                  </SelectItem>
+                  <SelectItem value="Female">
+                    {inputLanguage === 'latin' ? 'Female' : 
+                    inputLanguage === 'amharic' ? 'ሴት' : 'ኣንስታይ'}
+                  </SelectItem>
+                  <SelectItem value="Other">
+                    {inputLanguage === 'latin' ? 'Other' : 
+                    inputLanguage === 'amharic' ? 'ሌላ' : 'ካልእ'}
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium mb-1">
+                {inputLanguage === 'latin' ? 'Date of birth' : 
+                inputLanguage === 'amharic' ? 'የትውልድ ቀን' : 'ዕለተ ልደት'} 
+              </label>
+              <div className="grid grid-cols-3 gap-2">
+                {/* Year dropdown - required */}
+                <div>
+                  <Select value={birthYear} onValueChange={setBirthYear}>
+                    <SelectTrigger className="w-full text-xs h-9">
+                      <SelectValue placeholder={
+                        inputLanguage === 'latin' ? 'YYYY' : 
+                        inputLanguage === 'amharic' ? 'ዓመት' : 'ዓመት'
+                      } />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {years.map(year => (
+                        <SelectItem key={year} value={year}>{year}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                {/* Month dropdown - optional */}
+                <div>
+                  <Select value={birthMonth} onValueChange={setBirthMonth}>
+                    <SelectTrigger className="w-full text-xs h-9">
+                      <SelectValue placeholder={
+                        inputLanguage === 'latin' ? 'MM' : 
+                        inputLanguage === 'amharic' ? 'ወር' : 'ወርሒ'
+                      } />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {months.map(month => (
+                        <SelectItem key={month} value={month}>{month}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                {/* Day dropdown - optional */}
+                <div>
+                  <Select value={birthDay} onValueChange={setBirthDay} disabled={!birthMonth}>
+                    <SelectTrigger className="w-full text-xs h-9">
+                      <SelectValue placeholder={
+                        inputLanguage === 'latin' ? 'DD' : 
+                        inputLanguage === 'amharic' ? 'ቀን' : 'መዓልቲ'
+                      } />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {days.map(day => (
+                        <SelectItem key={day} value={day}>{day}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium mb-1">
+                {inputLanguage === 'latin' ? 'Telephone' : 
+                inputLanguage === 'amharic' ? 'ስልክ' : 'ተሌፎን'}
+              </label>
+              <Input
+                type="tel"
+                name="telephone"
+                value={formData.telephone || ''}
+                onChange={handleChange}
+                className="w-full"
+                dir={inputLanguage === 'latin' ? 'ltr' : 'rtl'}
+              />
+            </div>
           </div>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium mb-1">
-              {inputLanguage === 'latin' ? 'Gender' : 
-               inputLanguage === 'amharic' ? 'ፆታ' : 'ጾታ'} 
-              <span className="text-destructive">*</span>
-            </label>
-            <select
-              name="gender"
-              value={formData.gender}
-              onChange={handleChange}
-              className="w-full p-2 border rounded-md focus:ring-2 focus:ring-primary/30"
-              required
-            >
-              <option value="">
-                {inputLanguage === 'latin' ? 'Select Gender' : 
-                 inputLanguage === 'amharic' ? 'ፆታ ይምረጡ' : 'ጾታ ምረጽ'}
-              </option>
-              <option value="Male">
-                {inputLanguage === 'latin' ? 'Male' : 
-                 inputLanguage === 'amharic' ? 'ወንድ' : 'ተባዕታይ'}
-              </option>
-              <option value="Female">
-                {inputLanguage === 'latin' ? 'Female' : 
-                 inputLanguage === 'amharic' ? 'ሴት' : 'ኣንስታይ'}
-              </option>
-              <option value="Other">
-                {inputLanguage === 'latin' ? 'Other' : 
-                 inputLanguage === 'amharic' ? 'ሌላ' : 'ካልእ'}
-              </option>
-            </select>
-          </div>
+        {/* Residence Details Section */}
+        <div className="bg-muted/20 p-4 rounded-lg">
+          <h4 className="text-md font-medium mb-3 text-primary">
+            {inputLanguage === 'latin' ? 'Residence Details' : 
+            inputLanguage === 'amharic' ? 'የመኖሪያ ዝርዝሮች' : 'ዝርዝር ናይ መንበሪ'}
+          </h4>
           
-          <div>
-            <label className="block text-sm font-medium mb-1">
-              {inputLanguage === 'latin' ? 'Date of Birth' : 
-               inputLanguage === 'amharic' ? 'የትውልድ ቀን' : 'ዕለተ ልደት'} 
-            </label>
-            <div className="grid grid-cols-3 gap-2">
-              {/* Year dropdown - required */}
-              <div>
-                <label className="block text-xs text-muted-foreground mb-1">
-                  {inputLanguage === 'latin' ? 'Year' : 
-                   inputLanguage === 'amharic' ? 'ዓመት' : 'ዓመት'} 
-                  <span className="text-destructive">*</span>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm font-medium mb-1">
+                {inputLanguage === 'latin' ? 'Village' : 
+                inputLanguage === 'amharic' ? 'መንደር' : 'ዓዲ'}
+              </label>
+              <Select value={formData.village} onValueChange={(value) => setFormData({ ...formData, village: value })}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder={
+                    inputLanguage === 'latin' ? '(none)' : 
+                    inputLanguage === 'amharic' ? '(የለም)' : '(የለን)'
+                  } />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">
+                    {inputLanguage === 'latin' ? '(none)' : 
+                    inputLanguage === 'amharic' ? '(የለም)' : '(የለን)'}
+                  </SelectItem>
+                  <SelectItem value="Village1">Village 1</SelectItem>
+                  <SelectItem value="Village2">Village 2</SelectItem>
+                  <SelectItem value="Village3">Village 3</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium mb-1">
+                {inputLanguage === 'latin' ? 'Subvillage' : 
+                inputLanguage === 'amharic' ? 'ንዑስ መንደር' : 'ንኡስ ዓዲ'}
+              </label>
+              <Select value={formData.subVillage} onValueChange={(value) => setFormData({ ...formData, subVillage: value })}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder={
+                    inputLanguage === 'latin' ? 'Select Subvillage' : 
+                    inputLanguage === 'amharic' ? 'ንዑስ መንደር ይምረጡ' : 'ንኡስ ዓዲ ምረጽ'
+                  } />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Subvillage1">Subvillage 1</SelectItem>
+                  <SelectItem value="Subvillage2">Subvillage 2</SelectItem>
+                  <SelectItem value="Subvillage3">Subvillage 3</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="flex items-end space-x-3">
+              <div className="flex-1">
+                <label className="block text-sm font-medium mb-1">
+                  {inputLanguage === 'latin' ? 'Year moved in' : 
+                  inputLanguage === 'amharic' ? 'የገቡበት ዓመት' : 'ዓመት ምምጻእ'}
                 </label>
-                <Select value={birthYear} onValueChange={setBirthYear}>
+                <Select value={formData.yearMovedIn} onValueChange={(value) => setFormData({ ...formData, yearMovedIn: value })}>
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder={
-                      inputLanguage === 'latin' ? 'Year' : 
-                      inputLanguage === 'amharic' ? 'ዓመት' : 'ዓመት'
+                      inputLanguage === 'latin' ? 'Select Year' : 
+                      inputLanguage === 'amharic' ? 'ዓመት ይምረጡ' : 'ዓመት ምረጽ'
                     } />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">
-                      {inputLanguage === 'latin' ? 'Select Year' : 
-                       inputLanguage === 'amharic' ? 'ዓመት ይምረጡ' : 'ዓመት ምረጽ'}
-                    </SelectItem>
-                    {years.map(year => (
+                    {movedInYears.map(year => (
                       <SelectItem key={year} value={year}>{year}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
               
-              {/* Month dropdown - optional */}
-              <div>
-                <label className="block text-xs text-muted-foreground mb-1">
-                  {inputLanguage === 'latin' ? 'Month' : 
-                   inputLanguage === 'amharic' ? 'ወር' : 'ወርሒ'}
-                </label>
-                <Select value={birthMonth} onValueChange={setBirthMonth}>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder={
-                      inputLanguage === 'latin' ? 'Month' : 
-                      inputLanguage === 'amharic' ? 'ወር' : 'ወርሒ'
-                    } />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="">
-                      {inputLanguage === 'latin' ? 'Select Month' : 
-                       inputLanguage === 'amharic' ? 'ወር ይምረጡ' : 'ወርሒ ምረጽ'}
-                    </SelectItem>
-                    {months.map(month => (
-                      <SelectItem key={month} value={month}>{month}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+              <div className="flex items-center space-x-2 pb-2">
+                <div className="text-sm font-medium">OR</div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox 
+                    id="neverInDSS" 
+                    checked={formData.neverInDSS as boolean} 
+                    onCheckedChange={(checked) => 
+                      handleCheckboxChange('neverInDSS', checked as boolean)
+                    }
+                  />
+                  <Label htmlFor="neverInDSS" className="text-sm font-normal">
+                    {inputLanguage === 'latin' ? 'Never in DSS Area' : 
+                    inputLanguage === 'amharic' ? 'በDSS አካባቢ አልነበረም' : 'ኣብ DSS ከባቢ ፈጺሙ የለን'}
+                  </Label>
+                </div>
               </div>
-              
-              {/* Day dropdown - optional */}
-              <div>
-                <label className="block text-xs text-muted-foreground mb-1">
-                  {inputLanguage === 'latin' ? 'Day' : 
-                   inputLanguage === 'amharic' ? 'ቀን' : 'መዓልቲ'}
-                </label>
-                <Select value={birthDay} onValueChange={setBirthDay} disabled={!birthMonth}>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder={
-                      inputLanguage === 'latin' ? 'Day' : 
-                      inputLanguage === 'amharic' ? 'ቀን' : 'መዓልቲ'
-                    } />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="">
-                      {inputLanguage === 'latin' ? 'Select Day' : 
-                       inputLanguage === 'amharic' ? 'ቀን ይምረጡ' : 'መዓልቲ ምረጽ'}
-                    </SelectItem>
-                    {days.map(day => (
-                      <SelectItem key={day} value={day}>{day}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+            <div>
+              <label className="block text-sm font-medium mb-1">
+                {inputLanguage === 'latin' ? 'Ten Cell Leader First Name' : 
+                inputLanguage === 'amharic' ? 'የአስር ቤት መሪ መጠሪያ ስም' : 'ዓሰርተ ስድራ መራሒ ቀዳማይ ሽም'}
+              </label>
+              <Input
+                type="text"
+                name="cellLeaderFirstName"
+                value={formData.cellLeaderFirstName || ''}
+                onChange={handleChange}
+                className="w-full"
+                dir={inputLanguage === 'latin' ? 'ltr' : 'rtl'}
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium mb-1">
+                {inputLanguage === 'latin' ? 'Ten Cell Leader Middle Name' : 
+                inputLanguage === 'amharic' ? 'የአስር ቤት መሪ የአባት ስም' : 'ዓሰርተ ስድራ መራሒ ማእከላይ ሽም'}
+              </label>
+              <Input
+                type="text"
+                name="cellLeaderMiddleName"
+                value={formData.cellLeaderMiddleName || ''}
+                onChange={handleChange}
+                className="w-full"
+                dir={inputLanguage === 'latin' ? 'ltr' : 'rtl'}
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium mb-1">
+                {inputLanguage === 'latin' ? 'Ten Cell Leader Last Name' : 
+                inputLanguage === 'amharic' ? 'የአስር ቤት መሪ የአያት ስም' : 'ዓሰርተ ስድራ መራሒ ዳሓራይ ሽም'}
+              </label>
+              <Input
+                type="text"
+                name="cellLeaderLastName"
+                value={formData.cellLeaderLastName || ''}
+                onChange={handleChange}
+                className="w-full"
+                dir={inputLanguage === 'latin' ? 'ltr' : 'rtl'}
+              />
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+            <div>
+              <label className="block text-sm font-medium mb-1">
+                {inputLanguage === 'latin' ? 'Oldest Household Member First Name' : 
+                inputLanguage === 'amharic' ? 'የቤተሰብ ታላቅ አባል መጠሪያ ስም' : 'ዓበይ ኣባል ስድራ ቀዳማይ ሽም'}
+              </label>
+              <Input
+                type="text"
+                name="oldestHouseholdMemberFirstName"
+                value={formData.oldestHouseholdMemberFirstName || ''}
+                onChange={handleChange}
+                className="w-full"
+                dir={inputLanguage === 'latin' ? 'ltr' : 'rtl'}
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium mb-1">
+                {inputLanguage === 'latin' ? 'Oldest Household Member Middle Name' : 
+                inputLanguage === 'amharic' ? 'የቤተሰብ ታላቅ አባል የአባት ስም' : 'ዓበይ ኣባል ስድራ ማእከላይ ሽም'}
+              </label>
+              <Input
+                type="text"
+                name="oldestHouseholdMemberMiddleName"
+                value={formData.oldestHouseholdMemberMiddleName || ''}
+                onChange={handleChange}
+                className="w-full"
+                dir={inputLanguage === 'latin' ? 'ltr' : 'rtl'}
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium mb-1">
+                {inputLanguage === 'latin' ? 'Oldest Household Member Last Name' : 
+                inputLanguage === 'amharic' ? 'የቤተሰብ ታላቅ አባል የአያት ስም' : 'ዓበይ ኣባል ስድራ ዳሓራይ ሽም'}
+              </label>
+              <Input
+                type="text"
+                name="oldestHouseholdMemberLastName"
+                value={formData.oldestHouseholdMemberLastName || ''}
+                onChange={handleChange}
+                className="w-full"
+                dir={inputLanguage === 'latin' ? 'ltr' : 'rtl'}
+              />
             </div>
           </div>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium mb-1">
-              {inputLanguage === 'latin' ? 'Village/Location' : 
-               inputLanguage === 'amharic' ? 'መንደር/ቦታ' : 'ዓዲ/ቦታ'}
-            </label>
-            <input
-              type="text"
-              name="village"
-              value={formData.village || ''}
-              onChange={handleChange}
-              className="w-full p-2 border rounded-md focus:ring-2 focus:ring-primary/30"
-              dir={inputLanguage === 'latin' ? 'ltr' : 'rtl'}
-            />
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium mb-1">
-              {inputLanguage === 'latin' ? 'District' : 
-               inputLanguage === 'amharic' ? 'ወረዳ' : 'ዞባ'}
-            </label>
-            <input
-              type="text"
-              name="district"
-              value={formData.district || ''}
-              onChange={handleChange}
-              className="w-full p-2 border rounded-md focus:ring-2 focus:ring-primary/30"
-              dir={inputLanguage === 'latin' ? 'ltr' : 'rtl'}
-            />
-          </div>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium mb-1">
-              {inputLanguage === 'latin' ? 'Household Head' : 
-               inputLanguage === 'amharic' ? 'የቤተሰብ ኃላፊ' : 'ሓላፊ ስድራ'}
-            </label>
-            <input
-              type="text"
-              name="householdHead"
-              value={formData.householdHead || ''}
-              onChange={handleChange}
-              className="w-full p-2 border rounded-md focus:ring-2 focus:ring-primary/30"
-              dir={inputLanguage === 'latin' ? 'ltr' : 'rtl'}
-            />
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium mb-1">
-              {inputLanguage === 'latin' ? "Mother's Name" : 
-               inputLanguage === 'amharic' ? 'የእናት ስም' : 'ሽም ኣደ'}
-            </label>
-            <input
-              type="text"
-              name="motherName"
-              value={formData.motherName || ''}
-              onChange={handleChange}
-              className="w-full p-2 border rounded-md focus:ring-2 focus:ring-primary/30"
-              dir={inputLanguage === 'latin' ? 'ltr' : 'rtl'}
-            />
-          </div>
-        </div>
-        
-        <div>
+        {/* Identifiers Section */}
+        <div className="bg-muted/20 p-4 rounded-lg">
           <div className="flex justify-between items-center mb-2">
             <label className="block text-sm font-medium">
               {inputLanguage === 'latin' ? 'Identifiers' : 
-               inputLanguage === 'amharic' ? 'መለያዎች' : 'መለለይታት'}
+              inputLanguage === 'amharic' ? 'መለያዎች' : 'መለለይታት'}
             </label>
             <button
               type="button"
@@ -385,7 +572,7 @@ const RecordEntryForm = ({ onRecordSubmit }: RecordEntryFormProps) => {
               className="text-xs text-primary hover:underline"
             >
               + {inputLanguage === 'latin' ? 'Add Another' : 
-                 inputLanguage === 'amharic' ? 'ሌላ ጨምር' : 'ካልእ ወስኽ'}
+                inputLanguage === 'amharic' ? 'ሌላ ጨምር' : 'ካልእ ወስኽ'}
             </button>
           </div>
           
@@ -398,27 +585,27 @@ const RecordEntryForm = ({ onRecordSubmit }: RecordEntryFormProps) => {
               >
                 <option value="">
                   {inputLanguage === 'latin' ? 'Select Type' : 
-                   inputLanguage === 'amharic' ? 'ዓይነት ይምረጡ' : 'ዓይነት ምረጽ'}
+                  inputLanguage === 'amharic' ? 'ዓይነት ይምረጡ' : 'ዓይነት ምረጽ'}
                 </option>
                 <option value="Health ID">
                   {inputLanguage === 'latin' ? 'Health ID' : 
-                   inputLanguage === 'amharic' ? 'የጤና መታወቂያ' : 'ናይ ጥዕና መለለዪ'}
+                  inputLanguage === 'amharic' ? 'የጤና መታወቂያ' : 'ናይ ጥዕና መለለዪ'}
                 </option>
                 <option value="National ID">
                   {inputLanguage === 'latin' ? 'National ID' : 
-                   inputLanguage === 'amharic' ? 'ብሔራዊ መታወቂያ' : 'ሃገራዊ መለለዪ'}
+                  inputLanguage === 'amharic' ? 'ብሔራዊ መታወቂያ' : 'ሃገራዊ መለለዪ'}
                 </option>
                 <option value="Voter ID">
                   {inputLanguage === 'latin' ? 'Voter ID' : 
-                   inputLanguage === 'amharic' ? 'የመራጮች መታወቂያ' : 'ናይ መራጺ መለለዪ'}
+                  inputLanguage === 'amharic' ? 'የመራጮች መታወቂያ' : 'ናይ መራጺ መለለዪ'}
                 </option>
                 <option value="Community ID">
                   {inputLanguage === 'latin' ? 'Community ID' : 
-                   inputLanguage === 'amharic' ? 'የማህበረሰብ መታወቂያ' : 'ናይ ማሕበረሰብ መለለዪ'}
+                  inputLanguage === 'amharic' ? 'የማህበረሰብ መታወቂያ' : 'ናይ ማሕበረሰብ መለለዪ'}
                 </option>
                 <option value="Study ID">
                   {inputLanguage === 'latin' ? 'Study ID' : 
-                   inputLanguage === 'amharic' ? 'የጥናት መታወቂያ' : 'ናይ መጽናዕቲ መለለዪ'}
+                  inputLanguage === 'amharic' ? 'የጥናት መታወቂያ' : 'ናይ መጽናዕቲ መለለዪ'}
                 </option>
               </select>
               <input

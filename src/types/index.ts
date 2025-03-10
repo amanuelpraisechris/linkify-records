@@ -4,6 +4,7 @@ export interface Record {
   patientId?: string;
   firstName: string;
   lastName: string;
+  middleName?: string;
   gender: string;
   birthDate: string;
   address?: string;
@@ -21,11 +22,21 @@ export interface Record {
     updatedAt: string;
     source: string;
   };
-  // New fields for linkage
+  // Residence fields
   village?: string;
+  subVillage?: string;
   district?: string;
   householdHead?: string;
   motherName?: string;
+  yearMovedIn?: string;
+  neverInDSS?: boolean;
+  cellLeaderFirstName?: string;
+  cellLeaderMiddleName?: string;
+  cellLeaderLastName?: string;
+  oldestHouseholdMemberFirstName?: string;
+  oldestHouseholdMemberMiddleName?: string;
+  oldestHouseholdMemberLastName?: string;
+  telephone?: string;
   fuzzyScore?: number;
 }
 
