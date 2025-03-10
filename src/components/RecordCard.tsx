@@ -13,6 +13,96 @@ interface RecordCardProps {
   isHighlighted?: boolean;
 }
 
+// List of keys that should be excluded from name fields
+const nonPatientNameFields = [
+  "balozi_first_name", "\"balozi_first_name\"",
+  "balozi_middle_name", "\"balozi_middle_name\"", 
+  "balozi_last_name", "\"balozi_last_name\"",
+  "oldest_member_first_name", "\"oldest_member_first_name\"",
+  "oldest_member_middle_name", "\"oldest_member_middle_name\"",
+  "oldest_member_last_name", "\"oldest_member_last_name\"",
+  "cellLeaderFirstName", "cellLeaderMiddleName", "cellLeaderLastName",
+  "oldestHouseholdMemberFirstName", "oldestHouseholdMemberMiddleName", "oldestHouseholdMemberLastName"
+];
+
+// Helper to get name fields correctly
+const getNameField = (record: Record, field: 'firstName' | 'lastName' | 'middleName', defaultValue = '-'): string => {
+  // First check standard property
+  if (record[field]) return record[field] as string;
+  
+  // Check for common variations
+  if (field === 'firstName') {
+    if (record["FirstName"]) return record["FirstName"] as string;
+    if (record["\"FirstName\""]) return String(record["\"FirstName\""]).replace(/"/g, '');
+    if (record["first_name"]) return record["first_name"] as string;
+    if (record["\"first_name\""]) return String(record["\"first_name\""]).replace(/"/g, '');
+    if (record["name"]) return record["name"] as string;
+    if (record["\"name\""]) return String(record["\"name\""]).replace(/"/g, '');
+    
+    // Scan for other matching fields but exclude non-patient name fields
+    for (const key in record) {
+      if (nonPatientNameFields.includes(key)) continue;
+      
+      if ((key.toLowerCase().includes('first') || key.toLowerCase().includes('name')) && 
+          !key.toLowerCase().includes('last') && 
+          !key.toLowerCase().includes('middle') && 
+          !key.toLowerCase().includes('cell') &&
+          !key.toLowerCase().includes('oldest') &&
+          !key.toLowerCase().includes('balozi') &&
+          !key.toLowerCase().includes('household') &&
+          typeof record[key as keyof Record] === 'string') {
+        return String(record[key as keyof Record]);
+      }
+    }
+  }
+  
+  if (field === 'lastName') {
+    if (record["LastName"]) return record["LastName"] as string;
+    if (record["\"LastName\""]) return String(record["\"LastName\""]).replace(/"/g, '');
+    if (record["last_name"]) return record["last_name"] as string;
+    if (record["\"last_name\""]) return String(record["\"last_name\""]).replace(/"/g, '');
+    if (record["surname"]) return record["surname"] as string;
+    if (record["\"surname\""]) return String(record["\"surname\""]).replace(/"/g, '');
+    
+    // Scan for other matching fields but exclude non-patient name fields
+    for (const key in record) {
+      if (nonPatientNameFields.includes(key)) continue;
+      
+      if (key.toLowerCase().includes('last') && 
+          !key.toLowerCase().includes('cell') &&
+          !key.toLowerCase().includes('oldest') &&
+          !key.toLowerCase().includes('balozi') &&
+          !key.toLowerCase().includes('household') &&
+          typeof record[key as keyof Record] === 'string') {
+        return String(record[key as keyof Record]);
+      }
+    }
+  }
+  
+  if (field === 'middleName') {
+    if (record["MiddleName"]) return record["MiddleName"] as string;
+    if (record["\"MiddleName\""]) return String(record["\"MiddleName\""]).replace(/"/g, '');
+    if (record["middle_name"]) return record["middle_name"] as string;
+    if (record["\"middle_name\""]) return String(record["\"middle_name\""]).replace(/"/g, '');
+    
+    // Scan for other matching fields but exclude non-patient name fields
+    for (const key in record) {
+      if (nonPatientNameFields.includes(key)) continue;
+      
+      if (key.toLowerCase().includes('middle') && 
+          !key.toLowerCase().includes('cell') &&
+          !key.toLowerCase().includes('oldest') &&
+          !key.toLowerCase().includes('balozi') &&
+          !key.toLowerCase().includes('household') &&
+          typeof record[key as keyof Record] === 'string') {
+        return String(record[key as keyof Record]);
+      }
+    }
+  }
+  
+  return defaultValue;
+};
+
 const RecordCard = ({ 
   record,
   showActions = false,
@@ -23,6 +113,10 @@ const RecordCard = ({
   isHighlighted = false
 }: RecordCardProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
+  
+  // Get the correct name fields
+  const firstName = getNameField(record, 'firstName', '');
+  const lastName = getNameField(record, 'lastName', '');
 
   const formatDate = (dateString: string) => {
     const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'short', day: 'numeric' };
@@ -51,7 +145,7 @@ const RecordCard = ({
         <div className="flex justify-between items-start">
           <div>
             <h3 className="font-semibold text-lg text-foreground">
-              {record.firstName} {record.lastName}
+              {firstName} {lastName}
             </h3>
             <div className="flex items-center mt-1 text-sm text-muted-foreground">
               <span>{record.gender}</span>

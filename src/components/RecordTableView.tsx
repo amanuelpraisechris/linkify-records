@@ -47,10 +47,31 @@ const RecordTableView = ({
     }
   };
 
+  // List of keys that should be excluded from name fields
+  const nonPatientNameFields = [
+    "balozi_first_name", "\"balozi_first_name\"",
+    "balozi_middle_name", "\"balozi_middle_name\"", 
+    "balozi_last_name", "\"balozi_last_name\"",
+    "oldest_member_first_name", "\"oldest_member_first_name\"",
+    "oldest_member_middle_name", "\"oldest_member_middle_name\"",
+    "oldest_member_last_name", "\"oldest_member_last_name\"",
+    "cellLeaderFirstName", "cellLeaderMiddleName", "cellLeaderLastName",
+    "oldestHouseholdMemberFirstName", "oldestHouseholdMemberMiddleName", "oldestHouseholdMemberLastName"
+  ];
+
   const getDisplayValue = (record: Record, field: string, defaultValue = '-') => {
-    // Check for common DSS naming patterns
+    // Check for direct property match first (standard Record properties)
+    if (field === 'firstName' && record.firstName) return record.firstName;
+    if (field === 'lastName' && record.lastName) return record.lastName;
+    if (field === 'middleName' && record.middleName) return record.middleName;
+    if (field === 'village' && record.village) return record.village;
+    if (field === 'district' && record.district) return record.district;
+    if (field === 'subVillage' && record.subVillage) return record.subVillage;
+    if (field === 'birthDate' && record.birthDate) return record.birthDate;
+    
+    // For fields that might be in imported data with varying formats
     if (field === 'firstName') {
-      if (record.firstName) return record.firstName;
+      // Order of priority: standard field -> common variations -> general scan
       if (record["FirstName"]) return record["FirstName"];
       if (record["\"FirstName\""]) return String(record["\"FirstName\""]).replace(/"/g, '');
       if (record["first_name"]) return record["first_name"];
@@ -58,21 +79,17 @@ const RecordTableView = ({
       if (record["name"]) return record["name"];
       if (record["\"name\""]) return String(record["\"name\""]).replace(/"/g, '');
       
-      // Don't display TCL names as patient names
-      const keysThatArentNames = [
-        "balozi_first_name", "\"balozi_first_name\"",
-        "balozi_middle_name", "\"balozi_middle_name\"", 
-        "balozi_last_name", "\"balozi_last_name\"",
-        "oldest_member_first_name", "\"oldest_member_first_name\"",
-        "oldest_member_middle_name", "\"oldest_member_middle_name\"",
-        "oldest_member_last_name", "\"oldest_member_last_name\""
-      ];
-      
-      // Check all other fields that might contain first name
+      // Scan other fields, but exclude known non-patient name fields
       for (const key in record) {
-        if (keysThatArentNames.includes(key)) continue;
+        if (nonPatientNameFields.includes(key)) continue;
+        
         if ((key.toLowerCase().includes('first') || key.toLowerCase().includes('name')) && 
-            !key.toLowerCase().includes('last') && !key.toLowerCase().includes('middle') && 
+            !key.toLowerCase().includes('last') && 
+            !key.toLowerCase().includes('middle') && 
+            !key.toLowerCase().includes('cell') &&
+            !key.toLowerCase().includes('oldest') &&
+            !key.toLowerCase().includes('balozi') &&
+            !key.toLowerCase().includes('household') &&
             typeof record[key as keyof Record] === 'string') {
           return String(record[key as keyof Record]);
         }
@@ -81,7 +98,7 @@ const RecordTableView = ({
     }
     
     if (field === 'lastName') {
-      if (record.lastName) return record.lastName;
+      // Order of priority: standard field -> common variations -> general scan
       if (record["LastName"]) return record["LastName"];
       if (record["\"LastName\""]) return String(record["\"LastName\""]).replace(/"/g, '');
       if (record["last_name"]) return record["last_name"];
@@ -89,20 +106,16 @@ const RecordTableView = ({
       if (record["surname"]) return record["surname"];
       if (record["\"surname\""]) return String(record["\"surname\""]).replace(/"/g, '');
       
-      // Exclude TCL/household member names
-      const keysThatArentNames = [
-        "balozi_first_name", "\"balozi_first_name\"",
-        "balozi_middle_name", "\"balozi_middle_name\"", 
-        "balozi_last_name", "\"balozi_last_name\"",
-        "oldest_member_first_name", "\"oldest_member_first_name\"",
-        "oldest_member_middle_name", "\"oldest_member_middle_name\"",
-        "oldest_member_last_name", "\"oldest_member_last_name\""
-      ];
-      
-      // Check other fields that might contain last name
+      // Scan other fields, but exclude known non-patient name fields
       for (const key in record) {
-        if (keysThatArentNames.includes(key)) continue;
-        if (key.toLowerCase().includes('last') && typeof record[key as keyof Record] === 'string') {
+        if (nonPatientNameFields.includes(key)) continue;
+        
+        if (key.toLowerCase().includes('last') && 
+            !key.toLowerCase().includes('cell') &&
+            !key.toLowerCase().includes('oldest') &&
+            !key.toLowerCase().includes('balozi') &&
+            !key.toLowerCase().includes('household') &&
+            typeof record[key as keyof Record] === 'string') {
           return String(record[key as keyof Record]);
         }
       }
