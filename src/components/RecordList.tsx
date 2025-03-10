@@ -79,7 +79,7 @@ const RecordList = ({
     }
   };
 
-  const getDisplayName = (record: Record) => {
+  const getDisplayName = (record: PatientRecord) => {
     if (record["\"FirstName\""] && record["\"LastName\""]) {
       const firstName = record["\"FirstName\""].replace(/"/g, '');
       const lastName = record["\"LastName\""].replace(/"/g, '');
@@ -89,7 +89,7 @@ const RecordList = ({
     return `${record.firstName || ''} ${record.lastName || ''}`.trim() || 'Unknown';
   };
 
-  const getVillageName = (record: Record) => {
+  const getVillageName = (record: PatientRecord) => {
     if (record["\"villagename\""]) {
       return record["\"villagename\""].replace(/"/g, '');
     }
@@ -97,7 +97,7 @@ const RecordList = ({
     return record.village || '-';
   };
 
-  const getSubVillageName = (record: Record) => {
+  const getSubVillageName = (record: PatientRecord) => {
     if (record["\"subvillagename\""]) {
       return record["\"subvillagename\""].replace(/"/g, '');
     }
@@ -105,7 +105,7 @@ const RecordList = ({
     return record.subVillage || '-';
   };
 
-  const getGender = (record: Record) => {
+  const getGender = (record: PatientRecord) => {
     if (record["\"Sex\""]) {
       const sex = record["\"Sex\""].replace(/"/g, '');
       return sex === 'M' ? 'Male' : sex === 'F' ? 'Female' : sex;
@@ -114,7 +114,7 @@ const RecordList = ({
     return record.gender || '-';
   };
 
-  const getBirthDate = (record: Record) => {
+  const getBirthDate = (record: PatientRecord) => {
     if (record["\"dob\""]) {
       return record["\"dob\""].replace(/"/g, '');
     }
