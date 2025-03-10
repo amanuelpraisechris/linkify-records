@@ -44,8 +44,6 @@ const RecordList = ({
   const filteredRecords = records.filter(record => {
     if (!searchQuery) return true;
     
-    console.log(`Filtering record: ${record.firstName}`);
-    
     // Extract strings from the record that we want to search in
     const fieldsToSearch = [
       record.firstName,
@@ -89,13 +87,9 @@ const RecordList = ({
     
     saveMatchResult(matchResult);
     
-    // Use proper field access
-    const firstName = record.firstName || '';
-    const lastName = record.lastName || '';
-    
     toast({
       title: "Match Assigned",
-      description: `Successfully assigned match to ${firstName} ${lastName}`,
+      description: `Successfully assigned match to ${record.firstName} ${record.lastName}`,
     });
   };
   
@@ -132,7 +126,6 @@ const RecordList = ({
         viewMode === 'card' ? (
           <div className="grid gap-4 animate-fade-in">
             {filteredRecords.map((record) => {
-              // No need to transform the record - just use the fields as defined in the type
               return (
                 <RecordCard 
                   key={record.id} 
