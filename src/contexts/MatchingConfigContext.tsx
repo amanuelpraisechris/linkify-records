@@ -36,9 +36,9 @@ export const MatchingConfigProvider: React.FC<MatchingConfigProviderProps> = ({ 
   const [config, setConfig] = useState<MatchingConfig>({
     ...DEFAULT_MATCHING_CONFIG,
     threshold: {
-      high: 65,  // Lowered from 70
-      medium: 40, // Lowered from 50
-      low: 20     // Lowered from 30
+      high: 60,  // Lowered for better matching
+      medium: 35, // Lowered for better matching
+      low: 15     // Lowered for better matching
     }
   });
   
@@ -64,9 +64,9 @@ export const MatchingConfigProvider: React.FC<MatchingConfigProviderProps> = ({ 
     'Lenient Matching': {
       ...DEFAULT_MATCHING_CONFIG,
       threshold: {
-        high: 65,
-        medium: 40,
-        low: 20
+        high: 60,
+        medium: 35,
+        low: 15
       }
     }
   });

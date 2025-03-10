@@ -8,63 +8,22 @@ import { Database, FileUp, Users, ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { RecordDataProvider, useRecordData } from '@/contexts/RecordDataContext';
 import { MatchingConfigProvider } from '@/contexts/MatchingConfigContext';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 const DataManagementContent = () => {
-  const [dataSources, setDataSources] = useState<DataSource[]>([
-    {
-      id: 'community-db',
-      name: 'Community Database',
-      description: 'Main database with community-collected demographic data',
-      recordCount: 1250,
-      lastUpdated: '2023-10-15T14:30:00Z',
-      type: 'community'
-    },
-    {
-      id: 'facility-data',
-      name: 'Health Facility Records',
-      description: 'Patient records from local health facilities',
-      recordCount: 325,
-      lastUpdated: '2023-11-02T09:15:00Z',
-      type: 'facility'
-    }
-  ]);
-  
-  const { addImportedRecords } = useRecordData();
+  const { addImportedRecords, communityRecords, importedRecords } = useRecordData();
   const { toast } = useToast();
   
   const handleDataLoaded = (data: Record[], sourceId?: string) => {
     console.log('Data loaded:', data.length, 'records');
     
-    // Add to record data context for matching
-    addImportedRecords(data);
-    
-    // Update record count in the data source
-    if (sourceId) {
-      setDataSources(sources => sources.map(source => 
-        source.id === sourceId 
-          ? { 
-              ...source, 
-              recordCount: source.recordCount + data.length,
-              lastUpdated: new Date().toISOString()
-            } 
-          : source
-      ));
-    } else {
-      // Add new data source
-      const newSource: DataSource = {
-        id: `imported-${Date.now()}`,
-        name: `Imported Data (${new Date().toLocaleDateString()})`,
-        recordCount: data.length,
-        lastUpdated: new Date().toISOString(),
-        type: 'imported'
-      };
-      
-      setDataSources([...dataSources, newSource]);
-    }
+    // Add to record data context for matching - set as community database
+    const isCommunityDb = true; // Always set imported data as community database
+    addImportedRecords(data, isCommunityDb);
     
     toast({
       title: "Data Imported Successfully",
-      description: `${data.length} records have been added and are available for matching.`,
+      description: `${data.length} records have been imported as the main HDSS community database.`,
     });
   };
   
@@ -81,7 +40,7 @@ const DataManagementContent = () => {
           
           <h1 className="text-3xl font-bold tracking-tight mb-2">Data Management</h1>
           <p className="text-lg text-muted-foreground">
-            Import, manage, and update record databases for matching
+            Import external databases for record matching
           </p>
         </div>
         
@@ -90,74 +49,55 @@ const DataManagementContent = () => {
             <div className="bg-white dark:bg-black border rounded-xl shadow-card p-6 mb-8">
               <div className="flex items-center mb-4">
                 <FileUp className="w-5 h-5 mr-2 text-primary" />
-                <h2 className="text-xl font-semibold">Import New Data</h2>
+                <h2 className="text-xl font-semibold">Import HDSS Community Database</h2>
               </div>
               
               <p className="text-sm text-muted-foreground mb-6">
-                Upload a new database of community records or add to an existing one.
-                The data will be available for matching on the Record Entry page.
+                Upload your HDSS community database or health facility records for patient matching.
+                The data will be set as the main reference database for finding matches.
               </p>
+              
+              {communityRecords.length > 0 && (
+                <Alert className="mb-6 bg-green-50 text-green-800 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-900/50">
+                  <Users className="h-4 w-4" />
+                  <AlertTitle>Community Database Loaded</AlertTitle>
+                  <AlertDescription>
+                    {communityRecords.length} records have been imported as the main HDSS community database and are ready for matching.
+                  </AlertDescription>
+                </Alert>
+              )}
               
               <DataLoader onDataLoaded={handleDataLoaded} />
             </div>
             
-            <div className="bg-white dark:bg-black border rounded-xl shadow-card p-6">
-              <div className="flex items-center mb-4">
-                <Database className="w-5 h-5 mr-2 text-primary" />
-                <h2 className="text-xl font-semibold">Existing Data Sources</h2>
+            {communityRecords.length > 0 && (
+              <div className="bg-white dark:bg-black border rounded-xl shadow-card p-6 mb-8">
+                <div className="flex items-center mb-4">
+                  <Database className="w-5 h-5 mr-2 text-primary" />
+                  <h2 className="text-xl font-semibold">Next Steps</h2>
+                </div>
+                
+                <p className="text-sm text-muted-foreground mb-4">
+                  Your HDSS community database has been successfully imported with {communityRecords.length} records.
+                </p>
+                
+                <div className="p-4 bg-muted/30 rounded-lg mb-4">
+                  <h3 className="font-medium mb-2">What to do next:</h3>
+                  <ol className="list-decimal list-inside text-muted-foreground text-sm space-y-2">
+                    <li>Go to the <Link to="/record-entry" className="text-primary hover:underline">Search</Link> page</li>
+                    <li>Enter patient information to search for in the HDSS database</li>
+                    <li>Review potential matches that are found</li>
+                  </ol>
+                </div>
+                
+                <Link 
+                  to="/record-entry" 
+                  className="w-full bg-primary text-white py-2 px-4 rounded-md inline-block text-center hover:bg-primary/90"
+                >
+                  Go to Search Page
+                </Link>
               </div>
-              
-              <div className="space-y-4">
-                {dataSources.map((source) => (
-                  <div key={source.id} className="border rounded-lg p-4 hover:shadow-subtle transition-all duration-200">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h3 className="font-medium text-foreground">{source.name}</h3>
-                        {source.description && (
-                          <p className="text-sm text-muted-foreground mt-1">{source.description}</p>
-                        )}
-                      </div>
-                      <div className="bg-primary/10 text-primary text-sm px-2 py-1 rounded-full">
-                        {source.recordCount} records
-                      </div>
-                    </div>
-                    
-                    <div className="mt-4 flex items-center justify-between">
-                      <div className="text-xs text-muted-foreground">
-                        Last updated: {new Date(source.lastUpdated).toLocaleDateString()} at {new Date(source.lastUpdated).toLocaleTimeString()}
-                      </div>
-                      
-                      <div className="flex space-x-2">
-                        <button 
-                          className="text-xs text-primary hover:underline"
-                          onClick={() => {
-                            // View data functionality would go here
-                            toast({
-                              title: "View Data",
-                              description: `Viewing ${source.name} data would be implemented in a full version.`,
-                            });
-                          }}
-                        >
-                          View
-                        </button>
-                        <button 
-                          className="text-xs text-primary hover:underline"
-                          onClick={() => {
-                            // Update data functionality would go here
-                            toast({
-                              title: "Update Data",
-                              description: `Updating ${source.name} would be implemented in a full version.`,
-                            });
-                          }}
-                        >
-                          Update
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
+            )}
           </div>
           
           <div className="lg:col-span-1">
@@ -197,8 +137,8 @@ const DataManagementContent = () => {
                 <div className="p-4 bg-muted/30 rounded-lg">
                   <h3 className="font-medium mb-2">Matching Process</h3>
                   <p className="text-muted-foreground">
-                    The system uses probabilistic matching to identify potential duplicates based on
-                    similarity scores. Phonetic algorithms help match names with spelling variations.
+                    The system uses probabilistic matching to identify potential matches based on
+                    similarity scores. Fields like names, birth dates, and locations are compared for potential matches.
                   </p>
                 </div>
               </div>

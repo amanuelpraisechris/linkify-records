@@ -9,6 +9,7 @@ interface SearchBarProps {
   className?: string;
   dir?: 'ltr' | 'rtl';
   debounceTime?: number;
+  initialValue?: string;
 }
 
 const SearchBar = ({ 
@@ -16,17 +17,23 @@ const SearchBar = ({
   onSearch, 
   className = "",
   dir = "ltr",
-  debounceTime = 300
+  debounceTime = 300,
+  initialValue = ""
 }: SearchBarProps) => {
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState(initialValue);
   const [isFocused, setIsFocused] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
+    // Apply the search immediately when component mounts with an initial value
+    if (initialValue) {
+      onSearch(initialValue);
+    }
+  }, [initialValue, onSearch]);
+
+  useEffect(() => {
     const timer = setTimeout(() => {
-      if (query) {
-        onSearch(query);
-      }
+      onSearch(query);
     }, debounceTime);
 
     return () => clearTimeout(timer);

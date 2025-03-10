@@ -1,12 +1,13 @@
 
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Database, Link2, Search, User } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const { toast } = useToast();
+  const location = useLocation();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -21,14 +22,6 @@ const Navbar = () => {
       window.removeEventListener('scroll', handleScroll);
     };
   }, [scrolled]);
-
-  const handleDemo = () => {
-    toast({
-      title: "Demo Feature",
-      description: "This feature would be implemented in a full version.",
-      duration: 3000,
-    });
-  };
 
   return (
     <nav
@@ -50,29 +43,40 @@ const Navbar = () => {
           <div className="hidden md:flex items-center space-x-1">
             <Link
               to="/"
-              className="px-3 py-2 rounded-md text-sm font-medium text-foreground hover:bg-secondary transition-all-medium"
+              className={`px-3 py-2 rounded-md text-sm font-medium hover:bg-secondary transition-all-medium ${
+                location.pathname === '/' 
+                  ? 'bg-primary/10 text-primary' 
+                  : 'text-foreground'
+              }`}
             >
               Dashboard
             </Link>
-            <button
-              onClick={handleDemo}
-              className="px-3 py-2 rounded-md text-sm font-medium text-foreground hover:bg-secondary transition-all-medium flex items-center"
+            <Link
+              to="/data-management"
+              className={`px-3 py-2 rounded-md text-sm font-medium hover:bg-secondary transition-all-medium flex items-center ${
+                location.pathname === '/data-management' 
+                  ? 'bg-primary/10 text-primary' 
+                  : 'text-foreground'
+              }`}
             >
               <Database className="w-4 h-4 mr-1.5" />
               Records
-            </button>
-            <button
-              onClick={handleDemo}
-              className="px-3 py-2 rounded-md text-sm font-medium text-foreground hover:bg-secondary transition-all-medium flex items-center"
+            </Link>
+            <Link
+              to="/record-entry"
+              className={`px-3 py-2 rounded-md text-sm font-medium hover:bg-secondary transition-all-medium flex items-center ${
+                location.pathname === '/record-entry' 
+                  ? 'bg-primary/10 text-primary' 
+                  : 'text-foreground'
+              }`}
             >
               <Search className="w-4 h-4 mr-1.5" />
               Search
-            </button>
+            </Link>
           </div>
           
           <div className="flex items-center space-x-4">
             <button
-              onClick={handleDemo}
               className="p-2 rounded-full text-foreground hover:bg-secondary transition-all-medium"
               aria-label="User profile"
             >
