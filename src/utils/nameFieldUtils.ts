@@ -130,7 +130,7 @@ export const getNameField = (record: Record<string, any>, field: 'firstName' | '
  */
 export const getFullName = (
   record: Record<string, any>, 
-  format: 'firstLast' | 'lastFirst' | 'firstMiddleLast' = 'firstLast'
+  format: 'firstLast' | 'lastFirst' | 'firstMiddleLast' = 'firstMiddleLast'
 ): string => {
   const firstName = getNameField(record, 'firstName', '');
   const lastName = getNameField(record, 'lastName', '');

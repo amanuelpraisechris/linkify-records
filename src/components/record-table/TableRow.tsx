@@ -1,7 +1,7 @@
 
 import { ChevronDown, ChevronRight } from 'lucide-react';
 import { Record } from '@/types';
-import { getNameField, getFullName } from '../../utils/nameFieldUtils';
+import { getFullName } from '../../utils/nameFieldUtils';
 import { getDisplayValue, getGender } from '@/utils/recordDisplayUtils';
 import MatchScoreDisplay from './MatchScoreDisplay';
 import RecordActions from './RecordActions';
@@ -23,8 +23,8 @@ const TableRow = ({
   onAssignMatch,
   onToggleNotes
 }: TableRowProps) => {
-  // Use the consistent name utility
-  const fullName = getFullName(record);
+  // Use the consistent name utility with firstMiddleLast format
+  const fullName = getFullName(record, 'firstMiddleLast');
   
   return (
     <tr 

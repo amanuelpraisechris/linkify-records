@@ -1,6 +1,6 @@
 
 import { Record } from '@/types';
-import { getNameField, getFullName } from '@/utils/nameFieldUtils';
+import { getFullName } from '@/utils/nameFieldUtils';
 import { AlertTriangle } from 'lucide-react';
 
 interface RecordCardHeaderProps {
@@ -17,8 +17,8 @@ const getConfidenceLevel = (score?: number) => {
 };
 
 const RecordCardHeader = ({ record, matchScore }: RecordCardHeaderProps) => {
-  // Use the consistent utilities for displaying names
-  const fullName = getFullName(record);
+  // Use the consistent utilities for displaying names with firstMiddleLast format
+  const fullName = getFullName(record, 'firstMiddleLast');
   const confidenceLevel = getConfidenceLevel(matchScore);
   
   const formatDate = (dateString: string) => {

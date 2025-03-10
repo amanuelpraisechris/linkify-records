@@ -3,7 +3,7 @@ import { Record } from '@/types';
 import { Badge } from '@/components/ui/badge';
 import { Info } from 'lucide-react';
 import { getDisplayValue } from '@/utils/recordDisplayUtils';
-import { getNameField } from '@/utils/nameFieldUtils';
+import { getFullName } from '@/utils/nameFieldUtils';
 
 interface RecordDetailsProps {
   record: Record;
@@ -20,7 +20,7 @@ const RecordDetails = ({ record, showMatchDetail = false }: RecordDetailsProps) 
         </h4>
         <dl className="grid grid-cols-2 gap-2 text-sm">
           <dt className="text-muted-foreground">Full Name</dt>
-          <dd>{getNameField(record, 'firstName')} {getNameField(record, 'middleName')} {getNameField(record, 'lastName')}</dd>
+          <dd>{getFullName(record, 'firstMiddleLast')}</dd>
           
           <dt className="text-muted-foreground">Gender</dt>
           <dd>{getDisplayValue(record, 'gender', '-')}</dd>

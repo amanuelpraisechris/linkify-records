@@ -5,7 +5,7 @@ import { AlertTriangle } from 'lucide-react';
 import RecordCardHeader from './record-card/RecordCardHeader';
 import RecordCardDetails from './record-card/RecordCardDetails';
 import RecordCardActions from './record-card/RecordCardActions';
-import { getNameField, getFullName } from '@/utils/nameFieldUtils';
+import { getFullName } from '@/utils/nameFieldUtils';
 
 interface RecordCardProps {
   record: Record;
@@ -30,7 +30,7 @@ const RecordCard = ({
   
   // For debugging
   if (process.env.NODE_ENV !== 'production') {
-    const fullName = getFullName(record);
+    const fullName = getFullName(record, 'firstMiddleLast');
     console.log('Record in RecordCard:', record);
     console.log('Extracted full name:', fullName);
     
