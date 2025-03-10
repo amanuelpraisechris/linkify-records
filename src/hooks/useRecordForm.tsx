@@ -1,6 +1,7 @@
 
 import { Record, Visit, ResidencyPeriod } from '@/types';
 import { SupportedLanguage } from '@/utils/languageUtils';
+import { buildDateString } from '@/utils/dateUtils'; // Import directly from dateUtils
 import { useFormState } from './form/useFormState';
 import { useVisitHandlers } from './form/useVisitHandlers';
 import { useIdentifierHandlers } from './form/useIdentifierHandlers';
@@ -70,8 +71,7 @@ export const useRecordForm = ({ onRecordSubmit, onSaveForSearch }: UseRecordForm
   const {
     handleChange,
     handleCheckboxChange,
-    handlePatientFound,
-    buildDateString
+    handlePatientFound
   } = useFormHandlers({
     formData, 
     setFormData, 
@@ -93,6 +93,8 @@ export const useRecordForm = ({ onRecordSubmit, onSaveForSearch }: UseRecordForm
   } = useFormSubmission({
     formData,
     birthYear,
+    birthMonth,
+    birthDay,
     setFormData,
     setBirthYear,
     setBirthMonth,
@@ -108,8 +110,7 @@ export const useRecordForm = ({ onRecordSubmit, onSaveForSearch }: UseRecordForm
     clinicIds,
     residencyPeriods,
     onRecordSubmit,
-    onSaveForSearch,
-    buildDateString
+    onSaveForSearch
   });
   
   return {
