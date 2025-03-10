@@ -1,3 +1,4 @@
+
 import { Record } from '@/types';
 import { containsEthiopicScript, normalizeText, SupportedLanguage } from './languageUtils';
 
@@ -14,7 +15,6 @@ export interface FieldWeights {
   motherName: number;
   householdHead: number;
   phoneNumber: number;
-  balozi: number; // Added for Balozi field
   [key: string]: number; // Allow for additional custom fields
 }
 
@@ -22,16 +22,15 @@ export interface FieldWeights {
  * Default field weights with adjusted priorities
  */
 export const DEFAULT_FIELD_WEIGHTS: FieldWeights = {
-  firstName: 30, // Increased from 25
-  lastName: 30,  // Increased from 25
-  birthDate: 25, // Increased from 20
-  gender: 10,
-  village: 15,
-  district: 10,
-  motherName: 15, // Reduced from 20
-  householdHead: 12, // Reduced from 15
-  phoneNumber: 15,
-  balozi: 10, // Added with lower weight
+  firstName: 35, // Increased from 30
+  lastName: 35,  // Increased from 30
+  birthDate: 30, // Increased from 25
+  gender: 15,    // Increased from 10
+  village: 20,   // Increased from 15
+  district: 15,  // Increased from 10
+  motherName: 20, // Increased from 15
+  householdHead: 15, // Increased from 12
+  phoneNumber: 20,   // Increased from 15
 };
 
 /**
@@ -268,24 +267,6 @@ export const calculateMatchScore = (
     else if (householdHeadScore > 50) matchedOn.push('Household Head (partial)');
   }
   
-  // Compare Balozi information
-  if ((record1.baloziFirstName || record1.baloziLastName) && 
-      (record2.baloziFirstName || record2.baloziLastName)) {
-    // Try matching any of the Balozi names
-    const baloziFirstNameScore = calculateStringSimilarity(record1.baloziFirstName, record2.baloziFirstName, config);
-    const baloziLastNameScore = calculateStringSimilarity(record1.baloziLastName, record2.baloziLastName, config);
-    
-    // Use the best match score
-    const baloziScore = Math.max(baloziFirstNameScore, baloziLastNameScore);
-    const baloziWeight = config.fieldWeights.balozi;
-    
-    totalScore += baloziScore * baloziWeight;
-    totalWeight += baloziWeight;
-    
-    if (baloziScore > 80) matchedOn.push('Balozi');
-    else if (baloziScore > 50) matchedOn.push('Balozi (partial)');
-  }
-  
   // Compare phone number
   if (record1.phoneNumber && record2.phoneNumber) {
     const phoneNumberWeight = config.fieldWeights.phoneNumber;
@@ -293,6 +274,26 @@ export const calculateMatchScore = (
     totalScore += phoneNumberScore * phoneNumberWeight;
     totalWeight += phoneNumberWeight;
     if (phoneNumberScore === 100) matchedOn.push('Phone Number');
+  }
+  
+  // Compare oldest member (use as alternative to Balozi)
+  if ((record1.oldest_member_first_name || record1.oldest_member_last_name) && 
+      (record2.oldest_member_first_name || record2.oldest_member_last_name)) {
+    // If there's a specific weight for oldest member, use it, otherwise use a default
+    const oldestMemberWeight = config.fieldWeights.oldestMember || 15;
+    
+    // Calculate similarity scores for oldest member names
+    const oldestFirstNameScore = calculateStringSimilarity(record1.oldest_member_first_name, record2.oldest_member_first_name, config);
+    const oldestLastNameScore = calculateStringSimilarity(record1.oldest_member_last_name, record2.oldest_member_last_name, config);
+    
+    // Use the best match score
+    const oldestMemberScore = Math.max(oldestFirstNameScore, oldestLastNameScore);
+    
+    totalScore += oldestMemberScore * oldestMemberWeight;
+    totalWeight += oldestMemberWeight;
+    
+    if (oldestMemberScore > 80) matchedOn.push('Oldest Household Member');
+    else if (oldestMemberScore > 50) matchedOn.push('Oldest Household Member (partial)');
   }
   
   // Calculate final score

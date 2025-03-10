@@ -52,9 +52,10 @@ export const MatchingConfigProvider: React.FC<MatchingConfigProviderProps> = ({ 
         firstName: 35,
         lastName: 35,
         birthDate: 25,
-        balozi: 10,
-        village: 15,
-        district: 10
+        village: 20,
+        district: 15,
+        phoneNumber: 20,
+        householdHead: 15
       },
       threshold: {
         high: 85,
@@ -69,9 +70,9 @@ export const MatchingConfigProvider: React.FC<MatchingConfigProviderProps> = ({ 
         firstName: 40,
         lastName: 40,
         birthDate: 25,
-        gender: 10,
-        village: 15,
-        balozi: 5
+        gender: 15,
+        village: 20,
+        phoneNumber: 20
       },
       threshold: {
         high: 70,
