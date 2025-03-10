@@ -252,7 +252,7 @@ const RecordEntryForm = ({ onRecordSubmit }: RecordEntryFormProps) => {
           
           <div>
             <label className="block text-sm font-medium mb-1">
-              {inputLanguage === 'latin' ? 'Mother\'s Name' : 
+              {inputLanguage === 'latin' ? "Mother's Name" : 
                inputLanguage === 'amharic' ? 'የእናት ስም' : 'ሽም ኣደ'}
             </label>
             <input
@@ -345,7 +345,7 @@ const RecordEntryForm = ({ onRecordSubmit }: RecordEntryFormProps) => {
           >
             <Save className="w-4 h-4 mr-2" />
             {inputLanguage === 'latin' ? 'Submit & Find Matches' : 
-             inputLanguage === 'amharic' ? 'አስገባ እና ተመሳሳዮችን ፈልግ' : 'ኣቕርብ ከምኡ'ውን ተመሳሰልቲ ድለ'}
+             inputLanguage === 'amharic' ? 'አስገባ እና ተመሳሳዮችን ፈልግ' : 'ኣቕርብ ከምኡውን ተመሳሰልቲ ድለ'}
           </button>
         </div>
       </form>

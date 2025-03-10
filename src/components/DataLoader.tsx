@@ -171,7 +171,7 @@ const DataLoader = ({ onDataLoaded, dataSource }: DataLoaderProps) => {
         {getTranslatedText(
           'Upload a CSV or JSON file containing records for the community database. Each record should include identifiers like name, date of birth, and location.',
           'ለማህበረሰብ ዳታቤዝ መዝገቦችን የያዘ የCSV ወይም JSON ፋይል ይጫኑ። እያንዳንዱ መዝገብ እንደ ስም፣ የትውልድ ቀን እና ቦታ ያሉ መለያዎችን ማካተት አለበት።',
-          'CSV ወይ JSON ፋይል ዝሓዘ መዛግብቲ ንማሕበረሰብ ዳታቤዝ ጸዓን። ነፍሲ ወከፍ መዝገብ ከም ሽም፡ ዕለተ ልደት፡ ከምኡ'ውን ቦታ ዝኣመሰሉ መለለይታት ክሕዝ ኣለዎ።'
+          'CSV ወይ JSON ፋይል ዝሓዘ መዛግብቲ ንማሕበረሰብ ዳታቤዝ ጸዓን። ነፍሲ ወከፍ መዝገብ ከም ሽም፣ ዕለተ ልደት፣ ከምኡውን ቦታ ዝኣመሰሉ መለለይታት ክሕዝ ኣለዎ።'
         )}
       </p>
       
@@ -192,10 +192,10 @@ const DataLoader = ({ onDataLoaded, dataSource }: DataLoaderProps) => {
           <span className="text-sm font-medium mb-1">
             {isLoading 
               ? getTranslatedText('Processing File...', 'ፋይል በማስኬድ ላይ...', 'ፋይል ይሰራሕ ኣሎ...')
-              : getTranslatedText('Drag & Drop File or Click to Browse', 'ፋይል ይጎትቱ እና ይጣሉ ወይም ለማሰስ ይጫኑ', 'ፋይል ጎተት ከምኡ'ውን ድርብዮ ወይ ክትፍትሽ ጠውቕ')}
+              : getTranslatedText('Drag & Drop File or Click to Browse', 'ፋይል ይጎትቱ እና ይጣሉ ወይም ለማሰስ ይጫኑ', 'ፋይል ጎተት ከምኡውን ድርብዮ ወይ ክትፍትሽ ጠውቕ')}
           </span>
           <span className="text-xs text-muted-foreground">
-            {getTranslatedText('Supports CSV and JSON formats', 'የCSV እና JSON ቅርጸቶችን ይደግፋል', 'CSV ከምኡ'ውን JSON ቅርጽታት ይድግፍ')}
+            {getTranslatedText('Supports CSV and JSON formats', 'የCSV እና JSON ቅርጸቶችን ይደግፋል', 'CSV ከምኡውን JSON ቅርጽታት ይድግፍ')}
           </span>
           
           {isLoading && (
