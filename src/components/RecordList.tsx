@@ -44,38 +44,29 @@ const RecordList = ({
   const filteredRecords = records.filter(record => {
     if (!searchQuery) return true;
     
-    console.log(`Filtering record: ${record.firstName || record.FirstName || record["\"FirstName\""]}`);
+    console.log(`Filtering record: ${record.firstName}`);
     
-    // Normalize record fields to handle quoted and unquoted keys
-    const fields = Object.entries(record).reduce((acc, [key, value]) => {
-      if (key.startsWith('"') && typeof value === 'string') {
-        const cleanKey = key.replace(/"/g, '');
-        acc[cleanKey] = value;
-      } else {
-        acc[key] = value;
-      }
-      return acc;
-    }, {} as {[key: string]: any});
+    // Extract strings from the record that we want to search in
+    const fieldsToSearch = [
+      record.firstName,
+      record.lastName,
+      record.patientId,
+      record.healthFacility,
+      record.village,
+      record.district,
+    ];
     
-    // Try all possible naming patterns
-    const matches = 
-      compareStrings(record.firstName || fields.FirstName || '', searchQuery, searchLanguage) ||
-      compareStrings(record.lastName || fields.LastName || '', searchQuery, searchLanguage) ||
-      compareStrings(record.patientId || '', searchQuery, searchLanguage) ||
-      compareStrings(record.healthFacility || '', searchQuery, searchLanguage) ||
-      compareStrings(record.village || fields.villagename || '', searchQuery, searchLanguage) ||
-      compareStrings(record.district || fields.district || '', searchQuery, searchLanguage) ||
-      record.identifiers?.some(id => compareStrings(id.value, searchQuery, searchLanguage)) ||
-      compareStrings(fields.FirstName || '', searchQuery, searchLanguage) ||
-      compareStrings(fields.LastName || '', searchQuery, searchLanguage) ||
-      compareStrings(fields.villagename || '', searchQuery, searchLanguage) ||
-      compareStrings(fields.subvillagename || '', searchQuery, searchLanguage);
-    
-    if (matches) {
-      console.log(`Match found for "${searchQuery}": ${record.firstName || fields.FirstName || ''} ${record.lastName || fields.LastName || ''}`);
+    // Add identifier values to searchable fields
+    if (record.identifiers?.length) {
+      record.identifiers.forEach(id => {
+        fieldsToSearch.push(id.value);
+      });
     }
     
-    return matches;
+    // Filter out undefined or null values and perform the comparison
+    return fieldsToSearch
+      .filter(Boolean)
+      .some(field => compareStrings(field || '', searchQuery, searchLanguage));
   });
 
   const toggleRecordDetails = (recordId: string) => {
@@ -98,9 +89,9 @@ const RecordList = ({
     
     saveMatchResult(matchResult);
     
-    // Use improved display name logic
-    const firstName = record.firstName || record.FirstName || record["\"FirstName\""]?.replace(/"/g, '') || '';
-    const lastName = record.lastName || record.LastName || record["\"LastName\""]?.replace(/"/g, '') || '';
+    // Use proper field access
+    const firstName = record.firstName || '';
+    const lastName = record.lastName || '';
     
     toast({
       title: "Match Assigned",
@@ -141,36 +132,11 @@ const RecordList = ({
         viewMode === 'card' ? (
           <div className="grid gap-4 animate-fade-in">
             {filteredRecords.map((record) => {
-              // Transform the record to ensure proper data display
-              const normalizedRecord = {
-                ...record,
-                firstName: record.firstName || 
-                          (record.FirstName) || 
-                          (record["\"FirstName\""] ? record["\"FirstName\""].replace(/"/g, '') : ''),
-                lastName: record.lastName || 
-                         (record.LastName) || 
-                         (record["\"LastName\""] ? record["\"LastName\""].replace(/"/g, '') : ''),
-                gender: record.gender || 
-                        (record.Sex ? (record.Sex === 'M' ? 'Male' : record.Sex === 'F' ? 'Female' : record.Sex) : 
-                        (record["\"Sex\""] ? 
-                          (record["\"Sex\""].replace(/"/g, '') === 'M' ? 'Male' : 
-                          record["\"Sex\""].replace(/"/g, '') === 'F' ? 'Female' : 
-                          record["\"Sex\""].replace(/"/g, '')) : '-')),
-                birthDate: record.birthDate || 
-                          (record.dob) || 
-                          (record["\"dob\""] ? record["\"dob\""].replace(/"/g, '') : ''),
-                village: record.village || 
-                        (record.villagename) || 
-                        (record["\"villagename\""] ? record["\"villagename\""].replace(/"/g, '') : '-'),
-                subVillage: record.subVillage || 
-                           (record.subvillagename) || 
-                           (record["\"subvillagename\""] ? record["\"subvillagename\""].replace(/"/g, '') : '-'),
-              };
-              
+              // No need to transform the record - just use the fields as defined in the type
               return (
                 <RecordCard 
                   key={record.id} 
-                  record={normalizedRecord}
+                  record={record}
                   matchScore={record.metadata?.matchScore || record.fuzzyScore}
                   matchedOn={record.matchedOn}
                 />
