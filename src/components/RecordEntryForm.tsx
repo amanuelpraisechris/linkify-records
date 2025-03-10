@@ -4,6 +4,13 @@ import { Record } from '@/types';
 import { useToast } from '@/components/ui/use-toast';
 import { UserPlus, Save, X, Globe } from 'lucide-react';
 import { SupportedLanguage } from '@/utils/languageUtils';
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select';
 
 interface RecordEntryFormProps {
   onRecordSubmit: (record: Record) => void;
@@ -20,6 +27,11 @@ const RecordEntryForm = ({ onRecordSubmit }: RecordEntryFormProps) => {
     householdHead: '',
     motherName: '',
   });
+  
+  // Separate state for birth date components
+  const [birthYear, setBirthYear] = useState<string>('');
+  const [birthMonth, setBirthMonth] = useState<string>('');
+  const [birthDay, setBirthDay] = useState<string>('');
   
   const [identifiers, setIdentifiers] = useState<Array<{ type: string; value: string }>>([
     { type: 'Health ID', value: '' }
@@ -46,12 +58,22 @@ const RecordEntryForm = ({ onRecordSubmit }: RecordEntryFormProps) => {
   const removeIdentifier = (index: number) => {
     setIdentifiers(identifiers.filter((_, i) => i !== index));
   };
+
+  // Generate years for the dropdown (from current year back to 100 years ago)
+  const currentYear = new Date().getFullYear();
+  const years = Array.from({ length: 100 }, (_, i) => (currentYear - i).toString());
+  
+  // Generate months 1-12
+  const months = Array.from({ length: 12 }, (_, i) => (i + 1).toString().padStart(2, '0'));
+  
+  // Generate days 1-31
+  const days = Array.from({ length: 31 }, (_, i) => (i + 1).toString().padStart(2, '0'));
   
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
     // Validate required fields
-    if (!formData.firstName || !formData.lastName || !formData.birthDate) {
+    if (!formData.firstName || !formData.lastName || !birthYear) {
       toast({
         title: "Missing Information",
         description: "Please fill in all required fields.",
@@ -60,10 +82,24 @@ const RecordEntryForm = ({ onRecordSubmit }: RecordEntryFormProps) => {
       return;
     }
     
+    // Construct birthDate string based on available components
+    let birthDateStr = birthYear;
+    if (birthMonth) {
+      birthDateStr = `${birthDateStr}-${birthMonth}`;
+      if (birthDay) {
+        birthDateStr = `${birthDateStr}-${birthDay}`;
+      } else {
+        birthDateStr = `${birthDateStr}-01`; // Default to first day if only month is provided
+      }
+    } else {
+      birthDateStr = `${birthDateStr}-01-01`; // Default to January 1st if only year is provided
+    }
+    
     // Create a new record
     const newRecord: Record = {
       id: `new-${Date.now()}`,
       ...formData as Record,
+      birthDate: birthDateStr,
       identifiers: identifiers.filter(id => id.type && id.value),
       metadata: {
         createdAt: new Date().toISOString(),
@@ -85,6 +121,9 @@ const RecordEntryForm = ({ onRecordSubmit }: RecordEntryFormProps) => {
       householdHead: '',
       motherName: '',
     });
+    setBirthYear('');
+    setBirthMonth('');
+    setBirthDay('');
     setIdentifiers([{ type: 'Health ID', value: '' }]);
     
     toast({
@@ -189,16 +228,84 @@ const RecordEntryForm = ({ onRecordSubmit }: RecordEntryFormProps) => {
             <label className="block text-sm font-medium mb-1">
               {inputLanguage === 'latin' ? 'Date of Birth' : 
                inputLanguage === 'amharic' ? 'የትውልድ ቀን' : 'ዕለተ ልደት'} 
-              <span className="text-destructive">*</span>
             </label>
-            <input
-              type="date"
-              name="birthDate"
-              value={formData.birthDate}
-              onChange={handleChange}
-              className="w-full p-2 border rounded-md focus:ring-2 focus:ring-primary/30"
-              required
-            />
+            <div className="grid grid-cols-3 gap-2">
+              {/* Year dropdown - required */}
+              <div>
+                <label className="block text-xs text-muted-foreground mb-1">
+                  {inputLanguage === 'latin' ? 'Year' : 
+                   inputLanguage === 'amharic' ? 'ዓመት' : 'ዓመት'} 
+                  <span className="text-destructive">*</span>
+                </label>
+                <Select value={birthYear} onValueChange={setBirthYear}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder={
+                      inputLanguage === 'latin' ? 'Year' : 
+                      inputLanguage === 'amharic' ? 'ዓመት' : 'ዓመት'
+                    } />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">
+                      {inputLanguage === 'latin' ? 'Select Year' : 
+                       inputLanguage === 'amharic' ? 'ዓመት ይምረጡ' : 'ዓመት ምረጽ'}
+                    </SelectItem>
+                    {years.map(year => (
+                      <SelectItem key={year} value={year}>{year}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              {/* Month dropdown - optional */}
+              <div>
+                <label className="block text-xs text-muted-foreground mb-1">
+                  {inputLanguage === 'latin' ? 'Month' : 
+                   inputLanguage === 'amharic' ? 'ወር' : 'ወርሒ'}
+                </label>
+                <Select value={birthMonth} onValueChange={setBirthMonth}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder={
+                      inputLanguage === 'latin' ? 'Month' : 
+                      inputLanguage === 'amharic' ? 'ወር' : 'ወርሒ'
+                    } />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">
+                      {inputLanguage === 'latin' ? 'Select Month' : 
+                       inputLanguage === 'amharic' ? 'ወር ይምረጡ' : 'ወርሒ ምረጽ'}
+                    </SelectItem>
+                    {months.map(month => (
+                      <SelectItem key={month} value={month}>{month}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              {/* Day dropdown - optional */}
+              <div>
+                <label className="block text-xs text-muted-foreground mb-1">
+                  {inputLanguage === 'latin' ? 'Day' : 
+                   inputLanguage === 'amharic' ? 'ቀን' : 'መዓልቲ'}
+                </label>
+                <Select value={birthDay} onValueChange={setBirthDay} disabled={!birthMonth}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder={
+                      inputLanguage === 'latin' ? 'Day' : 
+                      inputLanguage === 'amharic' ? 'ቀን' : 'መዓልቲ'
+                    } />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">
+                      {inputLanguage === 'latin' ? 'Select Day' : 
+                       inputLanguage === 'amharic' ? 'ቀን ይምረጡ' : 'መዓልቲ ምረጽ'}
+                    </SelectItem>
+                    {days.map(day => (
+                      <SelectItem key={day} value={day}>{day}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
           </div>
         </div>
         
