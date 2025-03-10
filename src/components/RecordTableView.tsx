@@ -1,4 +1,3 @@
-
 import { Record } from '@/types';
 import { ChevronDown, ChevronRight, Info, CheckCircle, MessageSquareText } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
@@ -32,7 +31,6 @@ const RecordTableView = ({
   const formatMatchScore = (score?: number) => {
     if (score === undefined) return '--';
     
-    // Format the score based on thresholds
     if (score >= config.threshold.high) {
       return (
         <Badge variant="default" className="bg-green-500 text-white font-normal">High Match ({score}%)</Badge>
@@ -49,54 +47,34 @@ const RecordTableView = ({
   };
 
   const getDisplayValue = (record: Record, field: string, defaultValue = '-') => {
-    // First check for quoted fields (CSV format)
     const quotedField = `"${field}"`;
     
-    // Then check various name formats that might be in CSV
     if (field === 'firstName') {
-      // Check standard firstName field first
       if (record.firstName) return record.firstName;
-      
-      // Check for FirstName in quoted format
       if (record["\"FirstName\""]) 
         return String(record["\"FirstName\""]).replace(/"/g, '');
-      
-      // Check other possible name fields in CSV
       if (record["\"first_name\""]) 
         return String(record["\"first_name\""]).replace(/"/g, '');
-      
-      // Look for name field
       if (record["\"name\""]) 
         return String(record["\"name\""]).replace(/"/g, '');
-        
       return defaultValue;
     }
     
     if (field === 'lastName') {
-      // Check standard lastName field first
       if (record.lastName) return record.lastName;
-      
-      // Check for LastName in quoted format
       if (record["\"LastName\""]) 
         return String(record["\"LastName\""]).replace(/"/g, '');
-      
-      // Check other possible name fields in CSV
       if (record["\"last_name\""]) 
         return String(record["\"last_name\""]).replace(/"/g, '');
-      
-      // Look for surname field
       if (record["\"surname\""]) 
         return String(record["\"surname\""]).replace(/"/g, '');
-        
       return defaultValue;
     }
     
-    // For other fields, check quoted and unquoted versions
     if (record[quotedField as keyof Record]) {
       return String(record[quotedField as keyof Record]).replace(/"/g, '');
     }
     
-    // Then check direct field
     return String(record[field as keyof Record] || defaultValue);
   };
 
@@ -125,7 +103,6 @@ const RecordTableView = ({
         title: "Match Notes Saved",
         description: "Your notes have been saved successfully.",
       });
-      // Clear the note after saving
       setNoteText(prev => ({...prev, [record.id]: ''}));
     } else {
       toast({
@@ -292,8 +269,7 @@ const RecordTableView = ({
                             </div>
                           </div>
                         )}
-
-                        {/* Display household members if available */}
+                        
                         {record.householdMembers && record.householdMembers.length > 0 && (
                           <div className="md:col-span-2">
                             <h4 className="font-medium mb-2">Household Members</h4>
@@ -305,7 +281,6 @@ const RecordTableView = ({
                           </div>
                         )}
                         
-                        {/* Match notes section */}
                         {activeRecord === record.id && (
                           <div className="md:col-span-2 mt-4 border-t pt-4">
                             <h4 className="font-medium mb-2 flex items-center">

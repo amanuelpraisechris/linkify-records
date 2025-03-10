@@ -1,4 +1,3 @@
-
 export interface Record {
   id: string;
   patientId?: string;
@@ -41,6 +40,8 @@ export interface Record {
   fuzzyScore?: number;
   matchedOn?: string[];
   fieldScores?: {[key: string]: number};
+  sourceId?: string;
+  householdMembers?: string[];
 }
 
 export interface RecordMatch {
