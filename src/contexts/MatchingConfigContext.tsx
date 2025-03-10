@@ -8,9 +8,23 @@ import {
 } from '@/utils/matchingAlgorithms';
 import { useToast } from '@/components/ui/use-toast';
 
+// Algorithm types definition
+export type AlgorithmType = 'deterministic' | 'probabilistic';
+
+// Extended MatchingConfig interface to include algorithm type
+export interface ExtendedMatchingConfig extends MatchingConfig {
+  algorithmType: AlgorithmType;
+}
+
+// Extended default config
+const EXTENDED_DEFAULT_CONFIG: ExtendedMatchingConfig = {
+  ...DEFAULT_MATCHING_CONFIG,
+  algorithmType: 'deterministic'
+};
+
 interface MatchingConfigContextType {
-  config: MatchingConfig;
-  updateConfig: (config: Partial<MatchingConfig>) => void;
+  config: ExtendedMatchingConfig;
+  updateConfig: (config: Partial<ExtendedMatchingConfig>) => void;
   updateFieldWeights: (weights: Partial<FieldWeights>) => void;
   resetConfig: () => void;
   saveConfigProfile: (name: string) => void;
@@ -19,6 +33,7 @@ interface MatchingConfigContextType {
   deleteConfigProfile: (name: string) => void;
   exportConfigToJson: () => string;
   importConfigFromJson: (jsonString: string) => boolean;
+  setAlgorithmType: (type: AlgorithmType) => void;
 }
 
 const MatchingConfigContext = createContext<MatchingConfigContextType | undefined>(undefined);
@@ -42,11 +57,11 @@ interface MatchingConfigProviderProps {
 export const MatchingConfigProvider: React.FC<MatchingConfigProviderProps> = ({ children }) => {
   const { toast } = useToast();
   
-  // Default profiles
-  const defaultProfiles: Record<string, MatchingConfig> = {
-    'Default': DEFAULT_MATCHING_CONFIG,
+  // Default profiles with extended config
+  const defaultProfiles: Record<string, ExtendedMatchingConfig> = {
+    'Default': EXTENDED_DEFAULT_CONFIG,
     'DSS Linkage': {
-      ...DEFAULT_MATCHING_CONFIG,
+      ...EXTENDED_DEFAULT_CONFIG,
       fieldWeights: {
         ...DEFAULT_FIELD_WEIGHTS,
         firstName: 35,
@@ -64,7 +79,7 @@ export const MatchingConfigProvider: React.FC<MatchingConfigProviderProps> = ({ 
       }
     },
     'Name Priority': {
-      ...DEFAULT_MATCHING_CONFIG,
+      ...EXTENDED_DEFAULT_CONFIG,
       fieldWeights: {
         ...DEFAULT_FIELD_WEIGHTS,
         firstName: 40,
@@ -81,11 +96,20 @@ export const MatchingConfigProvider: React.FC<MatchingConfigProviderProps> = ({ 
       }
     },
     'Lenient Matching': {
-      ...DEFAULT_MATCHING_CONFIG,
+      ...EXTENDED_DEFAULT_CONFIG,
       threshold: {
         high: 60,
         medium: 35,
         low: 15
+      }
+    },
+    'Probabilistic': {
+      ...EXTENDED_DEFAULT_CONFIG,
+      algorithmType: 'probabilistic',
+      threshold: {
+        high: 70,
+        medium: 50,
+        low: 30
       }
     }
   };
@@ -109,7 +133,7 @@ export const MatchingConfigProvider: React.FC<MatchingConfigProviderProps> = ({ 
       const currentConfigJson = localStorage.getItem(CURRENT_CONFIG_KEY);
       // Modified the default config to have very low thresholds for better match detection
       const defaultConfig = {
-        ...DEFAULT_MATCHING_CONFIG,
+        ...EXTENDED_DEFAULT_CONFIG,
         threshold: {
           high: 60,  // Lowered for better matching
           medium: 35, // Lowered for better matching
@@ -117,17 +141,24 @@ export const MatchingConfigProvider: React.FC<MatchingConfigProviderProps> = ({ 
         }
       };
       
-      return currentConfigJson ?
+      const parsedConfig = currentConfigJson ?
         JSON.parse(currentConfigJson) :
         defaultConfig;
+      
+      // Ensure algorithmType exists in loaded config
+      if (!parsedConfig.algorithmType) {
+        parsedConfig.algorithmType = 'deterministic';
+      }
+      
+      return parsedConfig;
     } catch (error) {
       console.error('Failed to load current matching config:', error);
-      return DEFAULT_MATCHING_CONFIG;
+      return EXTENDED_DEFAULT_CONFIG;
     }
   };
   
-  const [config, setConfig] = useState<MatchingConfig>(initCurrentConfig());
-  const [savedProfiles, setSavedProfiles] = useState<Record<string, MatchingConfig>>(initSavedProfiles());
+  const [config, setConfig] = useState<ExtendedMatchingConfig>(initCurrentConfig());
+  const [savedProfiles, setSavedProfiles] = useState<Record<string, ExtendedMatchingConfig>>(initSavedProfiles());
   
   // Save profiles to local storage when they change
   useEffect(() => {
@@ -160,7 +191,7 @@ export const MatchingConfigProvider: React.FC<MatchingConfigProviderProps> = ({ 
     }
   }, [config]);
 
-  const updateConfig = (newConfig: Partial<MatchingConfig>) => {
+  const updateConfig = (newConfig: Partial<ExtendedMatchingConfig>) => {
     setConfig(prevConfig => ({
       ...prevConfig,
       ...newConfig,
@@ -178,7 +209,7 @@ export const MatchingConfigProvider: React.FC<MatchingConfigProviderProps> = ({ 
   };
 
   const resetConfig = () => {
-    setConfig(DEFAULT_MATCHING_CONFIG);
+    setConfig(EXTENDED_DEFAULT_CONFIG);
   };
 
   const saveConfigProfile = (name: string) => {
@@ -230,7 +261,12 @@ export const MatchingConfigProvider: React.FC<MatchingConfigProviderProps> = ({ 
         throw new Error('Invalid configuration format');
       }
       
-      setConfig(importedConfig);
+      // Ensure algorithm type exists
+      if (!importedConfig.algorithmType) {
+        importedConfig.algorithmType = 'deterministic';
+      }
+      
+      setConfig(importedConfig as ExtendedMatchingConfig);
       toast({
         title: "Configuration Imported",
         description: "The matching configuration has been imported successfully.",
@@ -246,6 +282,18 @@ export const MatchingConfigProvider: React.FC<MatchingConfigProviderProps> = ({ 
       return false;
     }
   };
+  
+  const setAlgorithmType = (type: AlgorithmType) => {
+    setConfig(prevConfig => ({
+      ...prevConfig,
+      algorithmType: type
+    }));
+    
+    toast({
+      title: "Algorithm Type Changed",
+      description: `Matching algorithm changed to ${type}.`,
+    });
+  };
 
   return (
     <MatchingConfigContext.Provider value={{ 
@@ -258,7 +306,8 @@ export const MatchingConfigProvider: React.FC<MatchingConfigProviderProps> = ({ 
       availableProfiles: Object.keys(savedProfiles),
       deleteConfigProfile,
       exportConfigToJson,
-      importConfigFromJson
+      importConfigFromJson,
+      setAlgorithmType
     }}>
       {children}
     </MatchingConfigContext.Provider>

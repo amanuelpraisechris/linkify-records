@@ -3,11 +3,13 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
-import { LogOut, Settings, UserCog, FileText } from 'lucide-react';
+import { LogOut, Settings, UserCog, FileText, SlidersHorizontal } from 'lucide-react';
 import ChangePasswordForm from './ChangePasswordForm';
+import AlgorithmConfiguration from './AlgorithmConfiguration';
 
 const AdminDashboard = () => {
   const [username, setUsername] = useState('');
+  const [showAlgorithmConfig, setShowAlgorithmConfig] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -88,6 +90,21 @@ const AdminDashboard = () => {
               </div>
               
               <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-4">
+                <h3 className="font-medium">Algorithm Settings</h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                  Configure algorithm type, weights, and view performance
+                </p>
+                <Button 
+                  className="mt-3" 
+                  size="sm" 
+                  onClick={() => setShowAlgorithmConfig(!showAlgorithmConfig)}
+                >
+                  <SlidersHorizontal className="h-4 w-4 mr-1" />
+                  Algorithm Settings
+                </Button>
+              </div>
+              
+              <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-4">
                 <h3 className="font-medium">User Management</h3>
                 <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                   Manage system users and permissions
@@ -113,10 +130,18 @@ const AdminDashboard = () => {
                   View detailed match statistics and reports
                 </p>
                 <Button className="mt-3" size="sm" onClick={() => navigate('/reports')}>
+                  <FileText className="h-4 w-4 mr-1" />
                   View Reports
                 </Button>
               </div>
             </div>
+
+            {/* Algorithm Configuration Section */}
+            {showAlgorithmConfig && (
+              <div className="mt-8">
+                <AlgorithmConfiguration />
+              </div>
+            )}
 
             {/* Add Password Change Form */}
             <div className="mt-8">
