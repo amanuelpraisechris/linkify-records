@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { LogOut, Settings, UserCog } from 'lucide-react';
+import ChangePasswordForm from './ChangePasswordForm';
 
 const AdminDashboard = () => {
   const [username, setUsername] = useState('');
@@ -105,6 +106,11 @@ const AdminDashboard = () => {
                   View Logs
                 </Button>
               </div>
+            </div>
+
+            {/* Add Password Change Form */}
+            <div className="mt-8">
+              <ChangePasswordForm />
             </div>
           </div>
         </div>

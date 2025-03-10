@@ -17,10 +17,13 @@ const AdminLogin = () => {
     e.preventDefault();
     setIsLoading(true);
 
+    // Get the stored password or use the default if none exists
+    const storedPassword = localStorage.getItem('adminPassword') || 'admin123';
+
     // Simple authentication logic - in a real app, you would want to use a more secure method
     // like JWT authentication with a backend
     setTimeout(() => {
-      if (username === 'admin' && password === 'admin123') {
+      if (username === 'admin' && password === storedPassword) {
         // Store auth state in localStorage
         localStorage.setItem('adminAuth', 'true');
         localStorage.setItem('adminUsername', username);
