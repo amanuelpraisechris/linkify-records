@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { PatientRecord } from '@/types';
+import { Record } from '@/types';
 import RecordCard from './RecordCard';
 import { compareStrings } from '@/utils/languageUtils';
 import { SupportedLanguage } from '@/utils/languageUtils';
@@ -9,7 +9,7 @@ import ViewToggle from './ViewToggle';
 import RecordTableView from './RecordTableView';
 
 interface RecordListProps {
-  records: PatientRecord[];
+  records: Record[];
   title?: string;
   emptyMessage?: string;
   showMatchDetail?: boolean;

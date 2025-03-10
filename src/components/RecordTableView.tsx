@@ -1,11 +1,11 @@
 
-import { PatientRecord } from '@/types';
+import { Record } from '@/types';
 import { ChevronDown, ChevronRight, Info } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { useMatchingConfig } from '@/contexts/MatchingConfigContext';
 
 interface RecordTableViewProps {
-  records: PatientRecord[];
+  records: Record[];
   expandedRecord: string | null;
   toggleRecordDetails: (recordId: string) => void;
   showMatchDetail?: boolean;
@@ -30,15 +30,15 @@ const RecordTableView = ({
     }
   };
 
-  const getDisplayValue = (record: PatientRecord, field: string, defaultValue = '-') => {
+  const getDisplayValue = (record: Record, field: string, defaultValue = '-') => {
     const quotedField = `"${field}"`;
-    if (record[quotedField as keyof PatientRecord]) {
-      return String(record[quotedField as keyof PatientRecord]).replace(/"/g, '');
+    if (record[quotedField as keyof Record]) {
+      return String(record[quotedField as keyof Record]).replace(/"/g, '');
     }
-    return record[field as keyof PatientRecord] || defaultValue;
+    return record[field as keyof Record] || defaultValue;
   };
 
-  const getGender = (record: PatientRecord) => {
+  const getGender = (record: Record) => {
     if (record["\"Sex\""]) {
       const sex = record["\"Sex\""].replace(/"/g, '');
       return sex === 'M' ? 'Male' : sex === 'F' ? 'Female' : sex;
