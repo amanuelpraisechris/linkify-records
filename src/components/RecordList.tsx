@@ -1,5 +1,6 @@
+
 import { useState, useEffect } from 'react';
-import { Record } from '@/types';
+import { Record as PatientRecord } from '@/types';
 import RecordCard from './RecordCard';
 import SearchBar from './SearchBar';
 import { Filter, Globe, Table, LayoutList, ChevronDown, ChevronRight, Info } from 'lucide-react';
@@ -9,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 
 interface RecordListProps {
-  records: Record[];
+  records: PatientRecord[];
   title?: string;
   emptyMessage?: string;
   showMatchDetail?: boolean;
