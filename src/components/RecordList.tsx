@@ -11,12 +11,14 @@ interface RecordListProps {
   records: Record[];
   title?: string;
   emptyMessage?: string;
+  showMatchDetail?: boolean;
 }
 
 const RecordList = ({ 
   records, 
   title = "Records",
-  emptyMessage = "No records found" 
+  emptyMessage = "No records found",
+  showMatchDetail = false
 }: RecordListProps) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [showFilters, setShowFilters] = useState(false);
