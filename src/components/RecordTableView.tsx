@@ -15,6 +15,122 @@ interface RecordTableViewProps {
   onSaveNotes?: (record: Record, notes: string) => void;
 }
 
+const nonPatientNameFields = [
+  "balozi_first_name", "\"balozi_first_name\"",
+  "balozi_middle_name", "\"balozi_middle_name\"", 
+  "balozi_last_name", "\"balozi_last_name\"",
+  "oldest_member_first_name", "\"oldest_member_first_name\"",
+  "oldest_member_middle_name", "\"oldest_member_middle_name\"",
+  "oldest_member_last_name", "\"oldest_member_last_name\"",
+  "cellLeaderFirstName", "cellLeaderMiddleName", "cellLeaderLastName",
+  "oldestHouseholdMemberFirstName", "oldestHouseholdMemberMiddleName", "oldestHouseholdMemberLastName"
+];
+
+const getNameField = (record: Record, field: 'firstName' | 'lastName' | 'middleName', defaultValue = '-'): string => {
+  if (field === 'firstName') {
+    if (record.firstName) return record.firstName;
+    if (record.FirstName) return record.FirstName as string;
+    if (record["FirstName"]) return record["FirstName"] as string;
+    if (record["\"FirstName\""]) return String(record["\"FirstName\""]).replace(/"/g, '');
+    if (record.first_name) return record.first_name as string;
+    if (record["first_name"]) return record["first_name"] as string;
+    if (record["\"first_name\""]) return String(record["\"first_name\""]).replace(/"/g, '');
+    if (record.name) return record.name as string;
+    if (record["name"]) return record["name"] as string;
+    if (record["\"name\""]) return String(record["\"name\""]).replace(/"/g, '');
+    
+    for (const key in record) {
+      const lcKey = key.toLowerCase();
+      if (lcKey === "firstname" && typeof record[key as keyof Record] === 'string') {
+        return String(record[key as keyof Record]);
+      }
+    }
+    
+    for (const key in record) {
+      if (nonPatientNameFields.includes(key)) continue;
+      
+      const lcKey = key.toLowerCase();
+      if ((lcKey.includes('first') || lcKey === 'name') && 
+          !lcKey.includes('last') && 
+          !lcKey.includes('middle') && 
+          !lcKey.includes('cell') &&
+          !lcKey.includes('oldest') &&
+          !lcKey.includes('balozi') &&
+          !lcKey.includes('household') &&
+          typeof record[key as keyof Record] === 'string') {
+        return String(record[key as keyof Record]);
+      }
+    }
+  }
+  
+  if (field === 'lastName') {
+    if (record.lastName) return record.lastName;
+    if (record.LastName) return record.LastName as string;
+    if (record["LastName"]) return record["LastName"] as string;
+    if (record["\"LastName\""]) return String(record["\"LastName\""]).replace(/"/g, '');
+    if (record.last_name) return record.last_name as string;
+    if (record["last_name"]) return record["last_name"] as string;
+    if (record["\"last_name\""]) return String(record["\"last_name\""]).replace(/"/g, '');
+    if (record.surname) return record.surname as string;
+    if (record["surname"]) return record["surname"] as string;
+    if (record["\"surname\""]) return String(record["\"surname\""]).replace(/"/g, '');
+    
+    for (const key in record) {
+      const lcKey = key.toLowerCase();
+      if (lcKey === "lastname" && typeof record[key as keyof Record] === 'string') {
+        return String(record[key as keyof Record]);
+      }
+    }
+    
+    for (const key in record) {
+      if (nonPatientNameFields.includes(key)) continue;
+      
+      const lcKey = key.toLowerCase();
+      if (lcKey.includes('last') && 
+          !lcKey.includes('cell') &&
+          !lcKey.includes('oldest') &&
+          !lcKey.includes('balozi') &&
+          !lcKey.includes('household') &&
+          typeof record[key as keyof Record] === 'string') {
+        return String(record[key as keyof Record]);
+      }
+    }
+  }
+  
+  if (field === 'middleName') {
+    if (record.middleName) return record.middleName;
+    if (record.MiddleName) return record.MiddleName as string;
+    if (record["MiddleName"]) return record["MiddleName"] as string;
+    if (record["\"MiddleName\""]) return String(record["\"MiddleName\""]).replace(/"/g, '');
+    if (record.middle_name) return record.middle_name as string;
+    if (record["middle_name"]) return record["middle_name"] as string;
+    if (record["\"middle_name\""]) return String(record["\"middle_name\""]).replace(/"/g, '');
+    
+    for (const key in record) {
+      const lcKey = key.toLowerCase();
+      if (lcKey === "middlename" && typeof record[key as keyof Record] === 'string') {
+        return String(record[key as keyof Record]);
+      }
+    }
+    
+    for (const key in record) {
+      if (nonPatientNameFields.includes(key)) continue;
+      
+      const lcKey = key.toLowerCase();
+      if (lcKey.includes('middle') && 
+          !lcKey.includes('cell') &&
+          !lcKey.includes('oldest') &&
+          !lcKey.includes('balozi') &&
+          !lcKey.includes('household') &&
+          typeof record[key as keyof Record] === 'string') {
+        return String(record[key as keyof Record]);
+      }
+    }
+  }
+  
+  return defaultValue;
+};
+
 const RecordTableView = ({ 
   records, 
   expandedRecord, 
@@ -28,6 +144,10 @@ const RecordTableView = ({
   const [activeRecord, setActiveRecord] = useState<string | null>(null);
   const [noteText, setNoteText] = useState<{[key: string]: string}>({});
   
+  if (process.env.NODE_ENV !== 'production') {
+    console.log('Records in RecordTableView:', records);
+  }
+
   const formatMatchScore = (score?: number) => {
     if (score === undefined) return '--';
     
@@ -44,97 +164,6 @@ const RecordTableView = ({
         <Badge variant="outline" className="font-normal text-muted-foreground">Low Match ({score}%)</Badge>
       );
     }
-  };
-
-  const nonPatientNameFields = [
-    "balozi_first_name", "\"balozi_first_name\"",
-    "balozi_middle_name", "\"balozi_middle_name\"", 
-    "balozi_last_name", "\"balozi_last_name\"",
-    "oldest_member_first_name", "\"oldest_member_first_name\"",
-    "oldest_member_middle_name", "\"oldest_member_middle_name\"",
-    "oldest_member_last_name", "\"oldest_member_last_name\"",
-    "cellLeaderFirstName", "cellLeaderMiddleName", "cellLeaderLastName",
-    "oldestHouseholdMemberFirstName", "oldestHouseholdMemberMiddleName", "oldestHouseholdMemberLastName"
-  ];
-
-  const getDisplayValue = (record: Record, field: string, defaultValue = '-') => {
-    if (field === 'firstName') {
-      if (record.firstName) return record.firstName;
-      if (record.FirstName) return record.FirstName as string;
-      if (record["FirstName"]) return record["FirstName"] as string;
-      if (record["\"FirstName\""]) return String(record["\"FirstName\""]).replace(/"/g, '');
-      if (record.first_name) return record.first_name as string;
-      if (record["first_name"]) return record["first_name"] as string;
-      if (record["\"first_name\""]) return String(record["\"first_name\""]).replace(/"/g, '');
-      if (record.name) return record.name as string;
-      if (record["name"]) return record["name"] as string;
-      if (record["\"name\""]) return String(record["\"name\""]).replace(/"/g, '');
-      
-      for (const key in record) {
-        if (nonPatientNameFields.includes(key)) continue;
-        
-        if ((key.toLowerCase().includes('first') || key.toLowerCase() === 'name') && 
-            !key.toLowerCase().includes('last') && 
-            !key.toLowerCase().includes('middle') && 
-            !key.toLowerCase().includes('cell') &&
-            !key.toLowerCase().includes('oldest') &&
-            !key.toLowerCase().includes('balozi') &&
-            !key.toLowerCase().includes('household') &&
-            typeof record[key as keyof Record] === 'string') {
-          return String(record[key as keyof Record]);
-        }
-      }
-      return defaultValue;
-    }
-    
-    if (field === 'lastName') {
-      if (record.lastName) return record.lastName;
-      if (record.LastName) return record.LastName as string;
-      if (record["LastName"]) return record["LastName"] as string;
-      if (record["\"LastName\""]) return String(record["\"LastName\""]).replace(/"/g, '');
-      if (record.last_name) return record.last_name as string;
-      if (record["last_name"]) return record["last_name"] as string;
-      if (record["\"last_name\""]) return String(record["\"last_name\""]).replace(/"/g, '');
-      if (record.surname) return record.surname as string;
-      if (record["surname"]) return record["surname"] as string;
-      if (record["\"surname\""]) return String(record["\"surname\""]).replace(/"/g, '');
-      
-      for (const key in record) {
-        if (nonPatientNameFields.includes(key)) continue;
-        
-        if (key.toLowerCase().includes('last') && 
-            !key.toLowerCase().includes('cell') &&
-            !key.toLowerCase().includes('oldest') &&
-            !key.toLowerCase().includes('balozi') &&
-            !key.toLowerCase().includes('household') &&
-            typeof record[key as keyof Record] === 'string') {
-          return String(record[key as keyof Record]);
-        }
-      }
-      return defaultValue;
-    }
-    
-    if (field === 'middleName' && record.middleName) return record.middleName;
-    if (field === 'village' && record.village) return record.village;
-    if (field === 'district' && record.district) return record.district;
-    if (field === 'subVillage' && record.subVillage) return record.subVillage;
-    if (field === 'birthDate' && record.birthDate) return record.birthDate;
-    
-    const quotedField = `"${field}"`;
-    if (record[quotedField as keyof Record]) {
-      return String(record[quotedField as keyof Record]).replace(/"/g, '');
-    }
-    
-    if (record[field as keyof Record] !== undefined) {
-      return String(record[field as keyof Record] || defaultValue);
-    }
-    
-    const unquotedKey = field.replace(/"/g, '');
-    if (record[unquotedKey as keyof Record] !== undefined) {
-      return String(record[unquotedKey as keyof Record]);
-    }
-    
-    return defaultValue;
   };
 
   const getGender = (record: Record) => {
@@ -163,7 +192,7 @@ const RecordTableView = ({
       onAssignMatch(record);
       toast({
         title: "Match Assigned",
-        description: `Successfully assigned match for record: ${getDisplayValue(record, 'firstName')} ${getDisplayValue(record, 'lastName')}`,
+        description: `Successfully assigned match for record: ${getNameField(record, 'firstName')} ${getNameField(record, 'lastName')}`,
       });
     }
   };
@@ -221,7 +250,7 @@ const RecordTableView = ({
                   </td>
                   <td className="px-4 py-4 whitespace-nowrap">
                     <div className="font-medium">
-                      {getDisplayValue(record, 'firstName', '-')} {getDisplayValue(record, 'lastName', '-')}
+                      {getNameField(record, 'firstName')} {getNameField(record, 'lastName')}
                     </div>
                     <div className="text-xs text-muted-foreground">
                       ID: {record.patientId || record.id.substring(0, 8)}
@@ -280,7 +309,7 @@ const RecordTableView = ({
                           </h4>
                           <dl className="grid grid-cols-2 gap-2 text-sm">
                             <dt className="text-muted-foreground">Full Name</dt>
-                            <dd>{getDisplayValue(record, 'firstName', '-')} {getDisplayValue(record, 'middleName', '')} {getDisplayValue(record, 'lastName', '-')}</dd>
+                            <dd>{getNameField(record, 'firstName')} {getNameField(record, 'middleName')} {getNameField(record, 'lastName')}</dd>
                             
                             <dt className="text-muted-foreground">Gender</dt>
                             <dd>{getGender(record)}</dd>

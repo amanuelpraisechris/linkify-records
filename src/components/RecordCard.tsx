@@ -25,32 +25,46 @@ const nonPatientNameFields = [
   "oldestHouseholdMemberFirstName", "oldestHouseholdMemberMiddleName", "oldestHouseholdMemberLastName"
 ];
 
-// Helper to get name fields correctly with improved priority handling
+// Enhanced helper to get name fields correctly with improved priority handling
 const getNameField = (record: Record, field: 'firstName' | 'lastName' | 'middleName', defaultValue = '-'): string => {
-  // Check standard field names with highest priority
+  // Direct property check with highest priority
   if (field === 'firstName') {
+    // Check standard field formats with highest priority
     if (record.firstName) return record.firstName;
     if (record.FirstName) return record.FirstName as string;
+    
+    // Check quoted and alternate formats
     if (record["FirstName"]) return record["FirstName"] as string;
     if (record["\"FirstName\""]) return String(record["\"FirstName\""]).replace(/"/g, '');
     if (record.first_name) return record.first_name as string;
     if (record["first_name"]) return record["first_name"] as string;
     if (record["\"first_name\""]) return String(record["\"first_name\""]).replace(/"/g, '');
+    
+    // Check for "name" field which might contain first name
     if (record.name) return record.name as string;
     if (record["name"]) return record["name"] as string;
     if (record["\"name\""]) return String(record["\"name\""]).replace(/"/g, '');
+    
+    // Check for any field with "firstname" (case insensitive)
+    for (const key in record) {
+      const lcKey = key.toLowerCase();
+      if (lcKey === "firstname" && typeof record[key as keyof Record] === 'string') {
+        return String(record[key as keyof Record]);
+      }
+    }
     
     // Scan for other matching fields but exclude non-patient name fields
     for (const key in record) {
       if (nonPatientNameFields.includes(key)) continue;
       
-      if ((key.toLowerCase().includes('first') || key.toLowerCase() === 'name') && 
-          !key.toLowerCase().includes('last') && 
-          !key.toLowerCase().includes('middle') && 
-          !key.toLowerCase().includes('cell') &&
-          !key.toLowerCase().includes('oldest') &&
-          !key.toLowerCase().includes('balozi') &&
-          !key.toLowerCase().includes('household') &&
+      const lcKey = key.toLowerCase();
+      if ((lcKey.includes('first') || lcKey === 'name') && 
+          !lcKey.includes('last') && 
+          !lcKey.includes('middle') && 
+          !lcKey.includes('cell') &&
+          !lcKey.includes('oldest') &&
+          !lcKey.includes('balozi') &&
+          !lcKey.includes('household') &&
           typeof record[key as keyof Record] === 'string') {
         return String(record[key as keyof Record]);
       }
@@ -58,8 +72,11 @@ const getNameField = (record: Record, field: 'firstName' | 'lastName' | 'middleN
   }
   
   if (field === 'lastName') {
+    // Check standard field formats with highest priority
     if (record.lastName) return record.lastName;
     if (record.LastName) return record.LastName as string;
+    
+    // Check quoted and alternate formats
     if (record["LastName"]) return record["LastName"] as string;
     if (record["\"LastName\""]) return String(record["\"LastName\""]).replace(/"/g, '');
     if (record.last_name) return record.last_name as string;
@@ -69,15 +86,24 @@ const getNameField = (record: Record, field: 'firstName' | 'lastName' | 'middleN
     if (record["surname"]) return record["surname"] as string;
     if (record["\"surname\""]) return String(record["\"surname\""]).replace(/"/g, '');
     
+    // Check for any field with "lastname" (case insensitive)
+    for (const key in record) {
+      const lcKey = key.toLowerCase();
+      if (lcKey === "lastname" && typeof record[key as keyof Record] === 'string') {
+        return String(record[key as keyof Record]);
+      }
+    }
+    
     // Scan for other matching fields but exclude non-patient name fields
     for (const key in record) {
       if (nonPatientNameFields.includes(key)) continue;
       
-      if (key.toLowerCase().includes('last') && 
-          !key.toLowerCase().includes('cell') &&
-          !key.toLowerCase().includes('oldest') &&
-          !key.toLowerCase().includes('balozi') &&
-          !key.toLowerCase().includes('household') &&
+      const lcKey = key.toLowerCase();
+      if (lcKey.includes('last') && 
+          !lcKey.includes('cell') &&
+          !lcKey.includes('oldest') &&
+          !lcKey.includes('balozi') &&
+          !lcKey.includes('household') &&
           typeof record[key as keyof Record] === 'string') {
         return String(record[key as keyof Record]);
       }
@@ -85,23 +111,35 @@ const getNameField = (record: Record, field: 'firstName' | 'lastName' | 'middleN
   }
   
   if (field === 'middleName') {
+    // Check standard field formats with highest priority
     if (record.middleName) return record.middleName;
     if (record.MiddleName) return record.MiddleName as string;
+    
+    // Check quoted and alternate formats
     if (record["MiddleName"]) return record["MiddleName"] as string;
     if (record["\"MiddleName\""]) return String(record["\"MiddleName\""]).replace(/"/g, '');
     if (record.middle_name) return record.middle_name as string;
     if (record["middle_name"]) return record["middle_name"] as string;
     if (record["\"middle_name\""]) return String(record["\"middle_name\""]).replace(/"/g, '');
     
+    // Check for any field with "middlename" (case insensitive)
+    for (const key in record) {
+      const lcKey = key.toLowerCase();
+      if (lcKey === "middlename" && typeof record[key as keyof Record] === 'string') {
+        return String(record[key as keyof Record]);
+      }
+    }
+    
     // Scan for other matching fields but exclude non-patient name fields
     for (const key in record) {
       if (nonPatientNameFields.includes(key)) continue;
       
-      if (key.toLowerCase().includes('middle') && 
-          !key.toLowerCase().includes('cell') &&
-          !key.toLowerCase().includes('oldest') &&
-          !key.toLowerCase().includes('balozi') &&
-          !key.toLowerCase().includes('household') &&
+      const lcKey = key.toLowerCase();
+      if (lcKey.includes('middle') && 
+          !lcKey.includes('cell') &&
+          !lcKey.includes('oldest') &&
+          !lcKey.includes('balozi') &&
+          !lcKey.includes('household') &&
           typeof record[key as keyof Record] === 'string') {
         return String(record[key as keyof Record]);
       }
@@ -140,6 +178,12 @@ const RecordCard = ({
   };
   
   const confidenceLevel = getConfidenceLevel(matchScore);
+
+  // For debugging
+  if (process.env.NODE_ENV !== 'production') {
+    console.log('Record in RecordCard:', record);
+    console.log('Extracted names:', { firstName, lastName });
+  }
 
   return (
     <div 
