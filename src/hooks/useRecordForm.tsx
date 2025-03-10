@@ -72,7 +72,7 @@ export const useRecordForm = ({ onRecordSubmit, onSaveForSearch }: UseRecordForm
     handleCheckboxChange,
     handlePatientFound,
     buildDateString
-  } = useFormHandlers(
+  } = useFormHandlers({
     formData, 
     setFormData, 
     setActiveTab, 
@@ -80,8 +80,11 @@ export const useRecordForm = ({ onRecordSubmit, onSaveForSearch }: UseRecordForm
     setBirthYear,
     setBirthMonth,
     setBirthDay,
+    birthYear,
+    birthMonth,
+    birthDay,
     onSaveForSearch
-  );
+  });
   
   // Form submission
   const {

@@ -37,8 +37,8 @@ export const useFormHandlers = ({
     }));
   };
   
-  const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, checked } = e.target;
+  // Modified to accept name and checked directly instead of event
+  const handleCheckboxChange = (name: string, checked: boolean) => {
     setFormData(prev => ({
       ...prev,
       [name]: checked
