@@ -41,7 +41,7 @@ const IdentifiersSection = ({
             onChange={(e) => handleIdentifierChange(index, 'type', e.target.value)}
             className="p-2 border rounded-md focus:ring-2 focus:ring-primary/30 w-1/3"
           >
-            <option value="">
+            <option value="none">
               {inputLanguage === 'latin' ? 'Select Type' : 
               inputLanguage === 'amharic' ? 'ዓይነት ይምረጡ' : 'ዓይነት ምረጽ'}
             </option>

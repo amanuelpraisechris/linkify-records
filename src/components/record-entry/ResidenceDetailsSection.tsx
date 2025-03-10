@@ -1,4 +1,3 @@
-
 import { Record } from '@/types';
 import { SupportedLanguage } from '@/utils/languageUtils';
 import { Input } from '@/components/ui/input';
@@ -50,7 +49,7 @@ const ResidenceDetailsSection = ({
               } />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">
+              <SelectItem value="none">
                 {inputLanguage === 'latin' ? '(none)' : 
                 inputLanguage === 'amharic' ? '(የለም)' : '(የለን)'}
               </SelectItem>
