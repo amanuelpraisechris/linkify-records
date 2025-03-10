@@ -1,5 +1,6 @@
 
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import SearchBar from '@/components/SearchBar';
 import StatCard from '@/components/StatCard';
@@ -7,7 +8,7 @@ import RecordList from '@/components/RecordList';
 import MatchingInterface from '@/components/MatchingInterface';
 import { useToast } from '@/components/ui/use-toast';
 import { dashboardStats, exampleRecords, recordMatches, newRecords } from '@/utils/mockData';
-import { Database, Link2, Search, Filter } from 'lucide-react';
+import { Database, Link2, Search, Filter, FileUp, UserPlus } from 'lucide-react';
 
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -56,6 +57,23 @@ const Index = () => {
               onSearch={handleSearch}
               className="animate-slide-up"
             />
+          </div>
+          
+          <div className="flex gap-4 mt-8">
+            <Link 
+              to="/data-management" 
+              className="flex items-center px-4 py-2 bg-primary/10 hover:bg-primary/20 text-primary rounded-md transition-all-medium"
+            >
+              <FileUp className="w-4 h-4 mr-2" />
+              Manage Databases
+            </Link>
+            <Link 
+              to="/record-entry" 
+              className="flex items-center px-4 py-2 bg-primary/10 hover:bg-primary/20 text-primary rounded-md transition-all-medium"
+            >
+              <UserPlus className="w-4 h-4 mr-2" />
+              New Patient Record
+            </Link>
           </div>
         </div>
         

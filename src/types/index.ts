@@ -21,6 +21,12 @@ export interface Record {
     updatedAt: string;
     source: string;
   };
+  // New fields for linkage
+  village?: string;
+  district?: string;
+  householdHead?: string;
+  motherName?: string;
+  fuzzyScore?: number;
 }
 
 export interface RecordMatch {
@@ -46,4 +52,25 @@ export interface DashboardStats {
   matchedRecords: number;
   pendingMatches: number;
   matchRate: number;
+}
+
+// New interfaces for data loading functionality
+export interface DataSource {
+  id: string;
+  name: string;
+  description?: string;
+  recordCount: number;
+  lastUpdated: string;
+  type: 'community' | 'facility' | 'imported';
+}
+
+export interface MatchingAlgorithm {
+  id: string;
+  name: string;
+  description: string;
+  thresholds: {
+    high: number;
+    medium: number;
+    low: number;
+  };
 }
