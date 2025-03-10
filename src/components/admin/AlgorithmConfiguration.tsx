@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -12,47 +11,46 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
-// Structure that maps weight field keys to meaningful descriptions
 const fieldDescriptions: {[key: string]: {label: string, description: string}} = {
   firstName: {
-    label: "First Name",
+    label: "firstName",
     description: "Patient's first name (given name) - Exact or fuzzy matching"
   },
   lastName: {
-    label: "Last Name", 
+    label: "lastName", 
     description: "Patient's last name (family name) - Exact or fuzzy matching"
   },
   middleName: {
-    label: "Middle Name",
+    label: "middleName",
     description: "Patient's middle name - Exact or fuzzy matching"
   },
   birthDate: {
-    label: "Complete Birth Date",
-    description: "Full birth date (YYYY-MM-DD) - Exact match gives highest score"
+    label: "birthDate",
+    description: "Full birth date in YYYY-MM-DD format"
   },
   gender: {
-    label: "Gender",
+    label: "gender",
     description: "Patient's gender (Male/Female) - Exact matching only"
   },
   village: {
-    label: "Village/Ward Name",
-    description: "Patient's residential village or ward - Exact or fuzzy matching"
+    label: "village",
+    description: "Patient's residential village - Exact or fuzzy matching"
   },
   district: {
-    label: "District Name",
-    description: "District of residence - Exact or fuzzy matching"
+    label: "district",
+    description: "Patient's district of residence - Exact or fuzzy matching"
   },
   motherName: {
-    label: "Mother's Full Name",
+    label: "motherName",
     description: "Patient's mother's name - Exact or fuzzy matching"
   },
   householdHead: {
-    label: "Household Head Name",
-    description: "Name of the head of household - Exact or fuzzy matching"
+    label: "householdHead",
+    description: "Name of the household head - Exact or fuzzy matching"
   },
   phoneNumber: {
-    label: "Phone Number",
-    description: "Patient's phone contact - Exact matching only"
+    label: "phoneNumber",
+    description: "Patient's phone number - Exact matching only"
   }
 };
 
@@ -60,9 +58,7 @@ const AlgorithmConfiguration = () => {
   const { config, updateFieldWeights, resetConfig, saveConfigProfile, setAlgorithmType } = useMatchingConfig();
   const { toast } = useToast();
   
-  // Local state for field weights
   const [fieldWeights, setFieldWeights] = useState(config.fieldWeights);
-  // State for algorithm performance metrics (in a real app, these would come from backend)
   const [metrics, setMetrics] = useState({
     accuracy: 0.85,
     precision: 0.82,
@@ -71,12 +67,10 @@ const AlgorithmConfiguration = () => {
   });
   const [profileName, setProfileName] = useState('');
   
-  // Update local state when config changes
   useEffect(() => {
     setFieldWeights(config.fieldWeights);
   }, [config.fieldWeights]);
   
-  // Handle field weight change
   const handleWeightChange = (field: string, value: string) => {
     const numValue = parseInt(value, 10) || 0;
     setFieldWeights(prev => ({
@@ -85,7 +79,6 @@ const AlgorithmConfiguration = () => {
     }));
   };
   
-  // Save updated weights
   const saveWeights = () => {
     updateFieldWeights(fieldWeights);
     toast({
@@ -94,7 +87,6 @@ const AlgorithmConfiguration = () => {
     });
   };
   
-  // Reset to defaults
   const resetWeights = () => {
     resetConfig();
     toast({
@@ -103,7 +95,6 @@ const AlgorithmConfiguration = () => {
     });
   };
   
-  // Save as profile
   const handleSaveProfile = () => {
     if (!profileName.trim()) {
       toast({
@@ -122,7 +113,6 @@ const AlgorithmConfiguration = () => {
     });
   };
   
-  // Handle algorithm type change
   const handleAlgorithmTypeChange = (value: string) => {
     setAlgorithmType(value as AlgorithmType);
   };
@@ -150,14 +140,13 @@ const AlgorithmConfiguration = () => {
           <TabsTrigger value="performance">Performance</TabsTrigger>
         </TabsList>
         
-        {/* Field Weights Tab */}
         <TabsContent value="weights" className="space-y-4">
           <CardContent className="space-y-4 pt-4">
             <Alert className="border-amber-300 bg-amber-50 dark:bg-amber-950/20">
               <XCircle className="h-4 w-4 text-amber-600" />
               <AlertDescription className="text-amber-700 font-medium">
                 <span className="block font-bold mb-1">Balozi Information Explicitly Excluded</span>
-                FirstName and LastName are set as primary matching attributes with highest weights.
+                firstName and lastName are set as primary matching attributes with highest weights.
                 Balozi information is completely excluded from matching criteria.
               </AlertDescription>
             </Alert>
@@ -165,7 +154,7 @@ const AlgorithmConfiguration = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {Object.entries(fieldWeights).map(([field, weight]) => {
                 const fieldInfo = fieldDescriptions[field] || {
-                  label: field.replace(/([A-Z])/g, ' $1').trim(),
+                  label: field,
                   description: "Weight for this attribute"
                 };
                 
@@ -234,7 +223,6 @@ const AlgorithmConfiguration = () => {
           </CardContent>
         </TabsContent>
         
-        {/* Algorithm Type Tab */}
         <TabsContent value="algorithm">
           <CardContent className="space-y-4 pt-4">
             <div className="space-y-4">
@@ -271,7 +259,6 @@ const AlgorithmConfiguration = () => {
           </CardContent>
         </TabsContent>
         
-        {/* Performance Metrics Tab */}
         <TabsContent value="performance">
           <CardContent className="space-y-4 pt-4">
             <div className="grid grid-cols-2 gap-4">
