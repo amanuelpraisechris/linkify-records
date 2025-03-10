@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -28,25 +29,25 @@ const fieldDescriptions: {[key: string]: {label: string, description: string}} =
     label: "birthDate",
     description: "Full birth date in YYYY-MM-DD format"
   },
-  gender: {
-    label: "gender",
-    description: "Patient's gender (Male/Female) - Exact matching only"
+  sex: {
+    label: "sex",
+    description: "Patient's sex (Male/Female) - Exact matching only"
   },
   village: {
     label: "village",
     description: "Patient's residential village - Exact or fuzzy matching"
   },
-  district: {
-    label: "district",
-    description: "Patient's district of residence - Exact or fuzzy matching"
+  subVillage: {
+    label: "subVillage",
+    description: "Patient's subvillage of residence - Exact or fuzzy matching"
   },
   motherName: {
     label: "motherName",
     description: "Patient's mother's name - Exact or fuzzy matching"
   },
-  householdHead: {
-    label: "householdHead",
-    description: "Name of the household head - Exact or fuzzy matching"
+  oldestHouseholdMember: {
+    label: "oldestHouseholdMember",
+    description: "Name of the oldest household member - Exact or fuzzy matching"
   },
   phoneNumber: {
     label: "phoneNumber",

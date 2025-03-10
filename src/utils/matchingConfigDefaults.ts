@@ -1,4 +1,5 @@
 
+
 import { FieldWeights, DEFAULT_MATCHING_CONFIG, DEFAULT_FIELD_WEIGHTS } from '@/utils/matchingAlgorithms';
 import { ExtendedMatchingConfig } from '@/types/matchingConfig';
 
@@ -9,11 +10,11 @@ export const UPDATED_FIELD_WEIGHTS: FieldWeights = {
   lastName: 45,
   middleName: 20,
   birthDate: 30,
-  gender: 15,
+  sex: 15,
   village: 25,
-  district: 20,
+  subVillage: 20,
   motherName: 25,
-  householdHead: 25,
+  oldestHouseholdMember: 25,
   phoneNumber: 20
   // Note: baloziFirstName, baloziMiddleName, and baloziLastName are intentionally omitted
 };
@@ -37,9 +38,9 @@ export const DEFAULT_PROFILES: Record<string, ExtendedMatchingConfig> = {
       middleName: 15,
       birthDate: 25,
       village: 20,
-      district: 15,
+      subVillage: 15,
       phoneNumber: 20,
-      householdHead: 15
+      oldestHouseholdMember: 15
     },
     threshold: {
       high: 85,
@@ -55,7 +56,7 @@ export const DEFAULT_PROFILES: Record<string, ExtendedMatchingConfig> = {
       lastName: 45,
       middleName: 20,
       birthDate: 25,
-      gender: 15,
+      sex: 15,
       village: 20,
       phoneNumber: 20
     },

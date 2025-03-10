@@ -18,7 +18,9 @@ const OldestMemberSection = ({
   return (
     <div className="mt-4">
       <ResidenceDetailsHeader 
-        title="Oldest Household Member" 
+        title={inputLanguage === 'latin' ? 'Oldest Household Member' : 
+               inputLanguage === 'amharic' ? 'የቤት ውስጥ ታላቅ አባል' : 
+               'ዓብዪ ኣባል ቤተሰብ'}
         inputLanguage={inputLanguage} 
       />
       <NameInputGroup 

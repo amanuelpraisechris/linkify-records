@@ -4,7 +4,7 @@ export interface Record {
   firstName: string;
   lastName: string;
   middleName?: string;
-  gender: string;
+  sex: string;
   birthDate: string;
   address?: string;
   phoneNumber?: string;

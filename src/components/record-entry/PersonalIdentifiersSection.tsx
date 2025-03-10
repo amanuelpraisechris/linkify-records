@@ -118,10 +118,10 @@ const PersonalIdentifiersSection = ({
             {inputLanguage === 'latin' ? 'Sex' : 
             inputLanguage === 'amharic' ? 'ፆታ' : 'ጾታ'}
           </label>
-          <Select value={formData.gender} onValueChange={(value) => handleChange({ target: { name: 'gender', value } } as React.ChangeEvent<HTMLSelectElement>)}>
+          <Select value={formData.sex} onValueChange={(value) => handleChange({ target: { name: 'sex', value } } as React.ChangeEvent<HTMLSelectElement>)}>
             <SelectTrigger className="w-full">
               <SelectValue placeholder={
-                inputLanguage === 'latin' ? 'Select Gender' : 
+                inputLanguage === 'latin' ? 'Select Sex' : 
                 inputLanguage === 'amharic' ? 'ፆታ ይምረጡ' : 'ጾታ ምረጽ'
               } />
             </SelectTrigger>
