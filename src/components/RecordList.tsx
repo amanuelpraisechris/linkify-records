@@ -47,7 +47,7 @@ const RecordList = ({
         acc[key] = value;
       }
       return acc;
-    }, {} as Record<string, any>);
+    }, {} as {[key: string]: any});
     
     const matches = 
       compareStrings(record.firstName, searchQuery, searchLanguage) ||

@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Upload, Database, AlertCircle, Globe } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
@@ -73,13 +72,38 @@ const DataLoader = ({ onDataLoaded, dataSource }: DataLoaderProps) => {
             }
           }));
         } else {
-          // Basic CSV parsing (in a real app, use a CSV parsing library)
+          // Improved CSV parsing
           const csv = e.target?.result as string;
-          const lines = csv.split('\n');
-          const headers = lines[0].split(',');
+          const lines = csv.split('\n').filter(line => line.trim() !== ''); // Skip empty lines
           
+          // Extract headers from the first row
+          const headers = lines[0].split(',').map(header => header.trim());
+          console.log("CSV headers detected:", headers);
+          
+          // Process all rows except the header row
           data = lines.slice(1).map((line, index) => {
-            const values = line.split(',');
+            // Handle quoted values in CSV
+            let matches = [];
+            let pos = 0;
+            const values: string[] = [];
+            const regex = /(?:^|,)(?:"([^"]*(?:""[^"]*)*)"|([^,]*))/g;
+            
+            while ((matches = regex.exec(line)) !== null) {
+              if (matches[1] !== undefined) {
+                values.push(matches[1].replace(/""/g, '"')); // Handle escaped quotes
+              } else {
+                values.push(matches[2] || '');
+              }
+            }
+            
+            // If regex approach didn't work, fallback to simple split
+            if (values.length === 0) {
+              const simpleSplit = line.split(',');
+              for (let i = 0; i < simpleSplit.length; i++) {
+                values.push(simpleSplit[i].trim());
+              }
+            }
+            
             const record: any = {
               id: `imported-${Date.now()}-${index}`,
               metadata: {
@@ -89,23 +113,41 @@ const DataLoader = ({ onDataLoaded, dataSource }: DataLoaderProps) => {
               }
             };
             
-            // Map CSV columns to record fields
+            // Map CSV columns to record fields, normalizing field names
             headers.forEach((header, i) => {
-              const cleanHeader = header.trim();
-              if (values[i]) {
-                record[cleanHeader] = values[i].trim();
+              if (i < values.length && values[i]) {
+                // Convert header to camelCase for standard fields
+                let fieldName = header;
+                
+                // Map common variations to standard field names
+                if (/first.?name/i.test(header)) fieldName = 'firstName';
+                if (/last.?name/i.test(header)) fieldName = 'lastName';
+                if (/middle.?name/i.test(header)) fieldName = 'middleName';
+                if (/birth.?date/i.test(header)) fieldName = 'birthDate';
+                if (/dob/i.test(header)) fieldName = 'birthDate';
+                if (/village/i.test(header)) fieldName = 'village';
+                if (/gender|sex/i.test(header)) fieldName = 'gender';
+                
+                record[fieldName] = values[i].trim();
+                
+                // Also store the original column name with quotes for backward compatibility
+                record[`"${header}"`] = values[i].trim();
               }
             });
             
+            console.log(`Processed record ${index}:`, record);
+            
             // Ensure required fields for Record type
             return {
-              firstName: record.firstName || '',
-              lastName: record.lastName || '',
-              gender: record.gender || '',
-              birthDate: record.birthDate || '',
+              firstName: record.firstName || record["FirstName"] || '',
+              lastName: record.lastName || record["LastName"] || '',
+              gender: record.gender || record["Sex"] || '',
+              birthDate: record.birthDate || record["dob"] || '',
               ...record
             } as Record;
           });
+          
+          console.log(`Successfully processed ${data.length} records from CSV (excluding header row)`);
         }
         
         setTimeout(() => {
@@ -124,6 +166,7 @@ const DataLoader = ({ onDataLoaded, dataSource }: DataLoaderProps) => {
           });
         }, 1000);
       } catch (error) {
+        console.error("Error processing file:", error);
         toast({
           title: interfaceLanguage === 'latin' ? "Error Loading Data" :
                  interfaceLanguage === 'amharic' ? "ውሂብ በመጫን ላይ ስህተት" :
