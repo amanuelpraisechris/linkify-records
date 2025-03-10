@@ -1,7 +1,4 @@
-
-
-
-import { FieldWeights, DEFAULT_MATCHING_CONFIG, DEFAULT_FIELD_WEIGHTS } from '@/utils/matchingAlgorithms';
+import { FieldWeights, DEFAULT_MATCHING_CONFIG, DEFAULT_FIELD_WEIGHTS } from '@/utils/matching';
 import { ExtendedMatchingConfig } from '@/types/matchingConfig';
 
 // Modified field weights to exclude Balozi information and prioritize FirstName and LastName

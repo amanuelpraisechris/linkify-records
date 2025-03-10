@@ -1,6 +1,7 @@
+
 import React, { createContext, useState, useContext, ReactNode, useEffect } from 'react';
 import { Record, MatchResult, Visit } from '@/types';
-import { calculateMatchScore } from '@/utils/matchingAlgorithms';
+import { calculateMatchScore } from '@/utils/matching';
 import { findProbabilisticMatches } from '@/utils/probabilisticMatching';
 import { useMatchingConfig } from './MatchingConfigContext';
 

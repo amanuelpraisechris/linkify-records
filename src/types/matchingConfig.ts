@@ -1,5 +1,5 @@
 
-import { FieldWeights, MatchingConfig } from '@/utils/matchingAlgorithms';
+import { FieldWeights, MatchingConfig } from '@/utils/matching';
 
 // Algorithm types definition
 export type AlgorithmType = 'deterministic' | 'probabilistic';

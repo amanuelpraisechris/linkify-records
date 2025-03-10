@@ -1,6 +1,6 @@
 
 import React, { createContext, useState, useContext, ReactNode, useEffect } from 'react';
-import { FieldWeights } from '@/utils/matchingAlgorithms';
+import { FieldWeights } from '@/utils/matching';
 import { useToast } from '@/components/ui/use-toast';
 import { 
   MatchingConfigContextType, 
