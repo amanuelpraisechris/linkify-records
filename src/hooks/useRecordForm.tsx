@@ -1,7 +1,6 @@
 
 import { Record, Visit, ResidencyPeriod } from '@/types';
 import { SupportedLanguage } from '@/utils/languageUtils';
-import { buildDateString } from '@/utils/dateUtils'; // Import directly from dateUtils
 import { useFormState } from './form/useFormState';
 import { useVisitHandlers } from './form/useVisitHandlers';
 import { useIdentifierHandlers } from './form/useIdentifierHandlers';

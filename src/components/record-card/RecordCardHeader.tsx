@@ -22,11 +22,11 @@ const RecordCardHeader = ({ record, matchScore }: RecordCardHeaderProps) => {
   const fullName = getFullName(record, 'firstMiddleLast');
   const confidenceLevel = getConfidenceLevel(matchScore);
   
-  // For debugging
+  // For debugging - log the birth date to see what format it's in
   if (process.env.NODE_ENV !== 'production') {
     console.log('Record in RecordCardHeader:', record);
-    console.log('Birth date value:', record.birthDate);
-    console.log('Extracted name:', fullName);
+    console.log('Birth date value:', record.birthDate, typeof record.birthDate);
+    console.log('Formatted date result:', formatDate(record.birthDate));
   }
   
   return (

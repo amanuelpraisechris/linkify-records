@@ -9,6 +9,9 @@ export const formatDate = (dateString: string | undefined, defaultValue = 'Unkno
   if (!dateString) return defaultValue;
   
   try {
+    // Log the input to help with debugging
+    console.log("formatDate input:", dateString, typeof dateString);
+    
     // Check if the date string is valid
     const date = new Date(dateString);
     
@@ -43,6 +46,12 @@ export const formatDate = (dateString: string | undefined, defaultValue = 'Unkno
           };
           return parsedDate.toLocaleDateString(undefined, options);
         }
+      }
+      
+      // Try handling quoted date strings that might come from JSON
+      if (dateString.startsWith('"') && dateString.endsWith('"')) {
+        const unquotedDate = dateString.substring(1, dateString.length - 1);
+        return formatDate(unquotedDate, defaultValue); // Recursive call with unquoted string
       }
       
       console.log(`Invalid date format: ${dateString}`);
@@ -102,7 +111,10 @@ export const buildDateString = (
     return `${yearValue}-${monthValue}-01`;
   }
   
-  return `${yearValue}-${monthValue}-${dayValue}`;
+  // Log the output date string for debugging
+  const dateString = `${yearValue}-${monthValue}-${dayValue}`;
+  console.log("buildDateString output:", dateString);
+  return dateString;
 };
 
 /**

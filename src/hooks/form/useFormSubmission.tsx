@@ -65,6 +65,12 @@ export const useFormSubmission = ({
     
     if (!birthDateStr) {
       console.warn("Failed to generate a valid birth date from inputs:", { birthYear, birthMonth, birthDay });
+      toast({
+        title: "Invalid Birth Date",
+        description: "Please provide at least a birth year.",
+        variant: "destructive",
+      });
+      return;
     }
     
     const searchRecord: Record = {
@@ -106,7 +112,7 @@ export const useFormSubmission = ({
     }
     
     const birthDateStr = buildDateString(birthYear, birthMonth, birthDay);
-    console.log("Generated birth date string for submission:", birthDateStr);
+    console.log("Generated birth date string for submission:", birthDateStr, typeof birthDateStr);
     
     if (!birthDateStr) {
       console.warn("Failed to generate a valid birth date from inputs:", { birthYear, birthMonth, birthDay });
@@ -131,6 +137,10 @@ export const useFormSubmission = ({
         source: 'Health Facility Entry'
       }
     };
+    
+    // Log the record we're submitting for debugging
+    console.log("Submitting record:", newRecord);
+    console.log("Birth date in record:", newRecord.birthDate, typeof newRecord.birthDate);
     
     onRecordSubmit(newRecord);
     
