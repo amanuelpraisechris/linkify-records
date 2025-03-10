@@ -5,6 +5,7 @@ import { useToast } from '@/hooks/use-toast';
 
 export const useVisitHandlers = () => {
   const [visit, setVisit] = useState<Visit>({
+    id: `visit_${Date.now()}`, // Add the required id field
     date: new Date().toISOString().split('T')[0],
     visitBy: 'PATIENT'
   });

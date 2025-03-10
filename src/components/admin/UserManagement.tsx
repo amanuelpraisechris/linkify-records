@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import {
   Card,
@@ -81,12 +80,10 @@ const UserManagement = () => {
   });
 
   useEffect(() => {
-    // Fetch mock users
     setUsers(mockUsers);
     setFilteredUsers(mockUsers);
     setActivities(mockUserActivities);
 
-    // Calculate user stats
     const stats: UserStats = {
       totalUsers: mockUsers.length,
       activeUsers: mockUsers.filter(user => user.status === 'active').length,
@@ -121,7 +118,6 @@ const UserManagement = () => {
   };
 
   const handleAddUser = () => {
-    // Validation
     if (!newUser.username || !newUser.email || !newUser.fullName) {
       toast({
         title: 'Missing information',
@@ -131,7 +127,6 @@ const UserManagement = () => {
       return;
     }
 
-    // In a real app, this would be an API call
     const newUserObject: User = {
       id: `user_${Date.now()}`,
       username: newUser.username,
@@ -163,7 +158,7 @@ const UserManagement = () => {
   const approveUser = (userId: string) => {
     const updatedUsers = users.map(user => 
       user.id === userId 
-        ? { ...user, status: 'active' } 
+        ? { ...user, status: 'active' as const } 
         : user
     );
     setUsers(updatedUsers);
@@ -178,7 +173,7 @@ const UserManagement = () => {
   const deactivateUser = (userId: string) => {
     const updatedUsers = users.map(user => 
       user.id === userId 
-        ? { ...user, status: 'inactive' } 
+        ? { ...user, status: 'inactive' as const } 
         : user
     );
     setUsers(updatedUsers);
@@ -193,7 +188,7 @@ const UserManagement = () => {
   const activateUser = (userId: string) => {
     const updatedUsers = users.map(user => 
       user.id === userId 
-        ? { ...user, status: 'active' } 
+        ? { ...user, status: 'active' as const } 
         : user
     );
     setUsers(updatedUsers);
