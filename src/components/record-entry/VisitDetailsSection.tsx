@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Visit } from '@/types';
 import { SupportedLanguage } from '@/utils/languageUtils';
 import { Button } from '@/components/ui/button';
-import { Calendar, CalendarCell, CalendarGrid, CalendarHeader, CalendarHeadCell, CalendarMonthSelect, CalendarNavButton, CalendarYearSelect } from '@/components/ui/calendar'; 
+import { Calendar } from '@/components/ui/calendar'; 
 import { format } from 'date-fns';
 import { 
   Select,
