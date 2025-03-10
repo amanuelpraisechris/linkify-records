@@ -63,6 +63,10 @@ export const useFormSubmission = ({
     const birthDateStr = buildDateString(birthYear, birthMonth, birthDay);
     console.log("Generated birth date string:", birthDateStr);
     
+    if (!birthDateStr) {
+      console.warn("Failed to generate a valid birth date from inputs:", { birthYear, birthMonth, birthDay });
+    }
+    
     const searchRecord: Record = {
       id: `search-${Date.now()}`,
       ...formData as Record,
@@ -103,6 +107,16 @@ export const useFormSubmission = ({
     
     const birthDateStr = buildDateString(birthYear, birthMonth, birthDay);
     console.log("Generated birth date string for submission:", birthDateStr);
+    
+    if (!birthDateStr) {
+      console.warn("Failed to generate a valid birth date from inputs:", { birthYear, birthMonth, birthDay });
+      toast({
+        title: "Invalid Birth Date",
+        description: "Please check the birth date information.",
+        variant: "destructive",
+      });
+      return;
+    }
     
     const newRecord: Record = {
       id: `new-${Date.now()}`,
