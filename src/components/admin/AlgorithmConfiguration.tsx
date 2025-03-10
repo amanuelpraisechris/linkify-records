@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -40,10 +39,6 @@ const fieldDescriptions: {[key: string]: {label: string, description: string}} =
   subVillage: {
     label: "subVillage",
     description: "Patient's subvillage of residence - Exact or fuzzy matching"
-  },
-  motherName: {
-    label: "motherName",
-    description: "Patient's mother's name - Exact or fuzzy matching"
   },
   oldestHouseholdMember: {
     label: "oldestHouseholdMember",

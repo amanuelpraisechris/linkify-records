@@ -1,5 +1,6 @@
 
 
+
 import { FieldWeights, DEFAULT_MATCHING_CONFIG, DEFAULT_FIELD_WEIGHTS } from '@/utils/matchingAlgorithms';
 import { ExtendedMatchingConfig } from '@/types/matchingConfig';
 
@@ -13,7 +14,6 @@ export const UPDATED_FIELD_WEIGHTS: FieldWeights = {
   sex: 15,
   village: 25,
   subVillage: 20,
-  motherName: 25,
   oldestHouseholdMember: 25,
   phoneNumber: 20
   // Note: baloziFirstName, baloziMiddleName, and baloziLastName are intentionally omitted

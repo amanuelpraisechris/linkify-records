@@ -10,11 +10,10 @@ export interface FieldWeights {
   birthDate: number;
   gender: number;
   village: number;
-  district: number;
-  motherName: number;
-  householdHead: number;
+  subVillage: number;
   phoneNumber: number;
   middleName: number;
+  oldestHouseholdMember: number;
   [key: string]: number; // Allow for additional custom fields
 }
 
@@ -28,10 +27,9 @@ export const DEFAULT_FIELD_WEIGHTS: FieldWeights = {
   birthDate: 30,
   gender: 15,
   village: 20,
-  district: 15,
-  motherName: 20,
-  householdHead: 15,
+  subVillage: 15,
   phoneNumber: 20,
+  oldestHouseholdMember: 15,
 };
 
 /**
@@ -248,34 +246,14 @@ export const calculateMatchScore = (
     else if (villageScore > 50) matchedOn.push('Village (partial)');
   }
   
-  // Compare district
-  if (record1.district && record2.district) {
-    const districtWeight = config.fieldWeights.district;
-    const districtScore = calculateStringSimilarity(record1.district, record2.district, config);
-    totalScore += districtScore * districtWeight;
-    totalWeight += districtWeight;
-    if (districtScore > 80) matchedOn.push('District');
-    else if (districtScore > 50) matchedOn.push('District (partial)');
-  }
-  
-  // Compare mother's name
-  if (record1.motherName && record2.motherName) {
-    const motherNameWeight = config.fieldWeights.motherName;
-    const motherNameScore = calculateStringSimilarity(record1.motherName, record2.motherName, config);
-    totalScore += motherNameScore * motherNameWeight;
-    totalWeight += motherNameWeight;
-    if (motherNameScore > 80) matchedOn.push('Mother\'s Name');
-    else if (motherNameScore > 50) matchedOn.push('Mother\'s Name (partial)');
-  }
-  
-  // Compare household head
-  if (record1.householdHead && record2.householdHead) {
-    const householdHeadWeight = config.fieldWeights.householdHead;
-    const householdHeadScore = calculateStringSimilarity(record1.householdHead, record2.householdHead, config);
-    totalScore += householdHeadScore * householdHeadWeight;
-    totalWeight += householdHeadWeight;
-    if (householdHeadScore > 80) matchedOn.push('Household Head');
-    else if (householdHeadScore > 50) matchedOn.push('Household Head (partial)');
+  // Compare subVillage
+  if (record1.subVillage && record2.subVillage) {
+    const subVillageWeight = config.fieldWeights.subVillage;
+    const subVillageScore = calculateStringSimilarity(record1.subVillage, record2.subVillage, config);
+    totalScore += subVillageScore * subVillageWeight;
+    totalWeight += subVillageWeight;
+    if (subVillageScore > 80) matchedOn.push('Sub-Village');
+    else if (subVillageScore > 50) matchedOn.push('Sub-Village (partial)');
   }
   
   // Compare phone number
@@ -291,7 +269,7 @@ export const calculateMatchScore = (
   if ((record1.oldest_member_first_name || record1.oldest_member_last_name) && 
       (record2.oldest_member_first_name || record2.oldest_member_last_name)) {
     // If there's a specific weight for oldest member, use it, otherwise use a default
-    const oldestMemberWeight = config.fieldWeights.oldestMember || 15;
+    const oldestMemberWeight = config.fieldWeights.oldestHouseholdMember || 15;
     
     // Calculate similarity scores for oldest member names
     const oldestFirstNameScore = calculateStringSimilarity(record1.oldest_member_first_name, record2.oldest_member_first_name, config);
