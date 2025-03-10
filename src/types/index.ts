@@ -1,3 +1,4 @@
+
 export interface Record {
   id: string;
   patientId?: string;
@@ -50,6 +51,7 @@ export interface Record {
 }
 
 export interface Visit {
+  id: string;
   date: string;
   visitBy: 'PATIENT' | 'TREATMENT SUPPORTER';
   clinicId?: string;
@@ -121,5 +123,48 @@ export interface MatchingAlgorithm {
     high: number;
     medium: number;
     low: number;
+  };
+}
+
+// New user management interfaces
+export interface User {
+  id: string;
+  username: string;
+  email: string;
+  fullName: string;
+  role: 'admin' | 'manager' | 'user' | 'pending';
+  status: 'active' | 'inactive' | 'pending';
+  createdAt: string;
+  lastLogin?: string;
+  permissions: Permission[];
+  activityLog?: UserActivity[];
+}
+
+export interface Permission {
+  id: string;
+  name: string;
+  description: string;
+  module: 'records' | 'matching' | 'admin' | 'reports';
+}
+
+export interface UserActivity {
+  id: string;
+  userId: string;
+  action: 'login' | 'logout' | 'create_record' | 'update_record' | 'delete_record' | 'export_data' | 'import_data' | 'password_change' | 'matching_review';
+  timestamp: string;
+  details?: string;
+  ipAddress?: string;
+}
+
+export interface UserStats {
+  totalUsers: number;
+  activeUsers: number;
+  pendingUsers: number;
+  recentActivities: {
+    passwordChanges: number;
+    dataExports: number;
+    dataImports: number;
+    recordCreations: number;
+    matchingReviews: number;
   };
 }

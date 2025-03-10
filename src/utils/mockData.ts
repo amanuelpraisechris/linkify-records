@@ -1,5 +1,4 @@
-
-import { Record, RecordMatch, DashboardStats } from '@/types';
+import { Record, RecordMatch, DashboardStats, User, UserActivity } from '@/types';
 
 // Generate a random date within the last few years
 const randomDate = (start: Date, end: Date) => {
@@ -247,3 +246,180 @@ export const dashboardStats: DashboardStats = {
   pendingMatches: recordMatches.length,
   matchRate: 68
 };
+
+// Mock user data for user management
+export const mockUsers: User[] = [
+  {
+    id: 'user_1',
+    username: 'admin',
+    email: 'admin@example.com',
+    fullName: 'System Administrator',
+    role: 'admin',
+    status: 'active',
+    createdAt: '2023-06-10T12:00:00Z',
+    lastLogin: '2023-07-14T08:25:43Z',
+    permissions: [
+      { id: 'perm_1', name: 'manage_users', description: 'Can manage users', module: 'admin' },
+      { id: 'perm_2', name: 'manage_records', description: 'Can manage records', module: 'records' },
+      { id: 'perm_3', name: 'manage_matching', description: 'Can manage matching', module: 'matching' },
+    ]
+  },
+  {
+    id: 'user_2',
+    username: 'manager',
+    email: 'manager@example.com',
+    fullName: 'Data Manager',
+    role: 'manager',
+    status: 'active',
+    createdAt: '2023-06-12T14:30:00Z',
+    lastLogin: '2023-07-13T16:42:19Z',
+    permissions: [
+      { id: 'perm_2', name: 'manage_records', description: 'Can manage records', module: 'records' },
+      { id: 'perm_3', name: 'manage_matching', description: 'Can manage matching', module: 'matching' },
+    ]
+  },
+  {
+    id: 'user_3',
+    username: 'user1',
+    email: 'user1@example.com',
+    fullName: 'Regular User',
+    role: 'user',
+    status: 'active',
+    createdAt: '2023-06-15T09:45:00Z',
+    lastLogin: '2023-07-14T11:30:22Z',
+    permissions: [
+      { id: 'perm_4', name: 'view_records', description: 'Can view records', module: 'records' },
+    ]
+  },
+  {
+    id: 'user_4',
+    username: 'user2',
+    email: 'user2@example.com',
+    fullName: 'Data Entry Clerk',
+    role: 'user',
+    status: 'active',
+    createdAt: '2023-06-18T13:15:00Z',
+    lastLogin: '2023-07-13T14:20:45Z',
+    permissions: [
+      { id: 'perm_4', name: 'view_records', description: 'Can view records', module: 'records' },
+      { id: 'perm_5', name: 'create_records', description: 'Can create records', module: 'records' },
+    ]
+  },
+  {
+    id: 'user_5',
+    username: 'newuser',
+    email: 'newuser@example.com',
+    fullName: 'New Pending User',
+    role: 'user',
+    status: 'pending',
+    createdAt: '2023-07-12T08:30:00Z',
+    permissions: []
+  },
+  {
+    id: 'user_6',
+    username: 'inactive',
+    email: 'inactive@example.com',
+    fullName: 'Inactive User',
+    role: 'user',
+    status: 'inactive',
+    createdAt: '2023-06-05T10:20:00Z',
+    lastLogin: '2023-06-20T15:45:12Z',
+    permissions: [
+      { id: 'perm_4', name: 'view_records', description: 'Can view records', module: 'records' },
+    ]
+  }
+];
+
+// Mock user activity data
+export const mockUserActivities: UserActivity[] = [
+  {
+    id: 'act_1',
+    userId: 'user_1',
+    action: 'login',
+    timestamp: new Date(Date.now() - 3600 * 1000).toISOString(),
+    details: 'Admin login from 192.168.1.1',
+    ipAddress: '192.168.1.1'
+  },
+  {
+    id: 'act_2',
+    userId: 'user_1',
+    action: 'import_data',
+    timestamp: new Date(Date.now() - 3000 * 1000).toISOString(),
+    details: 'Imported 250 records from Health Facility A',
+    ipAddress: '192.168.1.1'
+  },
+  {
+    id: 'act_3',
+    userId: 'user_2',
+    action: 'login',
+    timestamp: new Date(Date.now() - 86400 * 1000).toISOString(),
+    details: 'Manager login from 192.168.1.2',
+    ipAddress: '192.168.1.2'
+  },
+  {
+    id: 'act_4',
+    userId: 'user_2',
+    action: 'export_data',
+    timestamp: new Date(Date.now() - 82800 * 1000).toISOString(),
+    details: 'Exported 150 matched records to CSV',
+    ipAddress: '192.168.1.2'
+  },
+  {
+    id: 'act_5',
+    userId: 'user_3',
+    action: 'login',
+    timestamp: new Date(Date.now() - 172800 * 1000).toISOString(),
+    details: 'User login from 192.168.1.3',
+    ipAddress: '192.168.1.3'
+  },
+  {
+    id: 'act_6',
+    userId: 'user_3',
+    action: 'create_record',
+    timestamp: new Date(Date.now() - 170000 * 1000).toISOString(),
+    details: 'Created new patient record',
+    ipAddress: '192.168.1.3'
+  },
+  {
+    id: 'act_7',
+    userId: 'user_4',
+    action: 'login',
+    timestamp: new Date(Date.now() - 259200 * 1000).toISOString(),
+    details: 'User login from 192.168.1.4',
+    ipAddress: '192.168.1.4'
+  },
+  {
+    id: 'act_8',
+    userId: 'user_4',
+    action: 'update_record',
+    timestamp: new Date(Date.now() - 255600 * 1000).toISOString(),
+    details: 'Updated patient information',
+    ipAddress: '192.168.1.4'
+  },
+  {
+    id: 'act_9',
+    userId: 'user_1',
+    action: 'password_change',
+    timestamp: new Date(Date.now() - 604800 * 1000).toISOString(),
+    details: 'Changed account password',
+    ipAddress: '192.168.1.1'
+  },
+  {
+    id: 'act_10',
+    userId: 'user_2',
+    action: 'matching_review',
+    timestamp: new Date(Date.now() - 432000 * 1000).toISOString(),
+    details: 'Reviewed and approved 25 record matches',
+    ipAddress: '192.168.1.2'
+  },
+  // Additional activity entries spread over time for chart visualization
+  ...[...Array(30)].map((_, i) => ({
+    id: `act_gen_${i}`,
+    userId: mockUsers[i % mockUsers.length].id,
+    action: ['login', 'export_data', 'import_data', 'create_record', 'password_change', 'matching_review'][i % 6] as any,
+    timestamp: new Date(Date.now() - (i * 24 * 3600 * 1000)).toISOString(),
+    details: `Generated activity for testing - ${i}`,
+    ipAddress: `192.168.1.${i % 255}`
+  }))
+];
+

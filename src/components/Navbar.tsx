@@ -1,8 +1,9 @@
 
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Database, Link2, Search, User, Lock } from 'lucide-react';
-import { useToast } from '@/components/ui/use-toast';
+import { Database, Link2, Search, User, Lock, Users } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { Badge } from '@/components/ui/badge';
 
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
@@ -96,6 +97,7 @@ const Navbar = () => {
               >
                 <Lock className="w-4 h-4 mr-1.5" />
                 Admin
+                <Badge className="ml-2 bg-purple-500 text-white text-xs">Admin</Badge>
               </Link>
             )}
           </div>
@@ -112,10 +114,11 @@ const Navbar = () => {
             ) : (
               <Link
                 to="/admin-dashboard"
-                className="p-2 rounded-full text-primary hover:bg-secondary transition-all-medium"
+                className="p-2 rounded-full text-primary hover:bg-secondary transition-all-medium flex items-center"
                 aria-label="Admin dashboard"
               >
                 <Lock className="w-5 h-5" />
+                <span className="ml-1 text-xs font-medium hidden sm:inline">Admin</span>
               </Link>
             )}
             <button
