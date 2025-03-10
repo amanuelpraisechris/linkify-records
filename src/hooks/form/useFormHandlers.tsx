@@ -52,7 +52,7 @@ export const useFormHandlers = ({
       const searchRecord: Record = {
         id: `search-${Date.now()}`,
         ...formData as Record,
-        birthDate: birthYear ? `${birthYear}-${birthMonth || '01'}-${birthDay || '01'}` : '',
+        birthDate: buildDateString(),
         metadata: {
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),

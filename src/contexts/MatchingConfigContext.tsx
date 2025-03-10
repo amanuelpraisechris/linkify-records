@@ -1,11 +1,12 @@
 
-import React, { createContext, useState, useContext, ReactNode } from 'react';
+import React, { createContext, useState, useContext, ReactNode, useEffect } from 'react';
 import { 
   MatchingConfig, 
   DEFAULT_MATCHING_CONFIG,
   FieldWeights,
   DEFAULT_FIELD_WEIGHTS
 } from '@/utils/matchingAlgorithms';
+import { useToast } from '@/components/ui/use-toast';
 
 interface MatchingConfigContextType {
   config: MatchingConfig;
@@ -15,6 +16,9 @@ interface MatchingConfigContextType {
   saveConfigProfile: (name: string) => void;
   loadConfigProfile: (name: string) => void;
   availableProfiles: string[];
+  deleteConfigProfile: (name: string) => void;
+  exportConfigToJson: () => string;
+  importConfigFromJson: (jsonString: string) => boolean;
 }
 
 const MatchingConfigContext = createContext<MatchingConfigContextType | undefined>(undefined);
@@ -27,22 +31,19 @@ export const useMatchingConfig = () => {
   return context;
 };
 
+// Local Storage key
+const SAVED_PROFILES_KEY = 'matching-config-profiles';
+const CURRENT_CONFIG_KEY = 'matching-config-current';
+
 interface MatchingConfigProviderProps {
   children: ReactNode;
 }
 
 export const MatchingConfigProvider: React.FC<MatchingConfigProviderProps> = ({ children }) => {
-  // Modified the default config to have very low thresholds for better match detection
-  const [config, setConfig] = useState<MatchingConfig>({
-    ...DEFAULT_MATCHING_CONFIG,
-    threshold: {
-      high: 60,  // Lowered for better matching
-      medium: 35, // Lowered for better matching
-      low: 15     // Lowered for better matching
-    }
-  });
+  const { toast } = useToast();
   
-  const [savedProfiles, setSavedProfiles] = useState<Record<string, MatchingConfig>>({
+  // Default profiles
+  const defaultProfiles: Record<string, MatchingConfig> = {
     'Default': DEFAULT_MATCHING_CONFIG,
     'DSS Linkage': {
       ...DEFAULT_MATCHING_CONFIG,
@@ -86,7 +87,77 @@ export const MatchingConfigProvider: React.FC<MatchingConfigProviderProps> = ({ 
         low: 15
       }
     }
-  });
+  };
+  
+  // Get initial saved profiles from local storage if available
+  const initSavedProfiles = () => {
+    try {
+      const savedProfilesJson = localStorage.getItem(SAVED_PROFILES_KEY);
+      return savedProfilesJson ? 
+        { ...defaultProfiles, ...JSON.parse(savedProfilesJson) } : 
+        defaultProfiles;
+    } catch (error) {
+      console.error('Failed to load saved matching profiles:', error);
+      return defaultProfiles;
+    }
+  };
+  
+  // Get current config from local storage if available
+  const initCurrentConfig = () => {
+    try {
+      const currentConfigJson = localStorage.getItem(CURRENT_CONFIG_KEY);
+      // Modified the default config to have very low thresholds for better match detection
+      const defaultConfig = {
+        ...DEFAULT_MATCHING_CONFIG,
+        threshold: {
+          high: 60,  // Lowered for better matching
+          medium: 35, // Lowered for better matching
+          low: 15     // Lowered for better matching
+        }
+      };
+      
+      return currentConfigJson ?
+        JSON.parse(currentConfigJson) :
+        defaultConfig;
+    } catch (error) {
+      console.error('Failed to load current matching config:', error);
+      return DEFAULT_MATCHING_CONFIG;
+    }
+  };
+  
+  const [config, setConfig] = useState<MatchingConfig>(initCurrentConfig());
+  const [savedProfiles, setSavedProfiles] = useState<Record<string, MatchingConfig>>(initSavedProfiles());
+  
+  // Save profiles to local storage when they change
+  useEffect(() => {
+    try {
+      // Only save user-defined profiles, not the defaults
+      const userProfiles = { ...savedProfiles };
+      Object.keys(defaultProfiles).forEach(key => {
+        delete userProfiles[key];
+      });
+      
+      if (Object.keys(userProfiles).length > 0) {
+        localStorage.setItem(SAVED_PROFILES_KEY, JSON.stringify(userProfiles));
+      }
+    } catch (error) {
+      console.error('Failed to save matching profiles:', error);
+      toast({
+        title: "Error Saving Profiles",
+        description: "There was an error saving your matching profiles.",
+        variant: "destructive",
+      });
+    }
+  }, [savedProfiles, toast]);
+  
+  // Save current config to local storage when it changes
+  useEffect(() => {
+    try {
+      localStorage.setItem(CURRENT_CONFIG_KEY, JSON.stringify(config));
+    } catch (error) {
+      console.error('Failed to save current matching config:', error);
+    }
+  }, [config]);
 
   const updateConfig = (newConfig: Partial<MatchingConfig>) => {
     setConfig(prevConfig => ({
@@ -121,6 +192,59 @@ export const MatchingConfigProvider: React.FC<MatchingConfigProviderProps> = ({ 
       setConfig(savedProfiles[name]);
     }
   };
+  
+  const deleteConfigProfile = (name: string) => {
+    // Don't allow deletion of default profiles
+    if (Object.keys(defaultProfiles).includes(name)) {
+      toast({
+        title: "Cannot Delete Default Profile",
+        description: "Default profiles cannot be deleted.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setSavedProfiles(prev => {
+      const newProfiles = { ...prev };
+      delete newProfiles[name];
+      return newProfiles;
+    });
+    
+    toast({
+      title: "Profile Deleted",
+      description: `"${name}" matching profile has been deleted.`,
+    });
+  };
+  
+  const exportConfigToJson = () => {
+    return JSON.stringify(config, null, 2);
+  };
+  
+  const importConfigFromJson = (jsonString: string) => {
+    try {
+      const importedConfig = JSON.parse(jsonString);
+      
+      // Basic validation that it's a matching config
+      if (!importedConfig.fieldWeights || !importedConfig.threshold) {
+        throw new Error('Invalid configuration format');
+      }
+      
+      setConfig(importedConfig);
+      toast({
+        title: "Configuration Imported",
+        description: "The matching configuration has been imported successfully.",
+      });
+      return true;
+    } catch (error) {
+      console.error('Failed to import configuration:', error);
+      toast({
+        title: "Import Failed",
+        description: "The configuration could not be imported. Please check the format.",
+        variant: "destructive",
+      });
+      return false;
+    }
+  };
 
   return (
     <MatchingConfigContext.Provider value={{ 
@@ -130,7 +254,10 @@ export const MatchingConfigProvider: React.FC<MatchingConfigProviderProps> = ({ 
       resetConfig,
       saveConfigProfile,
       loadConfigProfile,
-      availableProfiles: Object.keys(savedProfiles)
+      availableProfiles: Object.keys(savedProfiles),
+      deleteConfigProfile,
+      exportConfigToJson,
+      importConfigFromJson
     }}>
       {children}
     </MatchingConfigContext.Provider>
