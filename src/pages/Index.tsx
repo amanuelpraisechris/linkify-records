@@ -6,6 +6,7 @@ import SearchBar from '@/components/SearchBar';
 import StatCard from '@/components/StatCard';
 import RecordList from '@/components/RecordList';
 import MatchingInterface from '@/components/MatchingInterface';
+import { MatchingConfigProvider } from '@/contexts/MatchingConfigContext';
 import { useToast } from '@/components/ui/use-toast';
 import { dashboardStats, exampleRecords, recordMatches, newRecords } from '@/utils/mockData';
 import { Database, Link2, Search, Filter, FileUp, UserPlus } from 'lucide-react';
@@ -137,12 +138,14 @@ const Index = () => {
           
           <div className="p-6">
             {activeTab === 'matching' ? (
-              <MatchingInterface 
-                matchData={recordMatches}
-                onMatchComplete={(result) => {
-                  console.log("Match result:", result);
-                }}
-              />
+              <MatchingConfigProvider>
+                <MatchingInterface 
+                  matchData={recordMatches}
+                  onMatchComplete={(result) => {
+                    console.log("Match result:", result);
+                  }}
+                />
+              </MatchingConfigProvider>
             ) : (
               <RecordList 
                 records={exampleRecords} 

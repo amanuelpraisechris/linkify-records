@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 export type ToastActionElement = React.ReactElement<HTMLButtonElement>;
 
@@ -121,6 +121,17 @@ export function useToast(): ToastContextType {
     const id = generateId();
     const toast = { id, ...props } as ToastProps;
     dispatch({ type: actionTypes.ADD_TOAST, toast });
+
+    // Auto-dismiss toast after duration
+    if (props.duration !== Infinity) {
+      const timeoutId = setTimeout(() => {
+        dismissToast(id);
+        setTimeout(() => removeToast(id), 300); // Remove after dismissal animation
+      }, props.duration || TOAST_REMOVE_DELAY);
+      
+      return id;
+    }
+    
     return id;
   }
 
