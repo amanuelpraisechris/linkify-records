@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import Navbar from '@/components/Navbar';
 import RecordEntryForm from '@/components/RecordEntryForm';
@@ -12,7 +11,6 @@ import { ArrowLeft, AlertCircle, Database, Info } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
-// Mock data to initialize the page with some clinic records
 const initialRecords: Record[] = [
   {
     id: '1',
@@ -59,12 +57,17 @@ const RecordEntryContent = () => {
   const handleRecordSubmit = (record: Record) => {
     try {
       // Add the clinic record
-      addRecord(record, 'clinic');
+      const recordWithSource = {
+        ...record,
+        sourceId: record.id, // Keep track of the source record ID for matching
+      };
+      
+      addRecord(recordWithSource, 'clinic');
       
       // Check if community database is loaded
       if (communityRecords.length === 0) {
         setPotentialMatches([]);
-        setSubmittedRecord(record);
+        setSubmittedRecord(recordWithSource);
         
         toast({
           title: "No Community Database",
@@ -75,9 +78,19 @@ const RecordEntryContent = () => {
       }
       
       // Find potential matches in the community database
-      const matches = findMatchesForRecord(record);
-      setPotentialMatches(matches);
-      setSubmittedRecord(record);
+      const matches = findMatchesForRecord(recordWithSource);
+      
+      // Add source ID to potential matches
+      const matchesWithSource = matches.map(match => ({
+        ...match,
+        record: {
+          ...match.record,
+          sourceId: record.id
+        }
+      }));
+      
+      setPotentialMatches(matchesWithSource);
+      setSubmittedRecord(recordWithSource);
       
       toast({
         title: "Record Submitted",
@@ -142,7 +155,8 @@ const RecordEntryContent = () => {
                       matchScore: match.score
                     }
                   }))} 
-                  showMatchDetail={true} 
+                  showMatchDetail={true}
+                  enableMatchAssignment={true}
                 />
               ) : submittedRecord ? (
                 <div className="bg-muted/30 p-6 rounded-lg border border-muted">

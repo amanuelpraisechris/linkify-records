@@ -7,25 +7,31 @@ import { SupportedLanguage } from '@/utils/languageUtils';
 import RecordFilters from './RecordFilters';
 import ViewToggle from './ViewToggle';
 import RecordTableView from './RecordTableView';
+import { useToast } from '@/components/ui/use-toast';
+import { useRecordData } from '@/contexts/RecordDataContext';
 
 interface RecordListProps {
   records: Record[];
   title?: string;
   emptyMessage?: string;
   showMatchDetail?: boolean;
+  enableMatchAssignment?: boolean;
 }
 
 const RecordList = ({ 
   records, 
   title = "Records",
   emptyMessage = "No records found",
-  showMatchDetail = false
+  showMatchDetail = false,
+  enableMatchAssignment = false
 }: RecordListProps) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [showFilters, setShowFilters] = useState(false);
   const [searchLanguage, setSearchLanguage] = useState<SupportedLanguage>('latin');
   const [viewMode, setViewMode] = useState<'card' | 'table'>('card');
   const [expandedRecord, setExpandedRecord] = useState<string | null>(null);
+  const { toast } = useToast();
+  const { saveMatchResult } = useRecordData();
   
   useEffect(() => {
     console.log(`RecordList received ${records.length} records`);
@@ -75,6 +81,35 @@ const RecordList = ({
     } else {
       setExpandedRecord(recordId);
     }
+  };
+
+  const handleAssignMatch = (record: Record) => {
+    const matchResult = {
+      sourceId: record.sourceId || "unknown",
+      matchId: record.id,
+      status: 'matched' as 'matched' | 'rejected' | 'manual-review',
+      confidence: record.metadata?.matchScore || record.fuzzyScore || 0,
+      matchedBy: 'user',
+      matchedAt: new Date().toISOString(),
+    };
+    
+    saveMatchResult(matchResult);
+    
+    toast({
+      title: "Match Assigned",
+      description: `Successfully assigned match to ${record.firstName || record["\"FirstName\""]?.replace(/"/g, '') || ''} ${record.lastName || record["\"LastName\""]?.replace(/"/g, '') || ''}`,
+    });
+  };
+  
+  const handleSaveNotes = (record: Record, notes: string) => {
+    // In a real app, we would save these notes to the database
+    console.log("Saving notes for record:", record.id);
+    console.log("Notes:", notes);
+    
+    toast({
+      title: "Match Notes Saved",
+      description: "Your notes have been saved successfully.",
+    });
   };
 
   return (
@@ -137,6 +172,8 @@ const RecordList = ({
             expandedRecord={expandedRecord}
             toggleRecordDetails={toggleRecordDetails}
             showMatchDetail={showMatchDetail}
+            onAssignMatch={enableMatchAssignment ? handleAssignMatch : undefined}
+            onSaveNotes={enableMatchAssignment ? handleSaveNotes : undefined}
           />
         )
       ) : (
