@@ -1,8 +1,11 @@
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { RecordMatch, MatchResult } from '@/types';
 import RecordCard from './RecordCard';
 import { useToast } from '@/components/ui/use-toast';
+import { useMatchingConfig } from '@/contexts/MatchingConfigContext';
+import { Badge } from '@/components/ui/badge';
+import { AlertCircle, CheckCircle2, HelpCircle } from 'lucide-react';
 
 interface MatchingInterfaceProps {
   matchData: RecordMatch[];
@@ -14,8 +17,42 @@ const MatchingInterface = ({ matchData, onMatchComplete }: MatchingInterfaceProp
   const [results, setResults] = useState<MatchResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const { config } = useMatchingConfig();
 
   const currentMatch = matchData[currentIndex];
+
+  const getConfidenceLevel = (score: number) => {
+    if (score >= config.threshold.high) return 'high';
+    if (score >= config.threshold.medium) return 'medium';
+    return 'low';
+  };
+
+  const renderConfidenceBadge = (score: number) => {
+    const level = getConfidenceLevel(score);
+    
+    if (level === 'high') {
+      return (
+        <Badge className="bg-green-500 hover:bg-green-600">
+          <CheckCircle2 className="w-3 h-3 mr-1" />
+          High Confidence ({score}%)
+        </Badge>
+      );
+    } else if (level === 'medium') {
+      return (
+        <Badge className="bg-amber-500 hover:bg-amber-600">
+          <HelpCircle className="w-3 h-3 mr-1" />
+          Medium Confidence ({score}%)
+        </Badge>
+      );
+    } else {
+      return (
+        <Badge className="bg-red-500 hover:bg-red-600">
+          <AlertCircle className="w-3 h-3 mr-1" />
+          Low Confidence ({score}%)
+        </Badge>
+      );
+    }
+  };
 
   const handleMatch = (matchId: string | null, confidence: number, status: 'matched' | 'rejected' | 'manual-review') => {
     setIsLoading(true);
@@ -89,6 +126,10 @@ const MatchingInterface = ({ matchData, onMatchComplete }: MatchingInterfaceProp
           {currentMatch.potentialMatches.length > 0 ? (
             currentMatch.potentialMatches.map((match, idx) => (
               <div key={match.record.id} className="relative animate-fade-in" style={{ animationDelay: `${idx * 100}ms` }}>
+                <div className="absolute right-4 top-4 z-10">
+                  {renderConfidenceBadge(match.score)}
+                </div>
+                
                 <RecordCard 
                   record={match.record}
                   showActions={!isLoading}
