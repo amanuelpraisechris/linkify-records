@@ -1,11 +1,12 @@
 
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Database, Link2, Search, User } from 'lucide-react';
+import { Database, Link2, Search, User, Lock } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const { toast } = useToast();
   const location = useLocation();
 
@@ -17,11 +18,21 @@ const Navbar = () => {
       }
     };
 
+    // Check if user is admin
+    const checkAdmin = () => {
+      const adminAuth = localStorage.getItem('adminAuth') === 'true';
+      setIsAdmin(adminAuth);
+    };
+
     window.addEventListener('scroll', handleScroll);
+    
+    // Check admin status initially and when location changes
+    checkAdmin();
+    
     return () => {
       window.removeEventListener('scroll', handleScroll);
     };
-  }, [scrolled]);
+  }, [scrolled, location]);
 
   return (
     <nav
@@ -73,9 +84,40 @@ const Navbar = () => {
               <Search className="w-4 h-4 mr-1.5" />
               Search
             </Link>
+            
+            {isAdmin && (
+              <Link
+                to="/admin-dashboard"
+                className={`px-3 py-2 rounded-md text-sm font-medium hover:bg-secondary transition-all-medium flex items-center ${
+                  location.pathname === '/admin-dashboard' 
+                    ? 'bg-primary/10 text-primary' 
+                    : 'text-foreground'
+                }`}
+              >
+                <Lock className="w-4 h-4 mr-1.5" />
+                Admin
+              </Link>
+            )}
           </div>
           
           <div className="flex items-center space-x-4">
+            {!isAdmin ? (
+              <Link
+                to="/admin-login"
+                className="p-2 rounded-full text-foreground hover:bg-secondary transition-all-medium"
+                aria-label="Admin login"
+              >
+                <Lock className="w-5 h-5" />
+              </Link>
+            ) : (
+              <Link
+                to="/admin-dashboard"
+                className="p-2 rounded-full text-primary hover:bg-secondary transition-all-medium"
+                aria-label="Admin dashboard"
+              >
+                <Lock className="w-5 h-5" />
+              </Link>
+            )}
             <button
               className="p-2 rounded-full text-foreground hover:bg-secondary transition-all-medium"
               aria-label="User profile"
