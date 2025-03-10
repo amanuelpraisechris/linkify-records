@@ -28,7 +28,10 @@ const MatchingInterface = ({ matchData, onMatchComplete }: MatchingInterfaceProp
   const { toast } = useToast();
   const { config } = useMatchingConfig();
 
-  const currentMatch = matchData[currentIndex];
+  // Make sure we have access to the current match
+  const currentMatch = matchData && matchData.length > 0 && currentIndex < matchData.length 
+    ? matchData[currentIndex] 
+    : null;
 
   const getConfidenceLevel = (score: number) => {
     if (score >= config.threshold.high) return 'high';
@@ -64,10 +67,14 @@ const MatchingInterface = ({ matchData, onMatchComplete }: MatchingInterfaceProp
   };
 
   const handleSelectMatch = (matchId: string) => {
+    console.log("Match selected:", matchId);
     setSelectedMatchId(matchId === selectedMatchId ? null : matchId);
   };
 
   const handleSaveSelectedMatch = () => {
+    console.log("Saving selected match:", selectedMatchId);
+    console.log("Consent given:", consentGiven);
+    
     if (!selectedMatchId) {
       toast({
         title: "No Match Selected",
@@ -89,6 +96,18 @@ const MatchingInterface = ({ matchData, onMatchComplete }: MatchingInterfaceProp
       return;
     }
     
+    // Make sure currentMatch is available before proceeding
+    if (!currentMatch) {
+      console.error("currentMatch is not available");
+      toast({
+        title: "Error",
+        description: "Match data is not available.",
+        variant: "destructive",
+        duration: 3000,
+      });
+      return;
+    }
+    
     setIsLoading(true);
     
     // Get the selected match details
@@ -96,6 +115,7 @@ const MatchingInterface = ({ matchData, onMatchComplete }: MatchingInterfaceProp
     
     if (!selectedMatch) {
       setIsLoading(false);
+      console.error("Selected match not found in potentialMatches");
       toast({
         title: "Error",
         description: "Could not find the selected match details.",
@@ -104,6 +124,8 @@ const MatchingInterface = ({ matchData, onMatchComplete }: MatchingInterfaceProp
       });
       return;
     }
+    
+    console.log("Selected match found:", selectedMatch);
     
     // Create the match result
     const result: MatchResult = {
@@ -119,17 +141,22 @@ const MatchingInterface = ({ matchData, onMatchComplete }: MatchingInterfaceProp
       consentDate: new Date().toISOString()
     };
     
+    console.log("Created result object:", result);
+    
     // Save the result
     setTimeout(() => {
       setResults([...results, result]);
       
       if (onMatchComplete) {
+        console.log("Calling onMatchComplete with result");
         onMatchComplete(result);
+      } else {
+        console.warn("onMatchComplete callback is not defined");
       }
       
       toast({
         title: "Match Saved",
-        description: "The selected match has been saved successfully with a " + selectedMatch.score + "% confidence score.",
+        description: `The selected match has been saved successfully with a ${selectedMatch.score}% confidence score.`,
         duration: 3000,
       });
       
@@ -292,7 +319,7 @@ const MatchingInterface = ({ matchData, onMatchComplete }: MatchingInterfaceProp
               )}
             </div>
             
-            {selectedMatchId && (
+            {currentMatch.potentialMatches.length > 0 && (
               <div className="mt-4 flex justify-end">
                 <Button
                   variant="default"
