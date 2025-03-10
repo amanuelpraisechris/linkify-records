@@ -2,26 +2,42 @@
 import { useState } from 'react';
 import { RecordMatch, MatchResult } from '@/types';
 import { useToast } from '@/components/ui/use-toast';
+import { MatchSelectionHandlers } from './types';
 
-interface UseMatchingProcessProps {
+interface UseMatchSelectionHandlersProps {
+  currentMatch: RecordMatch | null;
+  currentIndex: number;
   matchData: RecordMatch[];
+  results: MatchResult[];
+  setResults: React.Dispatch<React.SetStateAction<MatchResult[]>>;
+  setCurrentIndex: React.Dispatch<React.SetStateAction<number>>;
+  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  selectedMatchId: string | null;
+  setSelectedMatchId: React.Dispatch<React.SetStateAction<string | null>>;
+  matchNotes: string;
+  setMatchNotes: React.Dispatch<React.SetStateAction<string>>;
+  consentGiven: boolean;
+  setActiveTab: React.Dispatch<React.SetStateAction<string>>;
   onMatchComplete?: (result: MatchResult) => void;
 }
 
-export function useMatchingProcess({ matchData, onMatchComplete }: UseMatchingProcessProps) {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [results, setResults] = useState<MatchResult[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [matchNotes, setMatchNotes] = useState('');
-  const [consentGiven, setConsentGiven] = useState(false);
-  const [activeTab, setActiveTab] = useState('matching');
-  const [selectedMatchId, setSelectedMatchId] = useState<string | null>(null);
+export function useMatchSelectionHandlers({
+  currentMatch,
+  currentIndex,
+  matchData,
+  results,
+  setResults,
+  setCurrentIndex,
+  setIsLoading,
+  selectedMatchId,
+  setSelectedMatchId,
+  matchNotes,
+  setMatchNotes,
+  consentGiven,
+  setActiveTab,
+  onMatchComplete
+}: UseMatchSelectionHandlersProps): MatchSelectionHandlers {
   const { toast } = useToast();
-
-  // Make sure we have access to the current match
-  const currentMatch = matchData && matchData.length > 0 && currentIndex < matchData.length 
-    ? matchData[currentIndex] 
-    : null;
 
   const handleSelectMatch = (matchId: string) => {
     console.log("Match selected:", matchId);
@@ -195,17 +211,6 @@ export function useMatchingProcess({ matchData, onMatchComplete }: UseMatchingPr
   };
 
   return {
-    currentIndex,
-    results,
-    isLoading,
-    matchNotes,
-    setMatchNotes,
-    consentGiven,
-    setConsentGiven,
-    activeTab,
-    setActiveTab,
-    selectedMatchId,
-    currentMatch,
     handleSelectMatch,
     handleSaveSelectedMatch,
     handleMatch

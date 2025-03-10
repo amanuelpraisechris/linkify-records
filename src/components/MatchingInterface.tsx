@@ -2,7 +2,7 @@
 import { RecordMatch, MatchResult } from '@/types';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ClipboardList } from 'lucide-react';
-import { useMatchingProcess } from '@/hooks/useMatchingProcess';
+import { useMatchingProcess } from '@/hooks/matching-process';
 import MatchingTab from './matching-interface/MatchingTab';
 import ConsentTab from './matching-interface/ConsentTab';
 import HistoryTab from './matching-interface/HistoryTab';
