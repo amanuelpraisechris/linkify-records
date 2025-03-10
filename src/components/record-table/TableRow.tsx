@@ -1,7 +1,7 @@
 
 import { ChevronDown, ChevronRight } from 'lucide-react';
 import { Record } from '@/types';
-import { getNameField } from '@/utils/nameFieldUtils';
+import { getNameField, getFullName } from '../../../src/utils/nameFieldUtils';
 import { getDisplayValue, getGender } from '@/utils/recordDisplayUtils';
 import MatchScoreDisplay from './MatchScoreDisplay';
 import RecordActions from './RecordActions';
@@ -23,6 +23,9 @@ const TableRow = ({
   onAssignMatch,
   onToggleNotes
 }: TableRowProps) => {
+  // Use the consistent name utility
+  const fullName = getFullName(record);
+  
   return (
     <tr 
       className={`hover:bg-muted/30 transition-colors ${isExpanded ? 'bg-muted/20' : ''}`}
@@ -36,7 +39,7 @@ const TableRow = ({
       </td>
       <td className="px-4 py-4 whitespace-nowrap">
         <div className="font-medium">
-          {getNameField(record, 'firstName')} {getNameField(record, 'lastName')}
+          {fullName}
         </div>
         <div className="text-xs text-muted-foreground">
           ID: {record.patientId || record.id.substring(0, 8)}

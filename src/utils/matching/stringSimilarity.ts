@@ -1,6 +1,6 @@
-
 import { MatchingConfig } from './types';
 import { containsEthiopicScript, normalizeText, SupportedLanguage } from '../languageUtils';
+import { normalizeNameFields } from '../nameFieldUtils';
 
 /**
  * Calculate string similarity score with language-aware comparison

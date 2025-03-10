@@ -3,6 +3,7 @@ import { Record } from '@/types';
 import { MatchingConfig } from './types';
 import { DEFAULT_MATCHING_CONFIG } from './defaultConfig';
 import { calculateStringSimilarity, calculateDateSimilarity } from './stringSimilarity';
+import { getNameField, normalizeNameFields } from '../nameFieldUtils';
 
 /**
  * Calculate overall match score between two records
@@ -16,33 +17,48 @@ export const calculateMatchScore = (
   record1: Record,
   record2: Record,
   config: MatchingConfig = DEFAULT_MATCHING_CONFIG
-): { score: number; matchedOn: string[] } => {
+): { score: number; matchedOn: string[]; fieldScores?: {[key: string]: number} } => {
   const matchedOn: string[] = [];
   let totalScore = 0;
   let totalWeight = 0;
+  const fieldScores: {[key: string]: number} = {};
+  
+  // Extract names using the consistent utilities
+  const firstName1 = getNameField(record1, 'firstName', '');
+  const firstName2 = getNameField(record2, 'firstName', ''); 
+  const lastName1 = getNameField(record1, 'lastName', '');
+  const lastName2 = getNameField(record2, 'lastName', '');
+  const middleName1 = getNameField(record1, 'middleName', '');
+  const middleName2 = getNameField(record2, 'middleName', '');
   
   // Compare first name (primary identifier)
   const firstNameWeight = config.fieldWeights.firstName;
-  const firstNameScore = calculateStringSimilarity(record1.firstName, record2.firstName, config);
+  const firstNameScore = calculateStringSimilarity(firstName1, firstName2, config);
   totalScore += firstNameScore * firstNameWeight;
   totalWeight += firstNameWeight;
+  fieldScores['firstName'] = firstNameScore;
+  
   if (firstNameScore > 80) matchedOn.push('First Name');
   else if (firstNameScore > 50) matchedOn.push('First Name (partial)');
   
   // Compare last name (primary identifier)
   const lastNameWeight = config.fieldWeights.lastName;
-  const lastNameScore = calculateStringSimilarity(record1.lastName, record2.lastName, config);
+  const lastNameScore = calculateStringSimilarity(lastName1, lastName2, config);
   totalScore += lastNameScore * lastNameWeight;
   totalWeight += lastNameWeight;
+  fieldScores['lastName'] = lastNameScore;
+  
   if (lastNameScore > 80) matchedOn.push('Last Name');
   else if (lastNameScore > 50) matchedOn.push('Last Name (partial)');
   
   // Compare middle name (secondary identifier)
-  if (record1.middleName && record2.middleName) {
+  if (middleName1 && middleName2) {
     const middleNameWeight = config.fieldWeights.middleName || 15; // Default to 15 if not specified
-    const middleNameScore = calculateStringSimilarity(record1.middleName, record2.middleName, config);
+    const middleNameScore = calculateStringSimilarity(middleName1, middleName2, config);
     totalScore += middleNameScore * middleNameWeight;
     totalWeight += middleNameWeight;
+    fieldScores['middleName'] = middleNameScore;
+    
     if (middleNameScore > 80) matchedOn.push('Middle Name');
     else if (middleNameScore > 50) matchedOn.push('Middle Name (partial)');
   }
@@ -52,15 +68,21 @@ export const calculateMatchScore = (
   const birthDateScore = calculateDateSimilarity(record1.birthDate, record2.birthDate);
   totalScore += birthDateScore * birthDateWeight;
   totalWeight += birthDateWeight;
+  fieldScores['birthDate'] = birthDateScore;
+  
   if (birthDateScore === 100) matchedOn.push('Birth Date');
   else if (birthDateScore === 80) matchedOn.push('Birth Year/Month');
   else if (birthDateScore === 50) matchedOn.push('Birth Year');
   
   // Compare gender
   const genderWeight = config.fieldWeights.gender;
-  const genderScore = record1.gender === record2.gender ? 100 : 0;
+  const gender1 = record1.gender || record1.sex || '';
+  const gender2 = record2.gender || record2.sex || '';
+  const genderScore = gender1.toLowerCase() === gender2.toLowerCase() ? 100 : 0;
   totalScore += genderScore * genderWeight;
   totalWeight += genderWeight;
+  fieldScores['gender'] = genderScore;
+  
   if (genderScore === 100) matchedOn.push('Gender');
   
   // Compare village
@@ -69,6 +91,8 @@ export const calculateMatchScore = (
     const villageScore = calculateStringSimilarity(record1.village, record2.village, config);
     totalScore += villageScore * villageWeight;
     totalWeight += villageWeight;
+    fieldScores['village'] = villageScore;
+    
     if (villageScore > 80) matchedOn.push('Village');
     else if (villageScore > 50) matchedOn.push('Village (partial)');
   }
@@ -79,16 +103,23 @@ export const calculateMatchScore = (
     const subVillageScore = calculateStringSimilarity(record1.subVillage, record2.subVillage, config);
     totalScore += subVillageScore * subVillageWeight;
     totalWeight += subVillageWeight;
+    fieldScores['subVillage'] = subVillageScore;
+    
     if (subVillageScore > 80) matchedOn.push('Sub-Village');
     else if (subVillageScore > 50) matchedOn.push('Sub-Village (partial)');
   }
   
   // Compare phone number
-  if (record1.phoneNumber && record2.phoneNumber) {
+  const phone1 = record1.phoneNumber || record1.telephone || '';
+  const phone2 = record2.phoneNumber || record2.telephone || '';
+  
+  if (phone1 && phone2) {
     const phoneNumberWeight = config.fieldWeights.phoneNumber;
-    const phoneNumberScore = record1.phoneNumber === record2.phoneNumber ? 100 : 0;
+    const phoneNumberScore = phone1 === phone2 ? 100 : 0;
     totalScore += phoneNumberScore * phoneNumberWeight;
     totalWeight += phoneNumberWeight;
+    fieldScores['phoneNumber'] = phoneNumberScore;
+    
     if (phoneNumberScore === 100) matchedOn.push('Phone Number');
   }
   
@@ -107,6 +138,7 @@ export const calculateMatchScore = (
     
     totalScore += oldestMemberScore * oldestMemberWeight;
     totalWeight += oldestMemberWeight;
+    fieldScores['oldestHouseholdMember'] = oldestMemberScore;
     
     if (oldestMemberScore > 80) matchedOn.push('Oldest Household Member');
     else if (oldestMemberScore > 50) matchedOn.push('Oldest Household Member (partial)');
@@ -117,7 +149,8 @@ export const calculateMatchScore = (
   
   return {
     score: finalScore,
-    matchedOn
+    matchedOn,
+    fieldScores
   };
 };
 
@@ -133,11 +166,11 @@ export const findPotentialMatches = (
   sourceRecord: Record,
   targetRecords: Record[],
   config: MatchingConfig = DEFAULT_MATCHING_CONFIG
-): Array<{ record: Record; score: number; matchedOn: string[] }> => {
+): Array<{ record: Record; score: number; matchedOn: string[]; fieldScores?: {[key: string]: number} }> => {
   return targetRecords
     .map(record => {
-      const { score, matchedOn } = calculateMatchScore(sourceRecord, record, config);
-      return { record, score, matchedOn };
+      const { score, matchedOn, fieldScores } = calculateMatchScore(sourceRecord, record, config);
+      return { record, score, matchedOn, fieldScores };
     })
     .filter(match => match.score >= config.threshold.low)
     .sort((a, b) => b.score - a.score);

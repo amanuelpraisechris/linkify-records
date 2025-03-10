@@ -1,3 +1,4 @@
+
 // List of keys that should be excluded from name fields
 export const nonPatientNameFields = [
   "balozi_first_name", "\"balozi_first_name\"",
@@ -13,156 +14,162 @@ export const nonPatientNameFields = [
   "Ten Cell Leader Last Name", "\"Ten Cell Leader Last Name\""
 ];
 
-// Enhanced helper to get name fields correctly with improved priority handling
+/**
+ * Enhanced helper to get name fields correctly with improved priority and consistency
+ * This function checks multiple possible field patterns to ensure names are extracted
+ * consistently across different data sources (clinic records and HDSS)
+ */
 export const getNameField = (record: Record<string, any>, field: 'firstName' | 'lastName' | 'middleName', defaultValue = '-'): string => {
-  // Direct exact property check with highest priority
-  if (field === 'firstName') {
-    // Exact matches with highest priority
-    if (record.FirstName !== undefined) return String(record.FirstName);
-    if (record.firstName !== undefined) return String(record.firstName);
-    
-    // Check specific quoted formats
-    if (record["FirstName"] !== undefined) return String(record["FirstName"]);
-    if (record["firstName"] !== undefined) return String(record["firstName"]);
-    if (record["\"FirstName\""] !== undefined) return String(record["\"FirstName\""]).replace(/"/g, '');
-    if (record["\"firstName\""] !== undefined) return String(record["\"firstName\""]).replace(/"/g, '');
-    
-    // Standard naming conventions
-    if (record.first_name !== undefined) return String(record.first_name);
-    if (record["first_name"] !== undefined) return String(record["first_name"]);
-    if (record["\"first_name\""] !== undefined) return String(record["\"first_name\""]).replace(/"/g, '');
-    
-    // Special case for common alternate name field
-    if (record.name !== undefined && !nonPatientNameFields.some(field => field.toLowerCase().includes('name'))) {
-      return String(record.name);
-    }
-    
-    // Case-insensitive check for first name variants
-    for (const key in record) {
-      const lcKey = key.toLowerCase();
-      if ((lcKey === "firstname" || lcKey === "first_name") && 
-          !nonPatientNameFields.some(field => field.toLowerCase() === lcKey) &&
-          typeof record[key] === 'string') {
-        return String(record[key]);
-      }
-    }
-    
-    // Scan for other matching fields but explicitly exclude non-patient name fields
-    for (const key in record) {
-      if (nonPatientNameFields.some(field => 
-          field.toLowerCase() === key.toLowerCase() || 
-          field.replace(/"/g, '') === key)) continue;
-      
-      const lcKey = key.toLowerCase();
-      if ((lcKey.includes('first') && lcKey.includes('name')) &&
-          !lcKey.includes('cell') &&
-          !lcKey.includes('leader') &&
-          !lcKey.includes('oldest') &&
-          !lcKey.includes('balozi') &&
-          !lcKey.includes('household') &&
-          !lcKey.includes('member') &&
-          typeof record[key] === 'string') {
-        return String(record[key]);
-      }
+  if (!record) return defaultValue;
+  
+  // Define all possible field patterns for each name type
+  const fieldPatterns: Record<string, string[]> = {
+    firstName: [
+      'firstName', 'FirstName', 'first_name', 'First_Name', 'first name', 'First Name',
+      '"firstName"', '"FirstName"', '"first_name"', '"First_Name"', '"first name"', '"First Name"',
+      'first', 'First', 'givenName', 'GivenName', 'given_name', 'Given_Name'
+    ],
+    lastName: [
+      'lastName', 'LastName', 'last_name', 'Last_Name', 'last name', 'Last Name', 
+      '"lastName"', '"LastName"', '"last_name"', '"Last_Name"', '"last name"', '"Last Name"',
+      'surname', 'Surname', 'familyName', 'FamilyName', 'family_name', 'Family_Name'
+    ],
+    middleName: [
+      'middleName', 'MiddleName', 'middle_name', 'Middle_Name', 'middle name', 'Middle Name',
+      '"middleName"', '"MiddleName"', '"middle_name"', '"Middle_Name"', '"middle name"', '"Middle Name"',
+      'otherName', 'OtherName', 'other_name', 'Other_Name'
+    ]
+  };
+
+  // Try to find the field value using all possible patterns
+  const patterns = fieldPatterns[field] || [];
+  
+  for (const pattern of patterns) {
+    // Check for exact match
+    if (record[pattern] !== undefined && record[pattern] !== null) {
+      // Remove quotes if they exist in the value
+      let value = String(record[pattern]);
+      return value.replace(/^"(.*)"$/, '$1');
     }
   }
   
-  if (field === 'lastName') {
-    // Exact matches with highest priority
-    if (record.LastName !== undefined) return String(record.LastName);
-    if (record.lastName !== undefined) return String(record.lastName);
+  // If we couldn't find an exact match, try case-insensitive matching
+  for (const key in record) {
+    // Skip undefined or null values
+    if (record[key] === undefined || record[key] === null) continue;
     
-    // Check specific quoted formats
-    if (record["LastName"] !== undefined) return String(record["LastName"]);
-    if (record["lastName"] !== undefined) return String(record["lastName"]);
-    if (record["\"LastName\""] !== undefined) return String(record["\"LastName\""]).replace(/"/g, '');
-    if (record["\"lastName\""] !== undefined) return String(record["\"lastName\""]).replace(/"/g, '');
+    // Skip keys that match the non-patient name fields
+    if (nonPatientNameFields.some(nonField => 
+        nonField.toLowerCase() === key.toLowerCase() || 
+        nonField.replace(/"/g, '') === key.replace(/"/g, ''))) continue;
     
-    // Standard naming conventions
-    if (record.last_name !== undefined) return String(record.last_name);
-    if (record["last_name"] !== undefined) return String(record["last_name"]);
-    if (record["\"last_name\""] !== undefined) return String(record["\"last_name\""]).replace(/"/g, '');
+    const lcKey = key.toLowerCase().replace(/"/g, '');
     
-    // Check surname variants
-    if (record.surname !== undefined) return String(record.surname);
-    if (record["surname"] !== undefined) return String(record["surname"]);
-    if (record["\"surname\""] !== undefined) return String(record["\"surname\""]).replace(/"/g, '');
-    
-    // Case-insensitive check for last name variants
-    for (const key in record) {
-      const lcKey = key.toLowerCase();
-      if ((lcKey === "lastname" || lcKey === "last_name" || lcKey === "surname") && 
-          !nonPatientNameFields.some(field => field.toLowerCase() === lcKey) &&
-          typeof record[key] === 'string') {
-        return String(record[key]);
-      }
+    // Check if the key might match the field we're looking for
+    if (field === 'firstName' && 
+        (lcKey.includes('first') && lcKey.includes('name')) && 
+        !lcKey.includes('cell') && 
+        !lcKey.includes('leader') && 
+        !lcKey.includes('oldest') && 
+        !lcKey.includes('balozi') && 
+        !lcKey.includes('household') && 
+        !lcKey.includes('member')) {
+      return String(record[key]).replace(/^"(.*)"$/, '$1');
     }
     
-    // Scan for other matching fields but explicitly exclude non-patient name fields
-    for (const key in record) {
-      if (nonPatientNameFields.some(field => 
-          field.toLowerCase() === key.toLowerCase() || 
-          field.replace(/"/g, '') === key)) continue;
-      
-      const lcKey = key.toLowerCase();
-      if ((lcKey.includes('last') && lcKey.includes('name')) &&
-          !lcKey.includes('cell') &&
-          !lcKey.includes('leader') &&
-          !lcKey.includes('oldest') &&
-          !lcKey.includes('balozi') &&
-          !lcKey.includes('household') &&
-          !lcKey.includes('member') &&
-          typeof record[key] === 'string') {
-        return String(record[key]);
-      }
+    if (field === 'lastName' && 
+        ((lcKey.includes('last') && lcKey.includes('name')) || lcKey.includes('surname')) && 
+        !lcKey.includes('cell') && 
+        !lcKey.includes('leader') && 
+        !lcKey.includes('oldest') && 
+        !lcKey.includes('balozi') && 
+        !lcKey.includes('household') && 
+        !lcKey.includes('member')) {
+      return String(record[key]).replace(/^"(.*)"$/, '$1');
+    }
+    
+    if (field === 'middleName' && 
+        (lcKey.includes('middle') && lcKey.includes('name')) && 
+        !lcKey.includes('cell') && 
+        !lcKey.includes('leader') && 
+        !lcKey.includes('oldest') && 
+        !lcKey.includes('balozi') && 
+        !lcKey.includes('household') && 
+        !lcKey.includes('member')) {
+      return String(record[key]).replace(/^"(.*)"$/, '$1');
     }
   }
   
-  if (field === 'middleName') {
-    // Exact matches with highest priority
-    if (record.MiddleName !== undefined) return String(record.MiddleName);
-    if (record.middleName !== undefined) return String(record.middleName);
+  // As a last resort, check for full name and try to extract the requested part
+  if (record.name || record.fullName || record.full_name || record["name"] || record["fullName"] || record["full_name"]) {
+    const fullName = record.name || record.fullName || record.full_name || 
+                     record["name"] || record["fullName"] || record["full_name"] || '';
     
-    // Check specific quoted formats
-    if (record["MiddleName"] !== undefined) return String(record["MiddleName"]);
-    if (record["middleName"] !== undefined) return String(record["middleName"]);
-    if (record["\"MiddleName\""] !== undefined) return String(record["\"MiddleName\""]).replace(/"/g, '');
-    if (record["\"middleName\""] !== undefined) return String(record["\"middleName\""]).replace(/"/g, '');
+    const parts = String(fullName).split(' ').filter(Boolean);
     
-    // Standard naming conventions
-    if (record.middle_name !== undefined) return String(record.middle_name);
-    if (record["middle_name"] !== undefined) return String(record["middle_name"]);
-    if (record["\"middle_name\""] !== undefined) return String(record["\"middle_name\""]).replace(/"/g, '');
-    
-    // Case-insensitive check for middle name variants
-    for (const key in record) {
-      const lcKey = key.toLowerCase();
-      if ((lcKey === "middlename" || lcKey === "middle_name") && 
-          !nonPatientNameFields.some(field => field.toLowerCase() === lcKey) &&
-          typeof record[key] === 'string') {
-        return String(record[key]);
-      }
-    }
-    
-    // Scan for other matching fields but explicitly exclude non-patient name fields
-    for (const key in record) {
-      if (nonPatientNameFields.some(field => 
-          field.toLowerCase() === key.toLowerCase() || 
-          field.replace(/"/g, '') === key)) continue;
-      
-      const lcKey = key.toLowerCase();
-      if ((lcKey.includes('middle') && lcKey.includes('name')) &&
-          !lcKey.includes('cell') &&
-          !lcKey.includes('leader') &&
-          !lcKey.includes('oldest') &&
-          !lcKey.includes('balozi') &&
-          !lcKey.includes('household') &&
-          !lcKey.includes('member') &&
-          typeof record[key] === 'string') {
-        return String(record[key]);
-      }
+    if (parts.length > 0) {
+      if (field === 'firstName') return parts[0];
+      if (field === 'lastName' && parts.length > 1) return parts[parts.length - 1];
+      if (field === 'middleName' && parts.length > 2) return parts.slice(1, -1).join(' ');
     }
   }
   
   return defaultValue;
+};
+
+/**
+ * Gets the full name of a person from a record in a consistent format
+ * @param record The record containing name fields
+ * @param format Optional format to specify how name parts should be combined
+ * @returns Formatted full name
+ */
+export const getFullName = (
+  record: Record<string, any>, 
+  format: 'firstLast' | 'lastFirst' | 'firstMiddleLast' = 'firstLast'
+): string => {
+  const firstName = getNameField(record, 'firstName', '');
+  const lastName = getNameField(record, 'lastName', '');
+  const middleName = getNameField(record, 'middleName', '');
+  
+  if (!firstName && !lastName) return '-';
+  
+  switch (format) {
+    case 'lastFirst':
+      return [lastName, firstName].filter(Boolean).join(', ');
+    case 'firstMiddleLast':
+      return [firstName, middleName, lastName].filter(Boolean).join(' ');
+    case 'firstLast':
+    default:
+      return [firstName, lastName].filter(Boolean).join(' ');
+  }
+};
+
+/**
+ * Normalizes name fields in two records to ensure consistent comparison
+ * @param record1 First record to compare
+ * @param record2 Second record to compare
+ * @returns Object with normalized name fields for both records
+ */
+export const normalizeNameFields = (
+  record1: Record<string, any>,
+  record2: Record<string, any>
+): { 
+  first: { firstName: string; middleName: string; lastName: string; fullName: string; },
+  second: { firstName: string; middleName: string; lastName: string; fullName: string; } 
+} => {
+  const first = {
+    firstName: getNameField(record1, 'firstName', ''),
+    middleName: getNameField(record1, 'middleName', ''),
+    lastName: getNameField(record1, 'lastName', ''),
+    fullName: getFullName(record1, 'firstMiddleLast')
+  };
+  
+  const second = {
+    firstName: getNameField(record2, 'firstName', ''),
+    middleName: getNameField(record2, 'middleName', ''),
+    lastName: getNameField(record2, 'lastName', ''),
+    fullName: getFullName(record2, 'firstMiddleLast')
+  };
+  
+  return { first, second };
 };

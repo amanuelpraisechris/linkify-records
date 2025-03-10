@@ -1,6 +1,6 @@
 
 import { Record } from '@/types';
-import { getNameField } from '@/utils/nameFieldUtils';
+import { getNameField, getFullName } from '@/utils/nameFieldUtils';
 import { AlertTriangle } from 'lucide-react';
 
 interface RecordCardHeaderProps {
@@ -17,29 +17,34 @@ const getConfidenceLevel = (score?: number) => {
 };
 
 const RecordCardHeader = ({ record, matchScore }: RecordCardHeaderProps) => {
-  const firstName = getNameField(record, 'firstName', '');
-  const lastName = getNameField(record, 'lastName', '');
+  // Use the consistent utilities for displaying names
+  const fullName = getFullName(record, 'firstMiddleLast');
   const confidenceLevel = getConfidenceLevel(matchScore);
   
   const formatDate = (dateString: string) => {
-    const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'short', day: 'numeric' };
-    return new Date(dateString).toLocaleDateString(undefined, options);
+    if (!dateString) return 'Unknown';
+    try {
+      const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'short', day: 'numeric' };
+      return new Date(dateString).toLocaleDateString(undefined, options);
+    } catch (error) {
+      return dateString;
+    }
   };
   
   // For debugging
   if (process.env.NODE_ENV !== 'production') {
     console.log('Record in RecordCardHeader:', record);
-    console.log('Extracted names:', { firstName, lastName });
+    console.log('Extracted name:', fullName);
   }
   
   return (
     <div className="flex justify-between items-start">
       <div>
         <h3 className="font-semibold text-lg text-foreground">
-          {firstName} {lastName}
+          {fullName}
         </h3>
         <div className="flex items-center mt-1 text-sm text-muted-foreground">
-          <span>{record.gender}</span>
+          <span>{record.gender || record.sex || '-'}</span>
           <span className="mx-2">•</span>
           <span>DOB: {formatDate(record.birthDate)}</span>
         </div>
