@@ -1,3 +1,4 @@
+
 import { Record } from '@/types';
 import { ChevronDown, ChevronRight, Info, CheckCircle, MessageSquareText } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
@@ -47,43 +48,106 @@ const RecordTableView = ({
   };
 
   const getDisplayValue = (record: Record, field: string, defaultValue = '-') => {
-    const quotedField = `"${field}"`;
-    
+    // Check for common DSS naming patterns
     if (field === 'firstName') {
       if (record.firstName) return record.firstName;
-      if (record["\"FirstName\""]) 
-        return String(record["\"FirstName\""]).replace(/"/g, '');
-      if (record["\"first_name\""]) 
-        return String(record["\"first_name\""]).replace(/"/g, '');
-      if (record["\"name\""]) 
-        return String(record["\"name\""]).replace(/"/g, '');
+      if (record["FirstName"]) return record["FirstName"];
+      if (record["\"FirstName\""]) return String(record["\"FirstName\""]).replace(/"/g, '');
+      if (record["first_name"]) return record["first_name"];
+      if (record["\"first_name\""]) return String(record["\"first_name\""]).replace(/"/g, '');
+      if (record["name"]) return record["name"];
+      if (record["\"name\""]) return String(record["\"name\""]).replace(/"/g, '');
+      
+      // Don't display TCL names as patient names
+      const keysThatArentNames = [
+        "balozi_first_name", "\"balozi_first_name\"",
+        "balozi_middle_name", "\"balozi_middle_name\"", 
+        "balozi_last_name", "\"balozi_last_name\"",
+        "oldest_member_first_name", "\"oldest_member_first_name\"",
+        "oldest_member_middle_name", "\"oldest_member_middle_name\"",
+        "oldest_member_last_name", "\"oldest_member_last_name\""
+      ];
+      
+      // Check all other fields that might contain first name
+      for (const key in record) {
+        if (keysThatArentNames.includes(key)) continue;
+        if ((key.toLowerCase().includes('first') || key.toLowerCase().includes('name')) && 
+            !key.toLowerCase().includes('last') && !key.toLowerCase().includes('middle') && 
+            typeof record[key as keyof Record] === 'string') {
+          return String(record[key as keyof Record]);
+        }
+      }
       return defaultValue;
     }
     
     if (field === 'lastName') {
       if (record.lastName) return record.lastName;
-      if (record["\"LastName\""]) 
-        return String(record["\"LastName\""]).replace(/"/g, '');
-      if (record["\"last_name\""]) 
-        return String(record["\"last_name\""]).replace(/"/g, '');
-      if (record["\"surname\""]) 
-        return String(record["\"surname\""]).replace(/"/g, '');
+      if (record["LastName"]) return record["LastName"];
+      if (record["\"LastName\""]) return String(record["\"LastName\""]).replace(/"/g, '');
+      if (record["last_name"]) return record["last_name"];
+      if (record["\"last_name\""]) return String(record["\"last_name\""]).replace(/"/g, '');
+      if (record["surname"]) return record["surname"];
+      if (record["\"surname\""]) return String(record["\"surname\""]).replace(/"/g, '');
+      
+      // Exclude TCL/household member names
+      const keysThatArentNames = [
+        "balozi_first_name", "\"balozi_first_name\"",
+        "balozi_middle_name", "\"balozi_middle_name\"", 
+        "balozi_last_name", "\"balozi_last_name\"",
+        "oldest_member_first_name", "\"oldest_member_first_name\"",
+        "oldest_member_middle_name", "\"oldest_member_middle_name\"",
+        "oldest_member_last_name", "\"oldest_member_last_name\""
+      ];
+      
+      // Check other fields that might contain last name
+      for (const key in record) {
+        if (keysThatArentNames.includes(key)) continue;
+        if (key.toLowerCase().includes('last') && typeof record[key as keyof Record] === 'string') {
+          return String(record[key as keyof Record]);
+        }
+      }
       return defaultValue;
     }
     
+    // Handle quoted field names like "villagename"
+    const quotedField = `"${field}"`;
     if (record[quotedField as keyof Record]) {
       return String(record[quotedField as keyof Record]).replace(/"/g, '');
     }
     
-    return String(record[field as keyof Record] || defaultValue);
+    // Try to access field directly
+    if (record[field as keyof Record] !== undefined) {
+      return String(record[field as keyof Record] || defaultValue);
+    }
+    
+    // Try without quotes for keys that might have quotes in the data
+    const unquotedKey = field.replace(/"/g, '');
+    if (record[unquotedKey as keyof Record] !== undefined) {
+      return String(record[unquotedKey as keyof Record]);
+    }
+    
+    return defaultValue;
   };
 
   const getGender = (record: Record) => {
+    if (record.gender) return record.gender;
     if (record["\"Sex\""]) {
       const sex = record["\"Sex\""].replace(/"/g, '');
       return sex === 'M' ? 'Male' : sex === 'F' ? 'Female' : sex;
     }
-    return record.gender || '-';
+    if (record["Sex"]) {
+      const sex = record["Sex"];
+      return sex === 'M' ? 'Male' : sex === 'F' ? 'Female' : sex;
+    }
+    if (record["sex"]) {
+      const sex = record["sex"];
+      return sex === 'M' ? 'Male' : sex === 'F' ? 'Female' : sex;
+    }
+    if (record["\"sex\""]) {
+      const sex = record["\"sex\""].replace(/"/g, '');
+      return sex === 'M' ? 'Male' : sex === 'F' ? 'Female' : sex;
+    }
+    return '-';
   };
   
   const handleAssignMatch = (record: Record) => {

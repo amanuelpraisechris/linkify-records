@@ -31,7 +31,7 @@ const RecordList = ({
   const [viewMode, setViewMode] = useState<'card' | 'table'>('card');
   const [expandedRecord, setExpandedRecord] = useState<string | null>(null);
   const { toast } = useToast();
-  const { saveMatchResult } = useRecordData();
+  const { saveMatchResult, saveMatchNotes } = useRecordData();
   
   useEffect(() => {
     console.log(`RecordList received ${records.length} records`);
@@ -40,11 +40,13 @@ const RecordList = ({
     }
   }, [records]);
 
+  // Updated filtering logic to handle more field patterns
   const filteredRecords = records.filter(record => {
     if (!searchQuery) return true;
     
-    console.log(`Filtering record: ${record.firstName} ${record.lastName}`);
+    console.log(`Filtering record: ${record.firstName || record.FirstName || record["\"FirstName\""]}`);
     
+    // Normalize record fields to handle quoted and unquoted keys
     const fields = Object.entries(record).reduce((acc, [key, value]) => {
       if (key.startsWith('"') && typeof value === 'string') {
         const cleanKey = key.replace(/"/g, '');
@@ -55,13 +57,14 @@ const RecordList = ({
       return acc;
     }, {} as {[key: string]: any});
     
+    // Try all possible naming patterns
     const matches = 
-      compareStrings(record.firstName, searchQuery, searchLanguage) ||
-      compareStrings(record.lastName, searchQuery, searchLanguage) ||
+      compareStrings(record.firstName || fields.FirstName || '', searchQuery, searchLanguage) ||
+      compareStrings(record.lastName || fields.LastName || '', searchQuery, searchLanguage) ||
       compareStrings(record.patientId || '', searchQuery, searchLanguage) ||
       compareStrings(record.healthFacility || '', searchQuery, searchLanguage) ||
-      compareStrings(record.village || '', searchQuery, searchLanguage) ||
-      compareStrings(record.district || '', searchQuery, searchLanguage) ||
+      compareStrings(record.village || fields.villagename || '', searchQuery, searchLanguage) ||
+      compareStrings(record.district || fields.district || '', searchQuery, searchLanguage) ||
       record.identifiers?.some(id => compareStrings(id.value, searchQuery, searchLanguage)) ||
       compareStrings(fields.FirstName || '', searchQuery, searchLanguage) ||
       compareStrings(fields.LastName || '', searchQuery, searchLanguage) ||
@@ -69,7 +72,7 @@ const RecordList = ({
       compareStrings(fields.subvillagename || '', searchQuery, searchLanguage);
     
     if (matches) {
-      console.log(`Match found for "${searchQuery}": ${record.firstName || fields.FirstName} ${record.lastName || fields.LastName}`);
+      console.log(`Match found for "${searchQuery}": ${record.firstName || fields.FirstName || ''} ${record.lastName || fields.LastName || ''}`);
     }
     
     return matches;
@@ -95,16 +98,19 @@ const RecordList = ({
     
     saveMatchResult(matchResult);
     
+    // Use improved display name logic
+    const firstName = record.firstName || record.FirstName || record["\"FirstName\""]?.replace(/"/g, '') || '';
+    const lastName = record.lastName || record.LastName || record["\"LastName\""]?.replace(/"/g, '') || '';
+    
     toast({
       title: "Match Assigned",
-      description: `Successfully assigned match to ${record.firstName || record["\"FirstName\""]?.replace(/"/g, '') || ''} ${record.lastName || record["\"LastName\""]?.replace(/"/g, '') || ''}`,
+      description: `Successfully assigned match to ${firstName} ${lastName}`,
     });
   };
   
   const handleSaveNotes = (record: Record, notes: string) => {
-    // In a real app, we would save these notes to the database
-    console.log("Saving notes for record:", record.id);
-    console.log("Notes:", notes);
+    // This now uses the saveMatchNotes function from the context
+    saveMatchNotes(record.id, notes);
     
     toast({
       title: "Match Notes Saved",
@@ -138,22 +144,27 @@ const RecordList = ({
               // Transform the record to ensure proper data display
               const normalizedRecord = {
                 ...record,
-                firstName: record.firstName || (record["\"FirstName\""] ? record["\"FirstName\""].replace(/"/g, '') : ''),
-                lastName: record.lastName || (record["\"LastName\""] ? record["\"LastName\""].replace(/"/g, '') : ''),
-                gender: record["\"Sex\""] ? 
-                  (record["\"Sex\""].replace(/"/g, '') === 'M' ? 'Male' : 
-                   record["\"Sex\""].replace(/"/g, '') === 'F' ? 'Female' : 
-                   record["\"Sex\""].replace(/"/g, '')) : 
-                  (record.gender || '-'),
-                birthDate: record["\"dob\""] ? 
-                  record["\"dob\""].replace(/"/g, '') : 
-                  (record.birthDate || ''),
-                village: record["\"villagename\""] ? 
-                  record["\"villagename\""].replace(/"/g, '') : 
-                  (record.village || '-'),
-                subVillage: record["\"subvillagename\""] ? 
-                  record["\"subvillagename\""].replace(/"/g, '') : 
-                  (record.subVillage || '-'),
+                firstName: record.firstName || 
+                          (record.FirstName) || 
+                          (record["\"FirstName\""] ? record["\"FirstName\""].replace(/"/g, '') : ''),
+                lastName: record.lastName || 
+                         (record.LastName) || 
+                         (record["\"LastName\""] ? record["\"LastName\""].replace(/"/g, '') : ''),
+                gender: record.gender || 
+                        (record.Sex ? (record.Sex === 'M' ? 'Male' : record.Sex === 'F' ? 'Female' : record.Sex) : 
+                        (record["\"Sex\""] ? 
+                          (record["\"Sex\""].replace(/"/g, '') === 'M' ? 'Male' : 
+                          record["\"Sex\""].replace(/"/g, '') === 'F' ? 'Female' : 
+                          record["\"Sex\""].replace(/"/g, '')) : '-')),
+                birthDate: record.birthDate || 
+                          (record.dob) || 
+                          (record["\"dob\""] ? record["\"dob\""].replace(/"/g, '') : ''),
+                village: record.village || 
+                        (record.villagename) || 
+                        (record["\"villagename\""] ? record["\"villagename\""].replace(/"/g, '') : '-'),
+                subVillage: record.subVillage || 
+                           (record.subvillagename) || 
+                           (record["\"subvillagename\""] ? record["\"subvillagename\""].replace(/"/g, '') : '-'),
               };
               
               return (
