@@ -1,5 +1,10 @@
 
 /**
+ * Import the language type from languageUtils
+ */
+import { SupportedLanguage } from '../languageUtils';
+
+/**
  * Interface for field weight configuration
  */
 export interface FieldWeights {
@@ -33,4 +38,4 @@ export interface MatchingConfig {
 }
 
 // Re-export language types for convenience
-export type { SupportedLanguage } from '../languageUtils';
+export type { SupportedLanguage };
