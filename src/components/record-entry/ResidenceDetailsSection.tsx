@@ -41,23 +41,18 @@ const ResidenceDetailsSection = ({
             {inputLanguage === 'latin' ? 'Village' : 
             inputLanguage === 'amharic' ? 'መንደር' : 'ዓዲ'}
           </label>
-          <Select value={formData.village} onValueChange={(value) => handleChange({ target: { name: 'village', value } } as React.ChangeEvent<HTMLSelectElement>)}>
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder={
-                inputLanguage === 'latin' ? '(none)' : 
-                inputLanguage === 'amharic' ? '(የለም)' : '(የለን)'
-              } />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="none">
-                {inputLanguage === 'latin' ? '(none)' : 
-                inputLanguage === 'amharic' ? '(የለም)' : '(የለን)'}
-              </SelectItem>
-              <SelectItem value="Village1">Village 1</SelectItem>
-              <SelectItem value="Village2">Village 2</SelectItem>
-              <SelectItem value="Village3">Village 3</SelectItem>
-            </SelectContent>
-          </Select>
+          <Input
+            type="text"
+            name="village"
+            value={formData.village || ''}
+            onChange={handleChange}
+            className="w-full"
+            placeholder={
+              inputLanguage === 'latin' ? 'Enter village name' : 
+              inputLanguage === 'amharic' ? 'የመንደር ስም ያስገቡ' : 'ሽም ዓዲ የእቱ'
+            }
+            dir={inputLanguage === 'latin' ? 'ltr' : 'rtl'}
+          />
         </div>
         
         <div>
@@ -65,19 +60,18 @@ const ResidenceDetailsSection = ({
             {inputLanguage === 'latin' ? 'Subvillage' : 
             inputLanguage === 'amharic' ? 'ንዑስ መንደር' : 'ንኡስ ዓዲ'}
           </label>
-          <Select value={formData.subVillage} onValueChange={(value) => handleChange({ target: { name: 'subVillage', value } } as React.ChangeEvent<HTMLSelectElement>)}>
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder={
-                inputLanguage === 'latin' ? 'Select Subvillage' : 
-                inputLanguage === 'amharic' ? 'ንዑስ መንደር ይምረጡ' : 'ንኡስ ዓዲ ምረጽ'
-              } />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="Subvillage1">Subvillage 1</SelectItem>
-              <SelectItem value="Subvillage2">Subvillage 2</SelectItem>
-              <SelectItem value="Subvillage3">Subvillage 3</SelectItem>
-            </SelectContent>
-          </Select>
+          <Input
+            type="text"
+            name="subVillage"
+            value={formData.subVillage || ''}
+            onChange={handleChange}
+            className="w-full"
+            placeholder={
+              inputLanguage === 'latin' ? 'Enter subvillage name' : 
+              inputLanguage === 'amharic' ? 'የንዑስ መንደር ስም ያስገቡ' : 'ሽም ንኡስ ዓዲ የእቱ'
+            }
+            dir={inputLanguage === 'latin' ? 'ltr' : 'rtl'}
+          />
         </div>
         
         <div className="flex items-end space-x-3">
