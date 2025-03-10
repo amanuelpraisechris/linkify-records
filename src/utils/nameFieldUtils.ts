@@ -27,7 +27,8 @@ export const getNameField = (record: Record<string, any>, field: 'firstName' | '
     firstName: [
       'firstName', 'FirstName', 'first_name', 'First_Name', 'first name', 'First Name',
       '"firstName"', '"FirstName"', '"first_name"', '"First_Name"', '"first name"', '"First Name"',
-      'first', 'First', 'givenName', 'GivenName', 'given_name', 'Given_Name'
+      'first', 'First', 'givenName', 'GivenName', 'given_name', 'Given_Name',
+      'name', 'Name', '"name"', '"Name"'
     ],
     lastName: [
       'lastName', 'LastName', 'last_name', 'Last_Name', 'last name', 'Last Name', 
@@ -100,17 +101,21 @@ export const getNameField = (record: Record<string, any>, field: 'firstName' | '
     }
   }
   
-  // As a last resort, check for full name and try to extract the requested part
-  if (record.name || record.fullName || record.full_name || record["name"] || record["fullName"] || record["full_name"]) {
-    const fullName = record.name || record.fullName || record.full_name || 
-                     record["name"] || record["fullName"] || record["full_name"] || '';
-    
-    const parts = String(fullName).split(' ').filter(Boolean);
-    
-    if (parts.length > 0) {
-      if (field === 'firstName') return parts[0];
-      if (field === 'lastName' && parts.length > 1) return parts[parts.length - 1];
-      if (field === 'middleName' && parts.length > 2) return parts.slice(1, -1).join(' ');
+  // Special case for fullName field - try to extract parts if we have a full name
+  const fullNameFields = ['name', 'fullName', 'full_name', 'full name', 'Name', 'FullName', 'Full_Name', 'Full Name',
+                          '"name"', '"fullName"', '"full_name"', '"full name"', '"Name"', '"FullName"', '"Full_Name"', '"Full Name"'];
+  
+  for (const fullNameField of fullNameFields) {
+    if (record[fullNameField]) {
+      const fullName = String(record[fullNameField]).replace(/^"(.*)"$/, '$1');
+      const parts = fullName.split(' ').filter(Boolean);
+      
+      if (parts.length > 0) {
+        if (field === 'firstName') return parts[0];
+        if (field === 'lastName' && parts.length > 1) return parts[parts.length - 1];
+        if (field === 'middleName' && parts.length > 2) return parts.slice(1, -1).join(' ');
+      }
+      break;
     }
   }
   
@@ -131,6 +136,18 @@ export const getFullName = (
   const lastName = getNameField(record, 'lastName', '');
   const middleName = getNameField(record, 'middleName', '');
   
+  // If the record already has a full name field, use that directly
+  const fullNameFields = ['name', 'fullName', 'full_name', 'full name', 'Name', 'FullName', 'Full_Name', 'Full Name',
+                          '"name"', '"fullName"', '"full_name"', '"full name"', '"Name"', '"FullName"', '"Full_Name"', '"Full Name"'];
+  
+  for (const field of fullNameFields) {
+    if (record[field]) {
+      const fullName = String(record[field]).replace(/^"(.*)"$/, '$1');
+      if (fullName.trim()) return fullName.trim();
+    }
+  }
+  
+  // If no full name field, build from parts
   if (!firstName && !lastName) return '-';
   
   switch (format) {

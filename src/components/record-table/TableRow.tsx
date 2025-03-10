@@ -1,7 +1,7 @@
 
 import { ChevronDown, ChevronRight } from 'lucide-react';
 import { Record } from '@/types';
-import { getNameField, getFullName } from '../../../src/utils/nameFieldUtils';
+import { getNameField, getFullName } from '../../utils/nameFieldUtils';
 import { getDisplayValue, getGender } from '@/utils/recordDisplayUtils';
 import MatchScoreDisplay from './MatchScoreDisplay';
 import RecordActions from './RecordActions';
@@ -38,7 +38,7 @@ const TableRow = ({
         )}
       </td>
       <td className="px-4 py-4 whitespace-nowrap">
-        <div className="font-medium">
+        <div className="font-medium uppercase">
           {fullName}
         </div>
         <div className="text-xs text-muted-foreground">

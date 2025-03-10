@@ -18,7 +18,7 @@ const getConfidenceLevel = (score?: number) => {
 
 const RecordCardHeader = ({ record, matchScore }: RecordCardHeaderProps) => {
   // Use the consistent utilities for displaying names
-  const fullName = getFullName(record, 'firstMiddleLast');
+  const fullName = getFullName(record);
   const confidenceLevel = getConfidenceLevel(matchScore);
   
   const formatDate = (dateString: string) => {
@@ -40,7 +40,7 @@ const RecordCardHeader = ({ record, matchScore }: RecordCardHeaderProps) => {
   return (
     <div className="flex justify-between items-start">
       <div>
-        <h3 className="font-semibold text-lg text-foreground">
+        <h3 className="font-semibold text-lg text-foreground uppercase">
           {fullName}
         </h3>
         <div className="flex items-center mt-1 text-sm text-muted-foreground">

@@ -33,6 +33,15 @@ const RecordCard = ({
     const fullName = getFullName(record);
     console.log('Record in RecordCard:', record);
     console.log('Extracted full name:', fullName);
+    
+    // Additional debug to ensure we understand all name variations
+    if (record.firstName || record.lastName || record["\"firstName\""] || record["\"lastName\""]) {
+      console.log('Name fields found in record:', {
+        firstName: record.firstName || record["\"firstName\""],
+        lastName: record.lastName || record["\"lastName\""],
+        name: record.name || record["\"name\""]
+      });
+    }
   }
 
   return (
