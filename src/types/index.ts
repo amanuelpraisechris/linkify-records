@@ -39,6 +39,8 @@ export interface Record {
   oldestHouseholdMemberLastName?: string;
   telephone?: string;
   fuzzyScore?: number;
+  matchedOn?: string[];
+  fieldScores?: {[key: string]: number};
 }
 
 export interface RecordMatch {
@@ -47,6 +49,7 @@ export interface RecordMatch {
     record: Record;
     score: number;
     matchedOn: string[];
+    fieldScores?: {[key: string]: number};
   }>;
 }
 
@@ -57,6 +60,7 @@ export interface MatchResult {
   confidence: number;
   matchedBy: string;
   matchedAt: string;
+  fieldScores?: {[key: string]: number};
 }
 
 export interface DashboardStats {
