@@ -3,7 +3,8 @@ import { useState } from 'react';
 import { Record } from '@/types';
 import RecordCard from './RecordCard';
 import SearchBar from './SearchBar';
-import { Filter } from 'lucide-react';
+import { Filter, Globe } from 'lucide-react';
+import { SupportedLanguage, compareStrings } from '@/utils/languageUtils';
 
 interface RecordListProps {
   records: Record[];
@@ -18,17 +19,20 @@ const RecordList = ({
 }: RecordListProps) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [showFilters, setShowFilters] = useState(false);
+  const [searchLanguage, setSearchLanguage] = useState<SupportedLanguage>('latin');
 
   const filteredRecords = records.filter(record => {
     if (!searchQuery) return true;
     
-    const query = searchQuery.toLowerCase();
+    // Use language-aware comparison for search
     return (
-      record.firstName.toLowerCase().includes(query) ||
-      record.lastName.toLowerCase().includes(query) ||
-      record.patientId?.toLowerCase().includes(query) ||
-      record.healthFacility?.toLowerCase().includes(query) ||
-      record.identifiers?.some(id => id.value.toLowerCase().includes(query))
+      compareStrings(record.firstName, searchQuery, searchLanguage) ||
+      compareStrings(record.lastName, searchQuery, searchLanguage) ||
+      compareStrings(record.patientId || '', searchQuery, searchLanguage) ||
+      compareStrings(record.healthFacility || '', searchQuery, searchLanguage) ||
+      compareStrings(record.village || '', searchQuery, searchLanguage) ||
+      compareStrings(record.district || '', searchQuery, searchLanguage) ||
+      record.identifiers?.some(id => compareStrings(id.value, searchQuery, searchLanguage))
     );
   });
 
@@ -37,18 +41,37 @@ const RecordList = ({
       <div className="flex justify-between items-center">
         <h2 className="text-xl font-semibold">{title}</h2>
         
-        <button
-          onClick={() => setShowFilters(!showFilters)}
-          className="flex items-center text-sm font-medium text-muted-foreground hover:text-foreground transition-all-medium"
-        >
-          <Filter className="w-4 h-4 mr-1" />
-          Filters
-        </button>
+        <div className="flex items-center space-x-2">
+          <button
+            onClick={() => setShowFilters(!showFilters)}
+            className="flex items-center text-sm font-medium text-muted-foreground hover:text-foreground transition-all-medium"
+          >
+            <Filter className="w-4 h-4 mr-1" />
+            Filters
+          </button>
+          
+          <div className="flex items-center">
+            <Globe className="w-4 h-4 mr-1 text-muted-foreground" />
+            <select
+              value={searchLanguage}
+              onChange={(e) => setSearchLanguage(e.target.value as SupportedLanguage)}
+              className="text-sm bg-transparent border-none outline-none cursor-pointer"
+            >
+              <option value="latin">Latin</option>
+              <option value="amharic">Amharic</option>
+              <option value="tigrinya">Tigrinya</option>
+            </select>
+          </div>
+        </div>
       </div>
       
       <div className="mb-6">
         <SearchBar 
-          placeholder="Search by name, ID, or facility..." 
+          placeholder={searchLanguage === 'latin' 
+            ? "Search by name, ID, or facility..." 
+            : searchLanguage === 'amharic' 
+              ? "በስም፣ መታወቂያ ወይም ተቋም ይፈልጉ..." 
+              : "ብስም፡ መንነት ወይ ትካል ይድለዩ..."}
           onSearch={setSearchQuery}
         />
       </div>
@@ -56,8 +79,22 @@ const RecordList = ({
       {showFilters && (
         <div className="p-4 bg-muted/40 rounded-lg animate-fade-in mb-4">
           <div className="text-sm font-medium mb-2">Filter Options</div>
-          <div className="text-xs text-muted-foreground">
-            Advanced filters would appear here in a full implementation.
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="text-xs text-muted-foreground block mb-1">Search Language</label>
+              <select
+                value={searchLanguage}
+                onChange={(e) => setSearchLanguage(e.target.value as SupportedLanguage)}
+                className="w-full p-2 text-sm border rounded-md bg-background"
+              >
+                <option value="latin">Latin</option>
+                <option value="amharic">አማርኛ (Amharic)</option>
+                <option value="tigrinya">ትግርኛ (Tigrinya)</option>
+              </select>
+            </div>
+            <div className="text-xs text-muted-foreground">
+              Additional filters would appear here in a full implementation.
+            </div>
           </div>
         </div>
       )}

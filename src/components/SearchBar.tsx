@@ -6,9 +6,15 @@ interface SearchBarProps {
   placeholder?: string;
   onSearch: (query: string) => void;
   className?: string;
+  dir?: 'ltr' | 'rtl';
 }
 
-const SearchBar = ({ placeholder = "Search records...", onSearch, className = "" }: SearchBarProps) => {
+const SearchBar = ({ 
+  placeholder = "Search records...", 
+  onSearch, 
+  className = "",
+  dir = "ltr"
+}: SearchBarProps) => {
   const [query, setQuery] = useState('');
   const [isFocused, setIsFocused] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -31,6 +37,21 @@ const SearchBar = ({ placeholder = "Search records...", onSearch, className = ""
     }
   };
 
+  // Determine if text contains any Amharic or Tigrinya characters
+  const containsEthiopicScript = (text: string): boolean => {
+    // Ethiopic Unicode range: \u1200-\u137F (Ethiopic) and \u1380-\u139F (Ethiopic Supplement)
+    const ethiopicPattern = /[\u1200-\u137F\u1380-\u139F]/;
+    return ethiopicPattern.test(text);
+  };
+
+  // Dynamically set direction based on input content
+  const getDirection = (): 'ltr' | 'rtl' => {
+    if (dir !== 'ltr') return dir;
+    return containsEthiopicScript(query) ? 'rtl' : 'ltr';
+  };
+
+  const direction = getDirection();
+
   return (
     <div 
       className={`relative w-full transition-all duration-300 ${className}`}
@@ -43,24 +64,29 @@ const SearchBar = ({ placeholder = "Search records...", onSearch, className = ""
         }`}
       >
         <Search 
-          className={`absolute left-3 w-5 h-5 transition-all duration-300 ${
+          className={`${direction === 'rtl' ? 'right-3' : 'left-3'} absolute w-5 h-5 transition-all duration-300 ${
             isFocused ? 'text-primary' : 'text-muted-foreground'
           }`}
         />
         <input
           ref={inputRef}
           type="text"
-          className="w-full pl-10 pr-10 py-3 bg-transparent outline-none text-foreground"
+          className={`w-full py-3 bg-transparent outline-none text-foreground ${
+            direction === 'rtl' 
+              ? 'pr-10 pl-10 text-right' 
+              : 'pl-10 pr-10 text-left'
+          }`}
           placeholder={placeholder}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
+          dir={direction}
         />
         {query && (
           <button
             onClick={handleClear}
-            className="absolute right-3 p-1 rounded-full hover:bg-secondary transition-all-medium"
+            className={`absolute ${direction === 'rtl' ? 'left-3' : 'right-3'} p-1 rounded-full hover:bg-secondary transition-all-medium`}
             aria-label="Clear search"
           >
             <X className="w-4 h-4 text-muted-foreground" />

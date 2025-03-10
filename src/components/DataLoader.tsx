@@ -1,8 +1,9 @@
 
 import { useState } from 'react';
-import { Upload, Database, AlertCircle } from 'lucide-react';
+import { Upload, Database, AlertCircle, Globe } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { DataSource } from '@/types';
+import { SupportedLanguage } from '@/utils/languageUtils';
 
 interface DataLoaderProps {
   onDataLoaded: (data: any[]) => void;
@@ -12,6 +13,7 @@ interface DataLoaderProps {
 const DataLoader = ({ onDataLoaded, dataSource }: DataLoaderProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [interfaceLanguage, setInterfaceLanguage] = useState<SupportedLanguage>('latin');
   const { toast } = useToast();
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -21,8 +23,12 @@ const DataLoader = ({ onDataLoaded, dataSource }: DataLoaderProps) => {
     // Check file type
     if (!file.name.endsWith('.csv') && !file.name.endsWith('.json')) {
       toast({
-        title: "Invalid File Format",
-        description: "Please upload a CSV or JSON file.",
+        title: interfaceLanguage === 'latin' ? "Invalid File Format" :
+               interfaceLanguage === 'amharic' ? "ልክ ያልሆነ የፋይል ቅርጸት" :
+               "ዘይቅቡል ናይ ፋይል ቅርጺ",
+        description: interfaceLanguage === 'latin' ? "Please upload a CSV or JSON file." :
+                     interfaceLanguage === 'amharic' ? "እባክዎ የCSV ወይም JSON ፋይል ይጫኑ።" :
+                     "ብኽብረትካ CSV ወይ JSON ፋይል ጸዓን።",
         variant: "destructive",
       });
       return;
@@ -65,14 +71,26 @@ const DataLoader = ({ onDataLoaded, dataSource }: DataLoaderProps) => {
           setIsLoading(false);
           setUploadProgress(0);
           toast({
-            title: "Data Loaded Successfully",
-            description: `Loaded ${data.length} records from ${file.name}`,
+            title: interfaceLanguage === 'latin' ? "Data Loaded Successfully" :
+                   interfaceLanguage === 'amharic' ? "ውሂብ በተሳካ ሁኔታ ተጭኗል" :
+                   "ዳታ ብዕዉት ተጻዒኑ",
+            description: interfaceLanguage === 'latin' 
+              ? `Loaded ${data.length} records from ${file.name}` 
+              : interfaceLanguage === 'amharic'
+                ? `${data.length} መዝገቦችን ከ ${file.name} ጭኗል`
+                : `${data.length} መዛግብቲ ካብ ${file.name} ተጻዒኖም`,
           });
         }, 1000);
       } catch (error) {
         toast({
-          title: "Error Loading Data",
-          description: "The file format is invalid or corrupted.",
+          title: interfaceLanguage === 'latin' ? "Error Loading Data" :
+                 interfaceLanguage === 'amharic' ? "ውሂብ በመጫን ላይ ስህተት" :
+                 "ጌጋ ኣብ ምጽዓን ዳታ",
+          description: interfaceLanguage === 'latin' 
+            ? "The file format is invalid or corrupted." 
+            : interfaceLanguage === 'amharic'
+              ? "የፋይሉ ቅርጸት ልክ ያልሆነ ወይም የተበላሸ ነው።"
+              : "ቅርጺ ናይቲ ፋይል ዘይቅቡል ወይ ዝተበላሸወ እዩ።",
           variant: "destructive",
         });
         setIsLoading(false);
@@ -82,8 +100,14 @@ const DataLoader = ({ onDataLoaded, dataSource }: DataLoaderProps) => {
     
     reader.onerror = () => {
       toast({
-        title: "Error Reading File",
-        description: "There was an error reading the file.",
+        title: interfaceLanguage === 'latin' ? "Error Reading File" :
+               interfaceLanguage === 'amharic' ? "ፋይል በማንበብ ላይ ስህተት" :
+               "ጌጋ ኣብ ምንባብ ፋይል",
+        description: interfaceLanguage === 'latin' 
+          ? "There was an error reading the file." 
+          : interfaceLanguage === 'amharic'
+            ? "ፋይሉን በማንበብ ላይ ስህተት ተፈጥሯል።"
+            : "ጌጋ ኣብ ምንባብ ናይቲ ፋይል ተፈጢሩ።",
         variant: "destructive",
       });
       setIsLoading(false);
@@ -93,18 +117,62 @@ const DataLoader = ({ onDataLoaded, dataSource }: DataLoaderProps) => {
     reader.readAsText(file);
   };
   
+  const getTranslatedText = (
+    latinText: string, 
+    amharicText: string, 
+    tigrinyaText: string
+  ): string => {
+    switch (interfaceLanguage) {
+      case 'amharic':
+        return amharicText;
+      case 'tigrinya':
+        return tigrinyaText;
+      default:
+        return latinText;
+    }
+  };
+  
   return (
     <div className="border rounded-xl shadow-subtle p-6 bg-white dark:bg-black">
-      <div className="flex items-center mb-4">
-        <Database className="w-5 h-5 mr-2 text-primary" />
-        <h3 className="text-lg font-medium">
-          {dataSource ? `Upload to ${dataSource.name}` : 'Load Database Records'}
-        </h3>
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center">
+          <Database className="w-5 h-5 mr-2 text-primary" />
+          <h3 className="text-lg font-medium">
+            {dataSource 
+              ? getTranslatedText(
+                  `Upload to ${dataSource.name}`,
+                  `ወደ ${dataSource.name} ይጫኑ`,
+                  `ናብ ${dataSource.name} ጸዓን`
+                )
+              : getTranslatedText(
+                  'Load Database Records',
+                  'የዳታቤዝ መዝገቦችን ይጫኑ',
+                  'መዛግብቲ ዳታቤዝ ጸዓን'
+                )
+            }
+          </h3>
+        </div>
+        
+        <div className="flex items-center">
+          <Globe className="w-4 h-4 mr-1 text-muted-foreground" />
+          <select
+            value={interfaceLanguage}
+            onChange={(e) => setInterfaceLanguage(e.target.value as SupportedLanguage)}
+            className="text-sm bg-transparent border-none outline-none cursor-pointer"
+          >
+            <option value="latin">English</option>
+            <option value="amharic">አማርኛ</option>
+            <option value="tigrinya">ትግርኛ</option>
+          </select>
+        </div>
       </div>
       
-      <p className="text-sm text-muted-foreground mb-4">
-        Upload a CSV or JSON file containing records for the community database.
-        Each record should include identifiers like name, date of birth, and location.
+      <p className="text-sm text-muted-foreground mb-4" dir={interfaceLanguage === 'latin' ? 'ltr' : 'rtl'}>
+        {getTranslatedText(
+          'Upload a CSV or JSON file containing records for the community database. Each record should include identifiers like name, date of birth, and location.',
+          'ለማህበረሰብ ዳታቤዝ መዝገቦችን የያዘ የCSV ወይም JSON ፋይል ይጫኑ። እያንዳንዱ መዝገብ እንደ ስም፣ የትውልድ ቀን እና ቦታ ያሉ መለያዎችን ማካተት አለበት።',
+          'CSV ወይ JSON ፋይል ዝሓዘ መዛግብቲ ንማሕበረሰብ ዳታቤዝ ጸዓን። ነፍሲ ወከፍ መዝገብ ከም ሽም፡ ዕለተ ልደት፡ ከምኡ'ውን ቦታ ዝኣመሰሉ መለለይታት ክሕዝ ኣለዎ።'
+        )}
       </p>
       
       <div className="border-2 border-dashed border-muted rounded-lg p-8 text-center hover:bg-muted/20 transition-all-medium">
@@ -122,10 +190,12 @@ const DataLoader = ({ onDataLoaded, dataSource }: DataLoaderProps) => {
         >
           <Upload className="w-10 h-10 text-muted-foreground mb-2" />
           <span className="text-sm font-medium mb-1">
-            {isLoading ? "Processing File..." : "Drag & Drop File or Click to Browse"}
+            {isLoading 
+              ? getTranslatedText('Processing File...', 'ፋይል በማስኬድ ላይ...', 'ፋይል ይሰራሕ ኣሎ...')
+              : getTranslatedText('Drag & Drop File or Click to Browse', 'ፋይል ይጎትቱ እና ይጣሉ ወይም ለማሰስ ይጫኑ', 'ፋይል ጎተት ከምኡ'ውን ድርብዮ ወይ ክትፍትሽ ጠውቕ')}
           </span>
           <span className="text-xs text-muted-foreground">
-            Supports CSV and JSON formats
+            {getTranslatedText('Supports CSV and JSON formats', 'የCSV እና JSON ቅርጸቶችን ይደግፋል', 'CSV ከምኡ'ውን JSON ቅርጽታት ይድግፍ')}
           </span>
           
           {isLoading && (
@@ -137,7 +207,7 @@ const DataLoader = ({ onDataLoaded, dataSource }: DataLoaderProps) => {
                 ></div>
               </div>
               <div className="text-xs text-muted-foreground mt-1">
-                {uploadProgress}% Complete
+                {uploadProgress}% {getTranslatedText('Complete', 'ተጠናቋል', 'ተዛዚሙ')}
               </div>
             </div>
           )}
@@ -145,11 +215,14 @@ const DataLoader = ({ onDataLoaded, dataSource }: DataLoaderProps) => {
       </div>
       
       {dataSource && (
-        <div className="mt-4 bg-muted/30 p-3 rounded-md flex items-center">
-          <AlertCircle className="w-4 h-4 text-muted-foreground mr-2" />
+        <div className="mt-4 bg-muted/30 p-3 rounded-md flex items-center" dir={interfaceLanguage === 'latin' ? 'ltr' : 'rtl'}>
+          <AlertCircle className="w-4 h-4 text-muted-foreground mr-2 flex-shrink-0" />
           <span className="text-xs text-muted-foreground">
-            This will append new records to the existing {dataSource.name} 
-            ({dataSource.recordCount} records).
+            {getTranslatedText(
+              `This will append new records to the existing ${dataSource.name} (${dataSource.recordCount} records).`,
+              `ይህ አዳዲስ መዝገቦችን ወደ ነባሩ ${dataSource.name} (${dataSource.recordCount} መዝገቦች) ይጨምራል።`,
+              `እዚ ሓደስቲ መዛግብቲ ናብቲ ዘሎ ${dataSource.name} (${dataSource.recordCount} መዛግብቲ) ክውስኽ እዩ።`
+            )}
           </span>
         </div>
       )}

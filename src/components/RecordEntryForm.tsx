@@ -2,7 +2,8 @@
 import { useState } from 'react';
 import { Record } from '@/types';
 import { useToast } from '@/components/ui/use-toast';
-import { UserPlus, Save, X } from 'lucide-react';
+import { UserPlus, Save, X, Globe } from 'lucide-react';
+import { SupportedLanguage } from '@/utils/languageUtils';
 
 interface RecordEntryFormProps {
   onRecordSubmit: (record: Record) => void;
@@ -24,6 +25,7 @@ const RecordEntryForm = ({ onRecordSubmit }: RecordEntryFormProps) => {
     { type: 'Health ID', value: '' }
   ]);
   
+  const [inputLanguage, setInputLanguage] = useState<SupportedLanguage>('latin');
   const { toast } = useToast();
   
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -93,16 +95,33 @@ const RecordEntryForm = ({ onRecordSubmit }: RecordEntryFormProps) => {
   
   return (
     <div className="border rounded-xl shadow-subtle p-6 bg-white dark:bg-black">
-      <div className="flex items-center mb-4">
-        <UserPlus className="w-5 h-5 mr-2 text-primary" />
-        <h3 className="text-lg font-medium">New Patient Record</h3>
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center">
+          <UserPlus className="w-5 h-5 mr-2 text-primary" />
+          <h3 className="text-lg font-medium">New Patient Record</h3>
+        </div>
+        
+        <div className="flex items-center">
+          <Globe className="w-4 h-4 mr-1 text-muted-foreground" />
+          <select
+            value={inputLanguage}
+            onChange={(e) => setInputLanguage(e.target.value as SupportedLanguage)}
+            className="text-sm bg-transparent border-none outline-none cursor-pointer"
+          >
+            <option value="latin">Latin</option>
+            <option value="amharic">አማርኛ (Amharic)</option>
+            <option value="tigrinya">ትግርኛ (Tigrinya)</option>
+          </select>
+        </div>
       </div>
       
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium mb-1">
-              First Name <span className="text-destructive">*</span>
+              {inputLanguage === 'latin' ? 'First Name' : 
+               inputLanguage === 'amharic' ? 'መጠሪያ ስም' : 'ቀዳማይ ሽም'} 
+              <span className="text-destructive">*</span>
             </label>
             <input
               type="text"
@@ -111,12 +130,15 @@ const RecordEntryForm = ({ onRecordSubmit }: RecordEntryFormProps) => {
               onChange={handleChange}
               className="w-full p-2 border rounded-md focus:ring-2 focus:ring-primary/30"
               required
+              dir={inputLanguage === 'latin' ? 'ltr' : 'rtl'}
             />
           </div>
           
           <div>
             <label className="block text-sm font-medium mb-1">
-              Last Name <span className="text-destructive">*</span>
+              {inputLanguage === 'latin' ? 'Last Name' : 
+               inputLanguage === 'amharic' ? 'የአባት ስም' : 'ዳሓራይ ሽም'} 
+              <span className="text-destructive">*</span>
             </label>
             <input
               type="text"
@@ -125,6 +147,7 @@ const RecordEntryForm = ({ onRecordSubmit }: RecordEntryFormProps) => {
               onChange={handleChange}
               className="w-full p-2 border rounded-md focus:ring-2 focus:ring-primary/30"
               required
+              dir={inputLanguage === 'latin' ? 'ltr' : 'rtl'}
             />
           </div>
         </div>
@@ -132,7 +155,9 @@ const RecordEntryForm = ({ onRecordSubmit }: RecordEntryFormProps) => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium mb-1">
-              Gender <span className="text-destructive">*</span>
+              {inputLanguage === 'latin' ? 'Gender' : 
+               inputLanguage === 'amharic' ? 'ፆታ' : 'ጾታ'} 
+              <span className="text-destructive">*</span>
             </label>
             <select
               name="gender"
@@ -141,16 +166,30 @@ const RecordEntryForm = ({ onRecordSubmit }: RecordEntryFormProps) => {
               className="w-full p-2 border rounded-md focus:ring-2 focus:ring-primary/30"
               required
             >
-              <option value="">Select Gender</option>
-              <option value="Male">Male</option>
-              <option value="Female">Female</option>
-              <option value="Other">Other</option>
+              <option value="">
+                {inputLanguage === 'latin' ? 'Select Gender' : 
+                 inputLanguage === 'amharic' ? 'ፆታ ይምረጡ' : 'ጾታ ምረጽ'}
+              </option>
+              <option value="Male">
+                {inputLanguage === 'latin' ? 'Male' : 
+                 inputLanguage === 'amharic' ? 'ወንድ' : 'ተባዕታይ'}
+              </option>
+              <option value="Female">
+                {inputLanguage === 'latin' ? 'Female' : 
+                 inputLanguage === 'amharic' ? 'ሴት' : 'ኣንስታይ'}
+              </option>
+              <option value="Other">
+                {inputLanguage === 'latin' ? 'Other' : 
+                 inputLanguage === 'amharic' ? 'ሌላ' : 'ካልእ'}
+              </option>
             </select>
           </div>
           
           <div>
             <label className="block text-sm font-medium mb-1">
-              Date of Birth <span className="text-destructive">*</span>
+              {inputLanguage === 'latin' ? 'Date of Birth' : 
+               inputLanguage === 'amharic' ? 'የትውልድ ቀን' : 'ዕለተ ልደት'} 
+              <span className="text-destructive">*</span>
             </label>
             <input
               type="date"
@@ -165,61 +204,81 @@ const RecordEntryForm = ({ onRecordSubmit }: RecordEntryFormProps) => {
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium mb-1">Village/Location</label>
+            <label className="block text-sm font-medium mb-1">
+              {inputLanguage === 'latin' ? 'Village/Location' : 
+               inputLanguage === 'amharic' ? 'መንደር/ቦታ' : 'ዓዲ/ቦታ'}
+            </label>
             <input
               type="text"
               name="village"
               value={formData.village || ''}
               onChange={handleChange}
               className="w-full p-2 border rounded-md focus:ring-2 focus:ring-primary/30"
+              dir={inputLanguage === 'latin' ? 'ltr' : 'rtl'}
             />
           </div>
           
           <div>
-            <label className="block text-sm font-medium mb-1">District</label>
+            <label className="block text-sm font-medium mb-1">
+              {inputLanguage === 'latin' ? 'District' : 
+               inputLanguage === 'amharic' ? 'ወረዳ' : 'ዞባ'}
+            </label>
             <input
               type="text"
               name="district"
               value={formData.district || ''}
               onChange={handleChange}
               className="w-full p-2 border rounded-md focus:ring-2 focus:ring-primary/30"
+              dir={inputLanguage === 'latin' ? 'ltr' : 'rtl'}
             />
           </div>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium mb-1">Household Head</label>
+            <label className="block text-sm font-medium mb-1">
+              {inputLanguage === 'latin' ? 'Household Head' : 
+               inputLanguage === 'amharic' ? 'የቤተሰብ ኃላፊ' : 'ሓላፊ ስድራ'}
+            </label>
             <input
               type="text"
               name="householdHead"
               value={formData.householdHead || ''}
               onChange={handleChange}
               className="w-full p-2 border rounded-md focus:ring-2 focus:ring-primary/30"
+              dir={inputLanguage === 'latin' ? 'ltr' : 'rtl'}
             />
           </div>
           
           <div>
-            <label className="block text-sm font-medium mb-1">Mother's Name</label>
+            <label className="block text-sm font-medium mb-1">
+              {inputLanguage === 'latin' ? 'Mother\'s Name' : 
+               inputLanguage === 'amharic' ? 'የእናት ስም' : 'ሽም ኣደ'}
+            </label>
             <input
               type="text"
               name="motherName"
               value={formData.motherName || ''}
               onChange={handleChange}
               className="w-full p-2 border rounded-md focus:ring-2 focus:ring-primary/30"
+              dir={inputLanguage === 'latin' ? 'ltr' : 'rtl'}
             />
           </div>
         </div>
         
         <div>
           <div className="flex justify-between items-center mb-2">
-            <label className="block text-sm font-medium">Identifiers</label>
+            <label className="block text-sm font-medium">
+              {inputLanguage === 'latin' ? 'Identifiers' : 
+               inputLanguage === 'amharic' ? 'መለያዎች' : 'መለለይታት'}
+            </label>
             <button
               type="button"
               onClick={addIdentifier}
               className="text-xs text-primary hover:underline"
             >
-              + Add Another
+              + {inputLanguage === 'latin' ? 'Add Another' : 
+                 inputLanguage === 'amharic' ? 'ሌላ ጨምር' : 'ካልእ ወስኽ'}
             </button>
           </div>
           
@@ -230,19 +289,41 @@ const RecordEntryForm = ({ onRecordSubmit }: RecordEntryFormProps) => {
                 onChange={(e) => handleIdentifierChange(index, 'type', e.target.value)}
                 className="p-2 border rounded-md focus:ring-2 focus:ring-primary/30 w-1/3"
               >
-                <option value="">Select Type</option>
-                <option value="Health ID">Health ID</option>
-                <option value="National ID">National ID</option>
-                <option value="Voter ID">Voter ID</option>
-                <option value="Community ID">Community ID</option>
-                <option value="Study ID">Study ID</option>
+                <option value="">
+                  {inputLanguage === 'latin' ? 'Select Type' : 
+                   inputLanguage === 'amharic' ? 'ዓይነት ይምረጡ' : 'ዓይነት ምረጽ'}
+                </option>
+                <option value="Health ID">
+                  {inputLanguage === 'latin' ? 'Health ID' : 
+                   inputLanguage === 'amharic' ? 'የጤና መታወቂያ' : 'ናይ ጥዕና መለለዪ'}
+                </option>
+                <option value="National ID">
+                  {inputLanguage === 'latin' ? 'National ID' : 
+                   inputLanguage === 'amharic' ? 'ብሔራዊ መታወቂያ' : 'ሃገራዊ መለለዪ'}
+                </option>
+                <option value="Voter ID">
+                  {inputLanguage === 'latin' ? 'Voter ID' : 
+                   inputLanguage === 'amharic' ? 'የመራጮች መታወቂያ' : 'ናይ መራጺ መለለዪ'}
+                </option>
+                <option value="Community ID">
+                  {inputLanguage === 'latin' ? 'Community ID' : 
+                   inputLanguage === 'amharic' ? 'የማህበረሰብ መታወቂያ' : 'ናይ ማሕበረሰብ መለለዪ'}
+                </option>
+                <option value="Study ID">
+                  {inputLanguage === 'latin' ? 'Study ID' : 
+                   inputLanguage === 'amharic' ? 'የጥናት መታወቂያ' : 'ናይ መጽናዕቲ መለለዪ'}
+                </option>
               </select>
               <input
                 type="text"
                 value={id.value}
                 onChange={(e) => handleIdentifierChange(index, 'value', e.target.value)}
                 className="p-2 border rounded-md focus:ring-2 focus:ring-primary/30 flex-1"
-                placeholder="Enter identifier value"
+                placeholder={
+                  inputLanguage === 'latin' ? 'Enter identifier value' : 
+                  inputLanguage === 'amharic' ? 'የመለያ እሴት ያስገቡ' : 'ዋጋ መለለዪ ኣእቱ'
+                }
+                dir={inputLanguage === 'latin' ? 'ltr' : 'rtl'}
               />
               {identifiers.length > 1 && (
                 <button
@@ -263,7 +344,8 @@ const RecordEntryForm = ({ onRecordSubmit }: RecordEntryFormProps) => {
             className="inline-flex items-center px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-all-medium"
           >
             <Save className="w-4 h-4 mr-2" />
-            Submit & Find Matches
+            {inputLanguage === 'latin' ? 'Submit & Find Matches' : 
+             inputLanguage === 'amharic' ? 'አስገባ እና ተመሳሳዮችን ፈልግ' : 'ኣቕርብ ከምኡ'ውን ተመሳሰልቲ ድለ'}
           </button>
         </div>
       </form>
