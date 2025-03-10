@@ -6,8 +6,10 @@ import { Record, DataSource } from '@/types';
 import { useToast } from '@/components/ui/use-toast';
 import { Database, FileUp, Users, ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { RecordDataProvider, useRecordData } from '@/contexts/RecordDataContext';
+import { MatchingConfigProvider } from '@/contexts/MatchingConfigContext';
 
-const DataManagement = () => {
+const DataManagementContent = () => {
   const [dataSources, setDataSources] = useState<DataSource[]>([
     {
       id: 'community-db',
@@ -27,10 +29,14 @@ const DataManagement = () => {
     }
   ]);
   
+  const { addImportedRecords } = useRecordData();
   const { toast } = useToast();
   
-  const handleDataLoaded = (data: any[], sourceId?: string) => {
+  const handleDataLoaded = (data: Record[], sourceId?: string) => {
     console.log('Data loaded:', data.length, 'records');
+    
+    // Add to record data context for matching
+    addImportedRecords(data);
     
     // Update record count in the data source
     if (sourceId) {
@@ -58,7 +64,7 @@ const DataManagement = () => {
     
     toast({
       title: "Data Imported Successfully",
-      description: `${data.length} records have been added to the database.`,
+      description: `${data.length} records have been added and are available for matching.`,
     });
   };
   
@@ -75,7 +81,7 @@ const DataManagement = () => {
           
           <h1 className="text-3xl font-bold tracking-tight mb-2">Data Management</h1>
           <p className="text-lg text-muted-foreground">
-            Import, manage, and update record databases
+            Import, manage, and update record databases for matching
           </p>
         </div>
         
@@ -89,7 +95,7 @@ const DataManagement = () => {
               
               <p className="text-sm text-muted-foreground mb-6">
                 Upload a new database of community records or add to an existing one.
-                Supported formats include CSV and JSON.
+                The data will be available for matching on the Record Entry page.
               </p>
               
               <DataLoader onDataLoaded={handleDataLoaded} />
@@ -201,6 +207,16 @@ const DataManagement = () => {
         </div>
       </main>
     </div>
+  );
+};
+
+const DataManagement = () => {
+  return (
+    <MatchingConfigProvider>
+      <RecordDataProvider>
+        <DataManagementContent />
+      </RecordDataProvider>
+    </MatchingConfigProvider>
   );
 };
 

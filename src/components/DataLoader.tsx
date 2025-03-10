@@ -2,11 +2,11 @@
 import { useState } from 'react';
 import { Upload, Database, AlertCircle, Globe } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
-import { DataSource } from '@/types';
+import { DataSource, Record } from '@/types';
 import { SupportedLanguage } from '@/utils/languageUtils';
 
 interface DataLoaderProps {
-  onDataLoaded: (data: any[]) => void;
+  onDataLoaded: (data: Record[]) => void;
   dataSource?: DataSource;
 }
 
@@ -49,20 +49,62 @@ const DataLoader = ({ onDataLoaded, dataSource }: DataLoaderProps) => {
     
     reader.onload = (e) => {
       try {
-        let data;
+        let data: Record[] = [];
         if (file.name.endsWith('.json')) {
-          data = JSON.parse(e.target?.result as string);
+          const parsedData = JSON.parse(e.target?.result as string);
+          // Ensure the data conforms to our Record type
+          data = parsedData.map((item: any, index: number) => ({
+            id: item.id || `imported-${Date.now()}-${index}`,
+            firstName: item.firstName || '',
+            lastName: item.lastName || '',
+            middleName: item.middleName || '',
+            gender: item.gender || '',
+            birthDate: item.birthDate || '',
+            village: item.village || '',
+            subVillage: item.subVillage || '',
+            district: item.district || '',
+            householdHead: item.householdHead || '',
+            motherName: item.motherName || '',
+            identifiers: item.identifiers || [],
+            metadata: {
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+              source: dataSource?.name || 'Imported Data'
+            }
+          }));
         } else {
           // Basic CSV parsing (in a real app, use a CSV parsing library)
           const csv = e.target?.result as string;
           const lines = csv.split('\n');
           const headers = lines[0].split(',');
-          data = lines.slice(1).map(line => {
+          
+          data = lines.slice(1).map((line, index) => {
             const values = line.split(',');
-            return headers.reduce((obj, header, i) => {
-              obj[header.trim()] = values[i]?.trim();
-              return obj;
-            }, {} as any);
+            const record: any = {
+              id: `imported-${Date.now()}-${index}`,
+              metadata: {
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+                source: dataSource?.name || 'Imported Data'
+              }
+            };
+            
+            // Map CSV columns to record fields
+            headers.forEach((header, i) => {
+              const cleanHeader = header.trim();
+              if (values[i]) {
+                record[cleanHeader] = values[i].trim();
+              }
+            });
+            
+            // Ensure required fields for Record type
+            return {
+              firstName: record.firstName || '',
+              lastName: record.lastName || '',
+              gender: record.gender || '',
+              birthDate: record.birthDate || '',
+              ...record
+            } as Record;
           });
         }
         
