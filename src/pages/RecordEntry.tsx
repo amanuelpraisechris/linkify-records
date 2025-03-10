@@ -8,7 +8,7 @@ import { Record } from '@/types';
 import { useToast } from '@/components/ui/use-toast';
 import { RecordDataProvider, useRecordData } from '@/contexts/RecordDataContext';
 import { MatchingConfigProvider } from '@/contexts/MatchingConfigContext';
-import { ArrowLeft, AlertCircle } from 'lucide-react';
+import { ArrowLeft, AlertCircle, Database, Info } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
@@ -60,6 +60,19 @@ const RecordEntryContent = () => {
     // Add the clinic record
     addRecord(record, 'clinic');
     
+    // Check if community database is loaded
+    if (communityRecords.length === 0) {
+      setPotentialMatches([]);
+      setSubmittedRecord(record);
+      
+      toast({
+        title: "No Community Database",
+        description: "Please import the HDSS community database to enable matching.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     // Find potential matches in the community database
     const matches = findMatchesForRecord(record);
     setPotentialMatches(matches);
@@ -67,7 +80,7 @@ const RecordEntryContent = () => {
     
     toast({
       title: "Record Submitted",
-      description: `Found ${matches.length} potential matches for this record.`,
+      description: `Found ${matches.length} potential matches in the HDSS database.`,
     });
   };
 
@@ -92,8 +105,9 @@ const RecordEntryContent = () => {
           <Alert className="mb-6 bg-amber-50 text-amber-800 border-amber-200 dark:bg-amber-900/20 dark:text-amber-400 dark:border-amber-900/50">
             <AlertCircle className="h-4 w-4" />
             <AlertTitle>No Community Database Loaded</AlertTitle>
-            <AlertDescription>
-              Please import a community database to enable probabilistic matching of clinic records.
+            <AlertDescription className="flex flex-col gap-2">
+              <p>Please import a community database to enable probabilistic matching of clinic records.</p>
+              <p className="text-sm"><strong>Important:</strong> Click "Import Community Database" below and set it as the main HDSS database to enable matching functionality.</p>
             </AlertDescription>
           </Alert>
         )}
@@ -122,8 +136,32 @@ const RecordEntryContent = () => {
                   showMatchDetail={true} 
                 />
               ) : submittedRecord ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  No potential matches found for the submitted record in the HDSS database.
+                <div className="bg-muted/30 p-6 rounded-lg border border-muted">
+                  <div className="flex items-center gap-2 mb-2 text-amber-600 dark:text-amber-400">
+                    <AlertCircle className="h-5 w-5" />
+                    <h3 className="text-lg font-medium">No potential matches found</h3>
+                  </div>
+                  <p className="text-muted-foreground mb-4">
+                    No potential matches were found for the submitted record in the HDSS database.
+                  </p>
+                  
+                  {communityRecords.length === 0 ? (
+                    <Alert className="bg-blue-50 border-blue-200 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-900/50">
+                      <Database className="h-4 w-4" />
+                      <AlertTitle>Community Database Required</AlertTitle>
+                      <AlertDescription>
+                        You need to import the community HDSS database first to enable matching functionality.
+                      </AlertDescription>
+                    </Alert>
+                  ) : (
+                    <Alert className="bg-blue-50 border-blue-200 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-900/50">
+                      <Info className="h-4 w-4" />
+                      <AlertTitle>Try refining your search</AlertTitle>
+                      <AlertDescription>
+                        Consider checking the spelling of names, verify date of birth, or try including additional identifiers such as village or household information.
+                      </AlertDescription>
+                    </Alert>
+                  )}
                 </div>
               ) : (
                 <div className="text-center py-8 text-muted-foreground">

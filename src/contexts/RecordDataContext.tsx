@@ -69,7 +69,7 @@ export const RecordDataProvider: React.FC<RecordDataProviderProps> = ({
         );
         return [...nonCommunityRecords, ...newRecords];
       });
-      console.log(`Set ${newRecords.length} records as main community data source`);
+      console.log(`Set ${newRecords.length} records as main community data source (HDSS Database)`);
     } else {
       // Add to imported records
       setImportedRecords(newRecords);
@@ -86,32 +86,50 @@ export const RecordDataProvider: React.FC<RecordDataProviderProps> = ({
   };
 
   const findMatchesForRecord = (sourceRecord: Record) => {
+    // Debug information about available records
+    console.log(`Total records: ${records.length}`);
+    console.log(`Community records: ${communityRecords.length}`);
+    console.log(`Clinic records: ${clinicRecords.length}`);
+    console.log(`Imported records: ${importedRecords.length}`);
+    
     // Use community records as the main database to search in
-    // If no community records, fall back to all records plus imported records
     const searchPool = communityRecords.length > 0 
       ? communityRecords 
       : [...records, ...importedRecords].filter(record => record.id !== sourceRecord.id);
     
     console.log(`Searching for matches in ${searchPool.length} records`);
+    console.log('Search source record:', JSON.stringify(sourceRecord, null, 2));
     
-    // Use probabilistic matching if community records exist
+    // If we have no records to search in, return empty results
+    if (searchPool.length === 0) {
+      console.log('No records available to search in. Make sure to import HDSS community database.');
+      return [];
+    }
+    
+    // Use probabilistic matching with community records
     if (communityRecords.length > 0) {
-      return findProbabilisticMatches(sourceRecord, searchPool, config.threshold.low)
-        .map(match => ({
-          record: match.record,
-          score: match.score,
-          matchedOn: match.matchedOn,
-          fieldScores: match.fieldScores
-        }));
+      console.log('Using probabilistic matching algorithm');
+      const matches = findProbabilisticMatches(sourceRecord, searchPool, config.threshold.low);
+      console.log(`Found ${matches.length} probabilistic matches`);
+      return matches.map(match => ({
+        record: match.record,
+        score: match.score,
+        matchedOn: match.matchedOn,
+        fieldScores: match.fieldScores
+      }));
     } else {
       // Fall back to existing algorithm if no community records
-      return searchPool
+      console.log('Using fallback deterministic matching algorithm');
+      const matches = searchPool
         .map(record => {
           const { score, matchedOn } = calculateMatchScore(sourceRecord, record, config);
           return { record, score, matchedOn };
         })
         .filter(match => match.score >= config.threshold.low)
         .sort((a, b) => b.score - a.score);
+      
+      console.log(`Found ${matches.length} deterministic matches`);
+      return matches;
     }
   };
 
