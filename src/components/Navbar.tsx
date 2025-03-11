@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Database, Link2, Search, User, Lock, Users } from 'lucide-react';
+import { Database, Link2, Search, User, Lock, Users, Settings } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
 
@@ -87,18 +87,31 @@ const Navbar = () => {
             </Link>
             
             {isAdmin && (
-              <Link
-                to="/admin-dashboard"
-                className={`px-3 py-2 rounded-md text-sm font-medium hover:bg-secondary transition-all-medium flex items-center ${
-                  location.pathname === '/admin-dashboard' 
-                    ? 'bg-primary/10 text-primary' 
-                    : 'text-foreground'
-                }`}
-              >
-                <Lock className="w-4 h-4 mr-1.5" />
-                Admin
-                <Badge className="ml-2 bg-purple-500 text-white text-xs">Admin</Badge>
-              </Link>
+              <>
+                <Link
+                  to="/admin-dashboard"
+                  className={`px-3 py-2 rounded-md text-sm font-medium hover:bg-secondary transition-all-medium flex items-center ${
+                    location.pathname === '/admin-dashboard' 
+                      ? 'bg-primary/10 text-primary' 
+                      : 'text-foreground'
+                  }`}
+                >
+                  <Lock className="w-4 h-4 mr-1.5" />
+                  Admin
+                  <Badge className="ml-2 bg-purple-500 text-white text-xs">Admin</Badge>
+                </Link>
+                <Link
+                  to="/matching-configuration"
+                  className={`px-3 py-2 rounded-md text-sm font-medium hover:bg-secondary transition-all-medium flex items-center ${
+                    location.pathname === '/matching-configuration' 
+                      ? 'bg-primary/10 text-primary' 
+                      : 'text-foreground'
+                  }`}
+                >
+                  <Settings className="w-4 h-4 mr-1.5" />
+                  Matching Config
+                </Link>
+              </>
             )}
           </div>
           

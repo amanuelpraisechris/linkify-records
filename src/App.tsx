@@ -13,6 +13,7 @@ import AdminDashboard from "./components/admin/AdminDashboard";
 import ProtectedRoute from "./components/admin/ProtectedRoute";
 import Reports from "./pages/Reports";
 import { MatchingConfigProvider } from "./contexts/MatchingConfigContext";
+import MatchingConfiguration from "./pages/MatchingConfiguration";
 
 // Create a new QueryClient with default error handling
 const queryClient = new QueryClient({
@@ -51,7 +52,7 @@ const App = () => (
               path="/matching-configuration" 
               element={
                 <ProtectedRoute>
-                  <DataManagement />
+                  <MatchingConfiguration />
                 </ProtectedRoute>
               } 
             />
