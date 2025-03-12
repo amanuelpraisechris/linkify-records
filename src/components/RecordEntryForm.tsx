@@ -28,6 +28,7 @@ const RecordEntryForm = ({ onRecordSubmit, onSaveForSearch }: RecordEntryFormPro
     identifierType,
     inputLanguage,
     isRepeatPatient,
+    healthFacility,
     setBirthYear,
     setBirthMonth,
     setBirthDay,
@@ -47,7 +48,8 @@ const RecordEntryForm = ({ onRecordSubmit, onSaveForSearch }: RecordEntryFormPro
     handleVisitSave,
     handlePatientFound,
     handleNextToLinkage,
-    handleSubmit
+    handleSubmit,
+    handleHealthFacilityChange
   } = useRecordForm({ onRecordSubmit, onSaveForSearch });
   
   return (
@@ -107,6 +109,8 @@ const RecordEntryForm = ({ onRecordSubmit, onSaveForSearch }: RecordEntryFormPro
             handlePatientFound={handlePatientFound}
             handleNextToLinkage={handleNextToLinkage}
             handleSubmit={handleSubmit}
+            healthFacility={healthFacility}
+            handleHealthFacilityChange={handleHealthFacilityChange}
           />
         </TabsContent>
         

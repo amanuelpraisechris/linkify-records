@@ -2,6 +2,7 @@
 import { Record, Visit, ResidencyPeriod } from '@/types';
 import { SupportedLanguage } from '@/utils/languageUtils';
 import ClinicIdEntrySection from './ClinicIdEntrySection';
+import HealthFacilitySection from './HealthFacilitySection';
 import VisitDetailsSection from './VisitDetailsSection';
 import IdentifierTypeSelector from './IdentifierTypeSelector';
 import PersonalIdentifiersSection from './PersonalIdentifiersSection';
@@ -39,6 +40,8 @@ interface PatientRegistryTabProps {
   handlePatientFound: (record: Record) => void;
   handleNextToLinkage: () => void;
   handleSubmit: (e: React.FormEvent) => void;
+  healthFacility: string;
+  handleHealthFacilityChange: (value: string) => void;
 }
 
 const PatientRegistryTab = ({
@@ -69,7 +72,9 @@ const PatientRegistryTab = ({
   inputLanguage,
   handlePatientFound,
   handleNextToLinkage,
-  handleSubmit
+  handleSubmit,
+  healthFacility,
+  handleHealthFacilityChange
 }: PatientRegistryTabProps) => {
   return (
     <form className="space-y-6">
@@ -79,6 +84,12 @@ const PatientRegistryTab = ({
         addClinicId={addClinicId}
         removeClinicId={removeClinicId}
         onPatientFound={handlePatientFound}
+        inputLanguage={inputLanguage}
+      />
+      
+      <HealthFacilitySection
+        healthFacility={healthFacility}
+        handleHealthFacilityChange={handleHealthFacilityChange}
         inputLanguage={inputLanguage}
       />
       

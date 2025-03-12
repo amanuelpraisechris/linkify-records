@@ -36,7 +36,9 @@ export const useRecordForm = ({ onRecordSubmit, onSaveForSearch }: UseRecordForm
     inputLanguage,
     setInputLanguage,
     isRepeatPatient,
-    setIsRepeatPatient
+    setIsRepeatPatient,
+    healthFacility,
+    setHealthFacility
   } = useFormState();
   
   // Visit handlers
@@ -65,6 +67,15 @@ export const useRecordForm = ({ onRecordSubmit, onSaveForSearch }: UseRecordForm
     addClinicId,
     removeClinicId
   } = useClinicIdHandlers(clinicIds, setClinicIds);
+  
+  // Health facility handler
+  const handleHealthFacilityChange = (value: string) => {
+    setHealthFacility(value);
+    setFormData(prev => ({
+      ...prev,
+      healthFacility: value
+    }));
+  };
   
   // Form handlers
   const {
@@ -104,10 +115,12 @@ export const useRecordForm = ({ onRecordSubmit, onSaveForSearch }: UseRecordForm
     setIdentifierType,
     setIsRepeatPatient,
     setActiveTab,
+    setHealthFacility,
     visit,
     identifiers,
     clinicIds,
     residencyPeriods,
+    healthFacility,
     onRecordSubmit,
     onSaveForSearch
   });
@@ -125,6 +138,7 @@ export const useRecordForm = ({ onRecordSubmit, onSaveForSearch }: UseRecordForm
     identifierType,
     inputLanguage,
     isRepeatPatient,
+    healthFacility,
     setBirthYear,
     setBirthMonth,
     setBirthDay,
@@ -144,6 +158,7 @@ export const useRecordForm = ({ onRecordSubmit, onSaveForSearch }: UseRecordForm
     handleVisitSave,
     handlePatientFound,
     handleNextToLinkage,
-    handleSubmit
+    handleSubmit,
+    handleHealthFacilityChange
   };
 };

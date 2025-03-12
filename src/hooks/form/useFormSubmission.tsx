@@ -18,10 +18,12 @@ interface UseFormSubmissionProps {
   setIdentifierType: React.Dispatch<React.SetStateAction<'patient' | 'otherPerson'>>;
   setIsRepeatPatient: React.Dispatch<React.SetStateAction<boolean>>;
   setActiveTab: React.Dispatch<React.SetStateAction<string>>;
+  setHealthFacility?: React.Dispatch<React.SetStateAction<string>>;
   visit: Visit;
   identifiers: Array<{ type: string; value: string }>;
   clinicIds: Array<{ type: string; value: string }>;
   residencyPeriods: ResidencyPeriod[];
+  healthFacility?: string;
   onRecordSubmit: (record: Record) => void;
   onSaveForSearch?: (record: Record) => void;
 }
@@ -41,10 +43,12 @@ export const useFormSubmission = ({
   setIdentifierType,
   setIsRepeatPatient,
   setActiveTab,
+  setHealthFacility,
   visit,
   identifiers,
   clinicIds,
   residencyPeriods,
+  healthFacility,
   onRecordSubmit,
   onSaveForSearch
 }: UseFormSubmissionProps) => {
@@ -77,11 +81,13 @@ export const useFormSubmission = ({
       id: `search-${Date.now()}`,
       ...formData as Record,
       birthDate: birthDateStr,
+      healthFacility: healthFacility || '',
       identifiers: [...clinicIds, ...identifiers].filter(id => id.type && id.value),
       metadata: {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
-        source: 'Health Facility Entry'
+        source: 'Health Facility Entry',
+        facility: healthFacility
       }
     };
     
@@ -128,13 +134,15 @@ export const useFormSubmission = ({
       id: `new-${Date.now()}`,
       ...formData as Record,
       birthDate: birthDateStr,
+      healthFacility: healthFacility || '',
       identifiers: [...clinicIds, ...identifiers].filter(id => id.type && id.value),
       visits: [{...visit}],
       residencyTimeline: [...residencyPeriods],
       metadata: {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
-        source: 'Health Facility Entry'
+        source: 'Health Facility Entry',
+        facility: healthFacility
       }
     };
     
@@ -162,6 +170,7 @@ export const useFormSubmission = ({
       oldest_member_first_name: '',
       oldest_member_middle_name: '',
       oldest_member_last_name: '',
+      healthFacility: '',
     });
     setBirthYear('');
     setBirthMonth('');
@@ -171,6 +180,9 @@ export const useFormSubmission = ({
     setResidencyPeriods([]);
     setIdentifierType('patient');
     setIsRepeatPatient(false);
+    if (setHealthFacility) {
+      setHealthFacility('');
+    }
     setActiveTab('patient-registry');
     
     toast({

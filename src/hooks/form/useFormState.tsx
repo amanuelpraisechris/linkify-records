@@ -21,6 +21,7 @@ export const useFormState = () => {
     oldest_member_first_name: '',
     oldest_member_middle_name: '',
     oldest_member_last_name: '',
+    healthFacility: '',
   });
   
   const [birthYear, setBirthYear] = useState<string>('');
@@ -39,6 +40,7 @@ export const useFormState = () => {
   const [identifierType, setIdentifierType] = useState<'patient' | 'otherPerson'>('patient');
   const [inputLanguage, setInputLanguage] = useState<SupportedLanguage>('latin');
   const [isRepeatPatient, setIsRepeatPatient] = useState(false);
+  const [healthFacility, setHealthFacility] = useState<string>('');
   
   return {
     formData,
@@ -60,6 +62,8 @@ export const useFormState = () => {
     inputLanguage,
     setInputLanguage,
     isRepeatPatient,
-    setIsRepeatPatient
+    setIsRepeatPatient,
+    healthFacility,
+    setHealthFacility
   };
 };
