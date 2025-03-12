@@ -1,10 +1,9 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/components/ui/use-toast';
-import { useRecordData } from '@/contexts/RecordDataContext';
+import { useRecordData } from '@/contexts/record-data/RecordDataContext';
 import { DatabaseIcon, FileDownIcon, ShieldIcon } from 'lucide-react';
 import { generateSessionId, exportDataToCSV } from '@/utils/exportDataUtils';
 import { visitByOptions } from '@/utils/recordConstants';
