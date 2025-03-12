@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 import { Button } from '@/components/ui/button';
@@ -7,14 +6,17 @@ import { Record } from '@/types';
 import { useRecordData } from '@/contexts/record-data/RecordDataContext';
 import { Database, FileUp, RefreshCw, X, Users, Building, CheckCircle } from 'lucide-react';
 
-const ImportDataForMatching = () => {
+export interface ImportDataForMatchingProps {
+  onDataImport: (records: Record[]) => void;
+}
+
+const ImportDataForMatching = ({ onDataImport }: ImportDataForMatchingProps) => {
   const { importedRecords, communityRecords, addImportedRecords, clearImportedRecords } = useRecordData();
   const [showDataLoader, setShowDataLoader] = useState(false);
   const [importMode, setImportMode] = useState<'matching' | 'community'>('matching');
   const [dataLoaded, setDataLoaded] = useState(false);
   const { toast } = useToast();
 
-  // Check if data is already loaded
   useEffect(() => {
     if (communityRecords.length > 0 || importedRecords.length > 0) {
       setDataLoaded(true);
@@ -24,7 +26,6 @@ const ImportDataForMatching = () => {
 
   const handleDataLoaded = (data: Record[]) => {
     if (data.length > 0) {
-      // Mark the source appropriately based on the import mode
       const markedData = data.map(record => ({
         ...record,
         metadata: {
@@ -33,8 +34,9 @@ const ImportDataForMatching = () => {
         }
       }));
       
-      // Add to the appropriate data store
       addImportedRecords(markedData, importMode === 'community');
+      
+      onDataImport(markedData);
       
       setShowDataLoader(false);
       setDataLoaded(true);

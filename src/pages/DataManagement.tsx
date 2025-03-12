@@ -8,9 +8,6 @@ import ImportDataForMatching from '@/components/ImportDataForMatching';
 import RecordList from '@/components/RecordList';
 import DataManagementControls from '@/components/admin/DataManagementControls';
 
-// This is already defined in the ImportDataForMatching.tsx file
-// No need to redeclare it here
-
 const DataManagement = () => {
   const { 
     records, 
