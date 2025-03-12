@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/components/ui/use-toast';
@@ -9,14 +8,8 @@ import ImportDataForMatching from '@/components/ImportDataForMatching';
 import RecordList from '@/components/RecordList';
 import DataManagementControls from '@/components/admin/DataManagementControls';
 
-// This solves the issue by declaring the expected props for ImportDataForMatching
-// You'll need to update this declaration based on the actual component implementation
-declare module '@/components/ImportDataForMatching' {
-  export interface ImportDataForMatchingProps {
-    onDataImport: (records: Record[]) => void;
-  }
-  export default function ImportDataForMatching(props: ImportDataForMatchingProps): JSX.Element;
-}
+// This is already defined in the ImportDataForMatching.tsx file
+// No need to redeclare it here
 
 const DataManagement = () => {
   const { 

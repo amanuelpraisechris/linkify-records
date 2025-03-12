@@ -3,6 +3,7 @@ import { Record } from '@/types';
 import ImportDataForMatching from '@/components/ImportDataForMatching';
 import RecordEntryForm from '@/components/RecordEntryForm';
 import RecordList from '@/components/RecordList';
+import { useToast } from '@/components/ui/use-toast';
 
 interface RecordEntryTabProps {
   clinicRecords: Record[];
@@ -17,10 +18,20 @@ const RecordEntryTab = ({
   onRecordSubmit,
   onSaveForSearch
 }: RecordEntryTabProps) => {
+  const { toast } = useToast();
+
+  const handleDataImport = (records: Record[]) => {
+    toast({
+      title: "Data Import",
+      description: `${records.length} records were imported successfully.`,
+    });
+    // We could handle imported data further here if needed
+  };
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
       <div className="lg:col-span-1">
-        <ImportDataForMatching />
+        <ImportDataForMatching onDataImport={handleDataImport} />
         <RecordEntryForm 
           onRecordSubmit={onRecordSubmit} 
           onSaveForSearch={onSaveForSearch}
