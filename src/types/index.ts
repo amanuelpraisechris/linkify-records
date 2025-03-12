@@ -1,4 +1,3 @@
-
 export interface Record {
   id: string;
   patientId?: string;
@@ -23,6 +22,7 @@ export interface Record {
     source: string;
     matchScore?: number;
     matchNotes?: string;
+    facility?: string;
   };
   // Residence fields
   village?: string;
