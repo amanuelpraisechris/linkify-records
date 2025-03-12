@@ -39,8 +39,8 @@ const RecordEntryTab = ({
       </div>
       
       <div className="lg:col-span-2">
-        <div className="bg-white dark:bg-black border rounded-xl shadow-card p-6 mb-6">
-          <h2 className="text-xl font-semibold mb-4">Recently Added Clinic Records</h2>
+        <div className="bg-white/10 dark:bg-black/20 backdrop-blur-sm border border-white/20 rounded-xl shadow-card p-6 mb-6">
+          <h2 className="text-xl font-semibold mb-4 text-white">Recently Added Clinic Records</h2>
           <RecordList 
             records={clinicRecords} 
             showMatchDetail={false} 

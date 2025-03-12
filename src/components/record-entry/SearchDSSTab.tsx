@@ -1,11 +1,12 @@
 
-import { Search, Settings } from 'lucide-react';
+import { Search, Settings, Hospital } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { SupportedLanguage } from '@/utils/languageUtils';
 import { Record } from '@/types';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useMatchingConfig } from '@/contexts/MatchingConfigContext';
 import { Badge } from '@/components/ui/badge';
+import { useState } from 'react';
 
 interface SearchDSSTabProps {
   inputLanguage: SupportedLanguage;
@@ -29,6 +30,7 @@ const SearchDSSTab = ({
   onSaveForSearch
 }: SearchDSSTabProps) => {
   const { config, loadConfigProfile, availableProfiles } = useMatchingConfig();
+  const [selectedFacility, setSelectedFacility] = useState('');
   
   const handleSearch = () => {
     if (onSaveForSearch) {
@@ -40,7 +42,8 @@ const SearchDSSTab = ({
         metadata: {
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
-          source: 'Health Facility Entry'
+          source: 'Health Facility Entry',
+          facility: selectedFacility || 'Not Specified'
         }
       };
       onSaveForSearch(searchRecord);
@@ -83,6 +86,32 @@ const SearchDSSTab = ({
              inputLanguage === 'amharic' ? 'DSS ይፈልጉ' : 'DSS ድለ'}
           </Button>
         </div>
+      </div>
+      
+      <div className="bg-muted/20 backdrop-blur-sm p-4 rounded-md mb-4">
+        <div className="flex items-center space-x-2 mb-2">
+          <Hospital className="h-4 w-4" />
+          <h5 className="font-medium">
+            {inputLanguage === 'latin' ? 'Health Facility' : 
+             inputLanguage === 'amharic' ? 'የጤና ተቋም' : 'ትካል ጥዕና'}
+          </h5>
+        </div>
+        <Select
+          value={selectedFacility}
+          onValueChange={setSelectedFacility}
+        >
+          <SelectTrigger className="w-full backdrop-blur-sm bg-white/10">
+            <SelectValue placeholder={
+              inputLanguage === 'latin' ? 'Select health facility' : 
+              inputLanguage === 'amharic' ? 'የጤና ተቋም ይምረጡ' : 'ትካል ጥዕና ምረጽ'
+            } />
+          </SelectTrigger>
+          <SelectContent className="bg-white dark:bg-gray-800">
+            <SelectItem value="central-hospital">Central Hospital</SelectItem>
+            <SelectItem value="community-clinic">Community Clinic</SelectItem>
+            <SelectItem value="rural-health-center">Rural Health Center</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
       
       <div className="border-2 border-dashed rounded-md p-8 text-center">
