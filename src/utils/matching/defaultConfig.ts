@@ -15,6 +15,11 @@ export const DEFAULT_FIELD_WEIGHTS: FieldWeights = {
   subVillage: 15,
   phoneNumber: 20,
   oldestHouseholdMember: 15,
+  // Additional location identifiers
+  tabiaName: 15,
+  kushetName: 15,
+  gotName: 15,
+  houseNumber: 10,
 };
 
 /**

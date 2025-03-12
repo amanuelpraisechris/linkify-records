@@ -17,7 +17,12 @@ export interface FieldWeights {
   phoneNumber: number;
   middleName: number;
   oldestHouseholdMember: number;
-  [key: string]: number; // Allow for additional custom fields
+  // Additional location-based identifiers
+  tabiaName?: number;
+  kushetName?: number;
+  gotName?: number;
+  houseNumber?: number;
+  [key: string]: number | undefined; // Allow for additional custom fields
 }
 
 /**

@@ -40,5 +40,22 @@ export const fieldDescriptions: Record<string, FieldDescription> = {
   phoneNumber: {
     label: "phoneNumber",
     description: "Patient's phone number - Exact matching only"
+  },
+  // New location-based identifier fields
+  tabiaName: {
+    label: "tabiaName",
+    description: "Patient's Tabia name - Geographic identifier"
+  },
+  kushetName: {
+    label: "kushetName",
+    description: "Patient's Kushet name - Geographic identifier"
+  },
+  gotName: {
+    label: "gotName",
+    description: "Patient's Got name - Geographic identifier"
+  },
+  houseNumber: {
+    label: "houseNumber",
+    description: "Patient's house number - Exact matching only"
   }
 };

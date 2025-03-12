@@ -144,6 +144,75 @@ export const calculateMatchScore = (
     else if (oldestMemberScore > 50) matchedOn.push('Oldest Household Member (partial)');
   }
   
+  // NEW ADDITIONS: Compare the additional identifiers
+  
+  // Tabia Name
+  if (record1.identifiers && record2.identifiers) {
+    const tabia1 = record1.identifiers.find(id => id.type === 'Tabia Name')?.value || '';
+    const tabia2 = record2.identifiers.find(id => id.type === 'Tabia Name')?.value || '';
+    
+    if (tabia1 && tabia2) {
+      const tabiaWeight = config.fieldWeights.tabiaName || 15;
+      const tabiaScore = calculateStringSimilarity(tabia1, tabia2, config);
+      totalScore += tabiaScore * tabiaWeight;
+      totalWeight += tabiaWeight;
+      fieldScores['tabiaName'] = tabiaScore;
+      
+      if (tabiaScore > 80) matchedOn.push('Tabia Name');
+      else if (tabiaScore > 50) matchedOn.push('Tabia Name (partial)');
+    }
+  }
+  
+  // Kushet Name
+  if (record1.identifiers && record2.identifiers) {
+    const kushet1 = record1.identifiers.find(id => id.type === 'Kushet Name')?.value || '';
+    const kushet2 = record2.identifiers.find(id => id.type === 'Kushet Name')?.value || '';
+    
+    if (kushet1 && kushet2) {
+      const kushetWeight = config.fieldWeights.kushetName || 15;
+      const kushetScore = calculateStringSimilarity(kushet1, kushet2, config);
+      totalScore += kushetScore * kushetWeight;
+      totalWeight += kushetWeight;
+      fieldScores['kushetName'] = kushetScore;
+      
+      if (kushetScore > 80) matchedOn.push('Kushet Name');
+      else if (kushetScore > 50) matchedOn.push('Kushet Name (partial)');
+    }
+  }
+  
+  // Got Name
+  if (record1.identifiers && record2.identifiers) {
+    const got1 = record1.identifiers.find(id => id.type === 'Got Name')?.value || '';
+    const got2 = record2.identifiers.find(id => id.type === 'Got Name')?.value || '';
+    
+    if (got1 && got2) {
+      const gotWeight = config.fieldWeights.gotName || 15;
+      const gotScore = calculateStringSimilarity(got1, got2, config);
+      totalScore += gotScore * gotWeight;
+      totalWeight += gotWeight;
+      fieldScores['gotName'] = gotScore;
+      
+      if (gotScore > 80) matchedOn.push('Got Name');
+      else if (gotScore > 50) matchedOn.push('Got Name (partial)');
+    }
+  }
+  
+  // House Number
+  if (record1.identifiers && record2.identifiers) {
+    const house1 = record1.identifiers.find(id => id.type === 'House Number')?.value || '';
+    const house2 = record2.identifiers.find(id => id.type === 'House Number')?.value || '';
+    
+    if (house1 && house2) {
+      const houseWeight = config.fieldWeights.houseNumber || 10;
+      const houseScore = house1 === house2 ? 100 : 0; // Exact match for house numbers
+      totalScore += houseScore * houseWeight;
+      totalWeight += houseWeight;
+      fieldScores['houseNumber'] = houseScore;
+      
+      if (houseScore === 100) matchedOn.push('House Number');
+    }
+  }
+  
   // Calculate final score
   const finalScore = totalWeight > 0 ? Math.round(totalScore / totalWeight) : 0;
   

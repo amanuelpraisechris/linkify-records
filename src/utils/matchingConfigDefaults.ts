@@ -1,3 +1,4 @@
+
 import { FieldWeights, DEFAULT_MATCHING_CONFIG, DEFAULT_FIELD_WEIGHTS } from '@/utils/matching';
 import { ExtendedMatchingConfig } from '@/types/matchingConfig';
 
@@ -12,7 +13,12 @@ export const UPDATED_FIELD_WEIGHTS: FieldWeights = {
   village: 25,
   subVillage: 20,
   oldestHouseholdMember: 25,
-  phoneNumber: 20
+  phoneNumber: 20,
+  // Additional location identifiers with reasonable weights
+  tabiaName: 20,
+  kushetName: 18,
+  gotName: 15,
+  houseNumber: 12
   // Note: baloziFirstName, baloziMiddleName, and baloziLastName are intentionally omitted
 };
 
@@ -37,7 +43,11 @@ export const DEFAULT_PROFILES: Record<string, ExtendedMatchingConfig> = {
       village: 20,
       subVillage: 15,
       phoneNumber: 20,
-      oldestHouseholdMember: 15
+      oldestHouseholdMember: 15,
+      tabiaName: 25,
+      kushetName: 20,
+      gotName: 15,
+      houseNumber: 15
     },
     threshold: {
       high: 85,
