@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useMatchingConfig } from '@/contexts/MatchingConfigContext';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -181,9 +180,9 @@ const MatchingConfigAdmin = () => {
                     onChange={(val) => handleWeightChange('village', val)} 
                   />
                   <FieldWeightSlider 
-                    label="District" 
-                    value={config.fieldWeights.district} 
-                    onChange={(val) => handleWeightChange('district', val)} 
+                    label="Sub-Village" 
+                    value={config.fieldWeights.subVillage} 
+                    onChange={(val) => handleWeightChange('subVillage', val)} 
                   />
                 </div>
               </div>
@@ -195,11 +194,6 @@ const MatchingConfigAdmin = () => {
               <div className="space-y-4">
                 <h3 className="font-medium">Additional Identifiers</h3>
                 <div className="space-y-4">
-                  <FieldWeightSlider 
-                    label="Mother's Name" 
-                    value={config.fieldWeights.motherName} 
-                    onChange={(val) => handleWeightChange('motherName', val)} 
-                  />
                   <FieldWeightSlider 
                     label="Household Head" 
                     value={config.fieldWeights.householdHead} 
@@ -387,7 +381,6 @@ const MatchingConfigAdmin = () => {
   );
 };
 
-// Component for field weight slider with visualization
 const FieldWeightSlider = ({ 
   label, 
   value, 
@@ -414,12 +407,10 @@ const FieldWeightSlider = ({
   );
 };
 
-// Component for visualizing field weights as a horizontal bar chart
 const WeightChart = ({ fieldWeights }: { fieldWeights: FieldWeights }) => {
-  // Sort weights by value in descending order
   const sortedWeights = Object.entries(fieldWeights)
     .sort(([, a], [, b]) => b - a)
-    .slice(0, 6); // Show top 6 weights
+    .slice(0, 6);
   
   const totalWeight = sortedWeights.reduce((sum, [, weight]) => sum + weight, 0);
   
@@ -453,7 +444,6 @@ const WeightChart = ({ fieldWeights }: { fieldWeights: FieldWeights }) => {
   );
 };
 
-// Component for visualizing thresholds
 const ThresholdVisualizer = ({ 
   high, 
   medium, 
@@ -467,25 +457,21 @@ const ThresholdVisualizer = ({
     <div className="space-y-2">
       <h3 className="font-medium mb-2">Threshold Visualization</h3>
       <div className="relative w-full h-8 bg-gray-100 rounded-md">
-        {/* Low Match Zone */}
         <div 
           className="absolute h-full rounded-l-md border-r border-gray-200 bg-gray-200"
           style={{ width: `${low}%` }}
         ></div>
         
-        {/* Medium Match Zone */}
         <div 
           className="absolute h-full border-r border-gray-200 bg-amber-200"
           style={{ left: `${low}%`, width: `${medium - low}%` }}
         ></div>
         
-        {/* High Match Zone */}
         <div 
           className="absolute h-full rounded-r-md bg-green-200"
           style={{ left: `${medium}%`, width: `${100 - medium}%` }}
         ></div>
         
-        {/* Labels */}
         <div className="absolute w-full flex justify-between text-xs text-gray-500 px-2 pt-9">
           <span className="absolute left-0">0%</span>
           <span className="absolute" style={{ left: `${low}%`, transform: 'translateX(-50%)' }}>{low}%</span>
