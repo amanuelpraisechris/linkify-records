@@ -1,6 +1,7 @@
-// Update import for RecordDataContext
+
 import { useRecordData } from '@/contexts/record-data/RecordDataContext';
 import { SupportedLanguage } from '@/utils/languageUtils';
+import { Record } from '@/types';
 import { X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -10,6 +11,7 @@ interface ClinicIdEntrySectionProps {
   handleClinicIdChange: (index: number, field: 'type' | 'value', value: string) => void;
   addClinicId: () => void;
   removeClinicId: (index: number) => void;
+  onPatientFound: (record: Record) => void;
   inputLanguage: SupportedLanguage;
 }
 
@@ -18,6 +20,7 @@ const ClinicIdEntrySection = ({
   handleClinicIdChange,
   addClinicId,
   removeClinicId,
+  onPatientFound,
   inputLanguage
 }: ClinicIdEntrySectionProps) => {
   return (
