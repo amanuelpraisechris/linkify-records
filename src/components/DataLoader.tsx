@@ -1,8 +1,10 @@
+
 import { useState } from 'react';
-import { Upload, Database, AlertCircle, Globe } from 'lucide-react';
+import { Upload, Database, AlertCircle, Globe, FileSpreadsheet } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { DataSource, Record } from '@/types';
 import { SupportedLanguage } from '@/utils/languageUtils';
+import * as XLSX from 'xlsx';
 
 interface DataLoaderProps {
   onDataLoaded: (data: Record[]) => void;
@@ -20,14 +22,18 @@ const DataLoader = ({ onDataLoaded, dataSource }: DataLoaderProps) => {
     if (!file) return;
 
     // Check file type
-    if (!file.name.endsWith('.csv') && !file.name.endsWith('.json')) {
+    const isCSV = file.name.endsWith('.csv');
+    const isJSON = file.name.endsWith('.json');
+    const isExcel = file.name.endsWith('.xlsx') || file.name.endsWith('.xls');
+    
+    if (!isCSV && !isJSON && !isExcel) {
       toast({
         title: interfaceLanguage === 'latin' ? "Invalid File Format" :
                interfaceLanguage === 'amharic' ? "ልክ ያልሆነ የፋይል ቅርጸት" :
                "ዘይቅቡል ናይ ፋይል ቅርጺ",
-        description: interfaceLanguage === 'latin' ? "Please upload a CSV or JSON file." :
-                     interfaceLanguage === 'amharic' ? "እባክዎ የCSV ወይም JSON ፋይል ይጫኑ።" :
-                     "ብኽብረትካ CSV ወይ JSON ፋይል ጸዓን።",
+        description: interfaceLanguage === 'latin' ? "Please upload a CSV, JSON, or Excel file." :
+                     interfaceLanguage === 'amharic' ? "እባክዎ የCSV፣ JSON ወይም Excel ፋይል ይጫኑ።" :
+                     "ብኽብረትካ CSV፣ JSON ወይ Excel ፋይል ጸዓን።",
         variant: "destructive",
       });
       return;
@@ -35,171 +41,202 @@ const DataLoader = ({ onDataLoaded, dataSource }: DataLoaderProps) => {
 
     setIsLoading(true);
     
-    // Simulate file reading with progress
-    const reader = new FileReader();
-    const totalSize = file.size;
+    if (isExcel) {
+      // Handle Excel files
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const data = e.target?.result;
+          const workbook = XLSX.read(data, { type: 'binary' });
+          const sheetName = workbook.SheetNames[0];
+          const worksheet = workbook.Sheets[sheetName];
+          const jsonData = XLSX.utils.sheet_to_json(worksheet);
+          
+          const records = processJsonData(jsonData);
+          finishProcessing(records);
+        } catch (error) {
+          handleProcessingError(error);
+        }
+      };
+      reader.onprogress = updateProgress;
+      reader.onerror = handleReadError;
+      reader.readAsBinaryString(file);
+      return;
+    }
     
-    reader.onprogress = (event) => {
-      if (event.lengthComputable) {
-        const progress = Math.round((event.loaded / event.total) * 100);
-        setUploadProgress(progress);
-      }
-    };
+    // Handle CSV and JSON files (existing functionality)
+    const reader = new FileReader();
+    reader.onprogress = updateProgress;
     
     reader.onload = (e) => {
       try {
         let data: Record[] = [];
-        if (file.name.endsWith('.json')) {
+        if (isJSON) {
           const parsedData = JSON.parse(e.target?.result as string);
-          // Ensure the data conforms to our Record type
-          data = parsedData.map((item: any, index: number) => ({
-            id: item.id || `imported-${Date.now()}-${index}`,
-            firstName: item.firstName || '',
-            lastName: item.lastName || '',
-            middleName: item.middleName || '',
-            gender: item.gender || '',
-            birthDate: item.birthDate || '',
-            village: item.village || '',
-            subVillage: item.subVillage || '',
-            district: item.district || '',
-            householdHead: item.householdHead || '',
-            motherName: item.motherName || '',
-            identifiers: item.identifiers || [],
-            metadata: {
-              createdAt: new Date().toISOString(),
-              updatedAt: new Date().toISOString(),
-              source: dataSource?.name || 'Imported Data'
-            }
-          }));
+          data = processJsonData(parsedData);
         } else {
-          // Improved CSV parsing
-          const csv = e.target?.result as string;
-          const lines = csv.split('\n').filter(line => line.trim() !== ''); // Skip empty lines
-          
-          // Extract headers from the first row
-          const headers = lines[0].split(',').map(header => header.trim());
-          console.log("CSV headers detected:", headers);
-          
-          // Process all rows except the header row
-          data = lines.slice(1).map((line, index) => {
-            // Handle quoted values in CSV
-            let matches = [];
-            let pos = 0;
-            const values: string[] = [];
-            const regex = /(?:^|,)(?:"([^"]*(?:""[^"]*)*)"|([^,]*))/g;
-            
-            while ((matches = regex.exec(line)) !== null) {
-              if (matches[1] !== undefined) {
-                values.push(matches[1].replace(/""/g, '"')); // Handle escaped quotes
-              } else {
-                values.push(matches[2] || '');
-              }
-            }
-            
-            // If regex approach didn't work, fallback to simple split
-            if (values.length === 0) {
-              const simpleSplit = line.split(',');
-              for (let i = 0; i < simpleSplit.length; i++) {
-                values.push(simpleSplit[i].trim());
-              }
-            }
-            
-            const record: any = {
-              id: `imported-${Date.now()}-${index}`,
-              metadata: {
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString(),
-                source: dataSource?.name || 'Imported Data'
-              }
-            };
-            
-            // Map CSV columns to record fields, normalizing field names
-            headers.forEach((header, i) => {
-              if (i < values.length && values[i]) {
-                // Convert header to camelCase for standard fields
-                let fieldName = header;
-                
-                // Map common variations to standard field names
-                if (/first.?name/i.test(header)) fieldName = 'firstName';
-                if (/last.?name/i.test(header)) fieldName = 'lastName';
-                if (/middle.?name/i.test(header)) fieldName = 'middleName';
-                if (/birth.?date/i.test(header)) fieldName = 'birthDate';
-                if (/dob/i.test(header)) fieldName = 'birthDate';
-                if (/village/i.test(header)) fieldName = 'village';
-                if (/gender|sex/i.test(header)) fieldName = 'gender';
-                
-                record[fieldName] = values[i].trim();
-                
-                // Also store the original column name with quotes for backward compatibility
-                record[`"${header}"`] = values[i].trim();
-              }
-            });
-            
-            console.log(`Processed record ${index}:`, record);
-            
-            // Ensure required fields for Record type
-            return {
-              firstName: record.firstName || record["FirstName"] || '',
-              lastName: record.lastName || record["LastName"] || '',
-              gender: record.gender || record["Sex"] || '',
-              birthDate: record.birthDate || record["dob"] || '',
-              ...record
-            } as Record;
-          });
-          
-          console.log(`Successfully processed ${data.length} records from CSV (excluding header row)`);
+          data = processCSVData(e.target?.result as string);
         }
-        
-        setTimeout(() => {
-          onDataLoaded(data);
-          setIsLoading(false);
-          setUploadProgress(0);
-          toast({
-            title: interfaceLanguage === 'latin' ? "Data Loaded Successfully" :
-                   interfaceLanguage === 'amharic' ? "ውሂብ በተሳካ ሁኔታ ተጭኗል" :
-                   "ዳታ ብዕዉት ተጻዒኑ",
-            description: interfaceLanguage === 'latin' 
-              ? `Loaded ${data.length} records from ${file.name}` 
-              : interfaceLanguage === 'amharic'
-                ? `${data.length} መዝገቦችን ከ ${file.name} ጭኗል`
-                : `${data.length} መዛግብቲ ካብ ${file.name} ተጻዒኖም`,
-          });
-        }, 1000);
+        finishProcessing(data);
       } catch (error) {
-        console.error("Error processing file:", error);
-        toast({
-          title: interfaceLanguage === 'latin' ? "Error Loading Data" :
-                 interfaceLanguage === 'amharic' ? "ውሂብ በመጫን ላይ ስህተት" :
-                 "ጌጋ ኣብ ምጽዓን ዳታ",
-          description: interfaceLanguage === 'latin' 
-            ? "The file format is invalid or corrupted." 
-            : interfaceLanguage === 'amharic'
-              ? "የፋይሉ ቅርጸት ልክ ያልሆነ ወይም የተበላሸ ነው።"
-              : "ቅርጺ ናይቲ ፋይል ዘይቅቡል ወይ ዝተበላሸወ እዩ።",
-          variant: "destructive",
-        });
-        setIsLoading(false);
-        setUploadProgress(0);
+        handleProcessingError(error);
       }
     };
     
-    reader.onerror = () => {
-      toast({
-        title: interfaceLanguage === 'latin' ? "Error Reading File" :
-               interfaceLanguage === 'amharic' ? "ፋይል በማንበብ ላይ ስህተት" :
-               "ጌጋ ኣብ ምንባብ ፋይል",
-        description: interfaceLanguage === 'latin' 
-          ? "There was an error reading the file." 
-          : interfaceLanguage === 'amharic'
-            ? "ፋይሉን በማንበብ ላይ ስህተት ተፈጥሯል።"
-            : "ጌጋ ኣብ ምንባብ ናይቲ ፋይል ተፈጢሩ።",
-        variant: "destructive",
+    reader.onerror = handleReadError;
+    reader.readAsText(file);
+  };
+
+  // Helper functions to improve code organization
+  const updateProgress = (event: ProgressEvent<FileReader>) => {
+    if (event.lengthComputable) {
+      const progress = Math.round((event.loaded / event.total) * 100);
+      setUploadProgress(progress);
+    }
+  };
+
+  const processJsonData = (parsedData: any[]): Record[] => {
+    return parsedData.map((item: any, index: number) => ({
+      id: item.id || `imported-${Date.now()}-${index}`,
+      firstName: item.firstName || item.first_name || '',
+      lastName: item.lastName || item.last_name || '',
+      middleName: item.middleName || item.middle_name || '',
+      gender: item.gender || item.sex || '',
+      birthDate: item.birthDate || item.birth_date || item.dob || '',
+      village: item.village || '',
+      subVillage: item.subVillage || item.sub_village || '',
+      district: item.district || '',
+      householdHead: item.householdHead || item.household_head || '',
+      motherName: item.motherName || item.mother_name || '',
+      identifiers: item.identifiers || [],
+      metadata: {
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        source: dataSource?.name || 'Imported Data'
+      }
+    }));
+  };
+
+  const processCSVData = (csv: string): Record[] => {
+    const lines = csv.split('\n').filter(line => line.trim() !== '');
+    const headers = lines[0].split(',').map(header => header.trim());
+    console.log("CSV headers detected:", headers);
+    
+    return lines.slice(1).map((line, index) => {
+      // Handle quoted values in CSV
+      let matches = [];
+      const values: string[] = [];
+      const regex = /(?:^|,)(?:"([^"]*(?:""[^"]*)*)"|([^,]*))/g;
+      
+      while ((matches = regex.exec(line)) !== null) {
+        if (matches[1] !== undefined) {
+          values.push(matches[1].replace(/""/g, '"'));
+        } else {
+          values.push(matches[2] || '');
+        }
+      }
+      
+      // If regex approach didn't work, fallback to simple split
+      if (values.length === 0) {
+        const simpleSplit = line.split(',');
+        for (let i = 0; i < simpleSplit.length; i++) {
+          values.push(simpleSplit[i].trim());
+        }
+      }
+      
+      const record: any = {
+        id: `imported-${Date.now()}-${index}`,
+        metadata: {
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          source: dataSource?.name || 'Imported Data'
+        }
+      };
+      
+      // Map CSV columns to record fields, normalizing field names
+      headers.forEach((header, i) => {
+        if (i < values.length && values[i]) {
+          // Convert header to camelCase for standard fields
+          let fieldName = header;
+          
+          // Map common variations to standard field names
+          if (/first.?name/i.test(header)) fieldName = 'firstName';
+          if (/last.?name/i.test(header)) fieldName = 'lastName';
+          if (/middle.?name/i.test(header)) fieldName = 'middleName';
+          if (/birth.?date/i.test(header)) fieldName = 'birthDate';
+          if (/dob/i.test(header)) fieldName = 'birthDate';
+          if (/village/i.test(header)) fieldName = 'village';
+          if (/gender|sex/i.test(header)) fieldName = 'gender';
+          
+          record[fieldName] = values[i].trim();
+          
+          // Also store the original column name with quotes for backward compatibility
+          record[`"${header}"`] = values[i].trim();
+        }
       });
+      
+      console.log(`Processed record ${index}:`, record);
+      
+      // Ensure required fields for Record type
+      return {
+        firstName: record.firstName || record["FirstName"] || '',
+        lastName: record.lastName || record["LastName"] || '',
+        gender: record.gender || record["Sex"] || '',
+        birthDate: record.birthDate || record["dob"] || '',
+        ...record
+      } as Record;
+    });
+  };
+
+  const finishProcessing = (data: Record[]) => {
+    setTimeout(() => {
+      onDataLoaded(data);
       setIsLoading(false);
       setUploadProgress(0);
-    };
-    
-    reader.readAsText(file);
+      toast({
+        title: interfaceLanguage === 'latin' ? "Data Loaded Successfully" :
+               interfaceLanguage === 'amharic' ? "ውሂብ በተሳካ ሁኔታ ተጭኗል" :
+               "ዳታ ብዕዉት ተጻዒኑ",
+        description: interfaceLanguage === 'latin' 
+          ? `Loaded ${data.length} records successfully` 
+          : interfaceLanguage === 'amharic'
+            ? `${data.length} መዝገቦችን በተሳካ ሁኔታ ጭኗል`
+            : `${data.length} መዛግብቲ ብዕዉት ተጻዒኖም`,
+      });
+    }, 1000);
+  };
+
+  const handleProcessingError = (error: any) => {
+    console.error("Error processing file:", error);
+    toast({
+      title: interfaceLanguage === 'latin' ? "Error Loading Data" :
+             interfaceLanguage === 'amharic' ? "ውሂብ በመጫን ላይ ስህተት" :
+             "ጌጋ ኣብ ምጽዓን ዳታ",
+      description: interfaceLanguage === 'latin' 
+        ? "The file format is invalid or corrupted." 
+        : interfaceLanguage === 'amharic'
+          ? "የፋይሉ ቅርጸት ልክ ያልሆነ ወይም የተበላሸ ነው።"
+          : "ቅርጺ ናይቲ ፋይል ዘይቅቡል ወይ ዝተበላሸወ እዩ።",
+      variant: "destructive",
+    });
+    setIsLoading(false);
+    setUploadProgress(0);
+  };
+
+  const handleReadError = () => {
+    toast({
+      title: interfaceLanguage === 'latin' ? "Error Reading File" :
+             interfaceLanguage === 'amharic' ? "ፋይል በማንበብ ላይ ስህተት" :
+             "ጌጋ ኣብ ምንባብ ፋይል",
+      description: interfaceLanguage === 'latin' 
+        ? "There was an error reading the file." 
+        : interfaceLanguage === 'amharic'
+          ? "ፋይሉን በማንበብ ላይ ስህተት ተፈጥሯል።"
+          : "ጌጋ ኣብ ምንባብ ናይቲ ፋይል ተፈጢሩ።",
+      variant: "destructive",
+    });
+    setIsLoading(false);
+    setUploadProgress(0);
   };
   
   const getTranslatedText = (
@@ -254,9 +291,9 @@ const DataLoader = ({ onDataLoaded, dataSource }: DataLoaderProps) => {
       
       <p className="text-sm text-muted-foreground mb-4" dir={interfaceLanguage === 'latin' ? 'ltr' : 'rtl'}>
         {getTranslatedText(
-          'Upload a CSV or JSON file containing records for the community database. Each record should include identifiers like name, date of birth, and location.',
-          'ለማህበረሰብ ዳታቤዝ መዝገቦችን የያዘ የCSV ወይም JSON ፋይል ይጫኑ። እያንዳንዱ መዝገብ እንደ ስም፣ የትውልድ ቀን እና ቦታ ያሉ መለያዎችን ማካተት አለበት።',
-          'CSV ወይ JSON ፋይል ዝሓዘ መዛግብቲ ንማሕበረሰብ ዳታቤዝ ጸዓን። ነፍሲ ወከፍ መዝገብ ከም ሽም፣ ዕለተ ልደት፣ ከምኡውን ቦታ ዝኣመሰሉ መለለይታት ክሕዝ ኣለዎ።'
+          'Upload a CSV, JSON, or Excel file containing records for the community database. Each record should include identifiers like name, date of birth, and location.',
+          'ለማህበረሰብ ዳታቤዝ መዝገቦችን የያዘ የCSV፣ JSON ወይም Excel ፋይል ይጫኑ። እያንዳንዱ መዝገብ እንደ ስም፣ የትውልድ ቀን እና ቦታ ያሉ መለያዎችን ማካተት አለበት።',
+          'CSV፣ JSON ወይ Excel ፋይል ዝሓዘ መዛግብቲ ንማሕበረሰብ ዳታቤዝ ጸዓን። ነፍሲ ወከፍ መዝገብ ከም ሽም፣ ዕለተ ልደት፣ ከምኡውን ቦታ ዝኣመሰሉ መለለይታት ክሕዝ ኣለዎ።'
         )}
       </p>
       
@@ -265,7 +302,7 @@ const DataLoader = ({ onDataLoaded, dataSource }: DataLoaderProps) => {
           type="file"
           id="file-upload"
           className="hidden"
-          accept=".csv,.json"
+          accept=".csv,.json,.xlsx,.xls"
           onChange={handleFileUpload}
           disabled={isLoading}
         />
@@ -280,7 +317,7 @@ const DataLoader = ({ onDataLoaded, dataSource }: DataLoaderProps) => {
               : getTranslatedText('Drag & Drop File or Click to Browse', 'ፋይል ይጎትቱ እና ይጣሉ ወይም ለማሰስ ይጫኑ', 'ፋይል ጎተት ከምኡውን ድርብዮ ወይ ክትፍትሽ ጠውቕ')}
           </span>
           <span className="text-xs text-muted-foreground">
-            {getTranslatedText('Supports CSV and JSON formats', 'የCSV እና JSON ቅርጸቶችን ይደግፋል', 'CSV ከምኡውን JSON ቅርጽታት ይድግፍ')}
+            {getTranslatedText('Supports CSV, JSON, and Excel formats', 'የCSV፣ JSON እና Excel ቅርጸቶችን ይደግፋል', 'CSV፣ JSON ከምኡውን Excel ቅርጽታት ይድግፍ')}
           </span>
           
           {isLoading && (
