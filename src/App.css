@@ -1,10 +1,153 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --primary-gradient: linear-gradient(120deg, #f8b6c0, #ff7b7b);
+  --primary-button: #ff4e50;
+  --primary-button-hover: #e53e45;
+  --text-light: #ffffff;
+  --text-light-muted: rgba(255, 255, 255, 0.7);
+}
+
+body {
+  font-family: 'Poppins', sans-serif;
+  margin: 0;
+  padding: 0;
+  background: var(--primary-gradient);
+  color: var(--text-light);
+  min-height: 100vh;
+}
+
 #root {
-  max-width: 1280px;
+  max-width: 1400px;
   margin: 0 auto;
   padding: 2rem;
   text-align: center;
 }
 
+.welcome-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 80vh;
+  text-align: center;
+  padding: 2rem;
+}
+
+.header-large {
+  font-size: 3rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: var(--text-light);
+}
+
+.sub-header {
+  font-size: 1.5rem;
+  font-weight: 300;
+  margin-bottom: 2rem;
+  color: var(--text-light);
+}
+
+.intro-text {
+  max-width: 80%;
+  margin: 0 auto 2rem;
+  font-size: 1.1rem;
+  font-weight: 400;
+  line-height: 1.6;
+  color: var(--text-light);
+}
+
+.cta-btn {
+  padding: 15px 30px;
+  background-color: var(--primary-button);
+  color: white;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: background-color 0.3s ease-in-out;
+}
+
+.cta-btn:hover {
+  background-color: var(--primary-button-hover);
+}
+
+.footer {
+  margin-top: 3rem;
+  font-size: 0.9rem;
+  color: var(--text-light-muted);
+}
+
+.footer a {
+  color: var(--text-light);
+  text-decoration: none;
+}
+
+.footer a:hover {
+  text-decoration: underline;
+}
+
+/* Card styling with the new design */
+.card-pinkish {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  color: white;
+  transition: all 0.3s ease;
+}
+
+.card-pinkish:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
+}
+
+/* Apply new styles to existing shadcn components */
+.bg-white.dark\:bg-black {
+  background: rgba(255, 255, 255, 0.1) !important;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  color: white !important;
+}
+
+/* Override button styles */
+.btn-theme-primary {
+  background-color: var(--primary-button) !important;
+  color: white !important;
+  border-radius: 50px !important;
+  border: none !important;
+  padding: 10px 20px !important;
+  font-weight: 500 !important;
+  transition: all 0.3s ease !important;
+}
+
+.btn-theme-primary:hover {
+  background-color: var(--primary-button-hover) !important;
+  transform: translateY(-2px) !important;
+}
+
+/* Custom table styling */
+.table-theme {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 15px;
+  overflow: hidden;
+}
+
+.table-theme th {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  font-weight: 500;
+}
+
+.table-theme td {
+  color: white;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Keep logo animation unchanged */
 .logo {
   height: 6em;
   padding: 1.5em;
@@ -31,12 +174,4 @@
   a:nth-of-type(2) .logo {
     animation: logo-spin infinite 20s linear;
   }
-}
-
-.card {
-  padding: 2em;
-}
-
-.read-the-docs {
-  color: #888;
 }

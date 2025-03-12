@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/components/ui/use-toast';
@@ -7,6 +8,7 @@ import { Record } from '@/types';
 import ImportDataForMatching from '@/components/ImportDataForMatching';
 import RecordList from '@/components/RecordList';
 import DataManagementControls from '@/components/admin/DataManagementControls';
+import { Button } from '@/components/ui/button';
 
 const DataManagement = () => {
   const { 
@@ -52,8 +54,14 @@ const DataManagement = () => {
 
   return (
     <MatchingConfigProvider>
-      <div className="container mx-auto py-10">
-        <h1 className="text-3xl font-bold mb-6">Data Management</h1>
+      <div className="container mx-auto py-10 px-4">
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold mb-3 text-white">Data Management</h1>
+          <p className="text-white/80 max-w-2xl mx-auto">
+            Import, manage, and organize your records for matching and analysis. 
+            Use this interface to prepare your data for the record linkage process.
+          </p>
+        </div>
 
         <DataManagementControls 
           onClearImportedData={handleClearImportedData}
@@ -68,8 +76,8 @@ const DataManagement = () => {
           </div>
 
           <div>
-            <div className="bg-white dark:bg-black border rounded-xl shadow-card p-6">
-              <h2 className="text-xl font-semibold mb-4">All Records</h2>
+            <div className="card-pinkish p-6 rounded-xl">
+              <h2 className="text-xl font-semibold mb-4 text-white">All Records</h2>
               <RecordList records={records} emptyMessage="No records available." />
             </div>
           </div>
@@ -77,25 +85,29 @@ const DataManagement = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
           <div className="md:col-span-1">
-            <div className="bg-white dark:bg-black border rounded-xl shadow-card p-6">
-              <h2 className="text-xl font-semibold mb-4">Community Records</h2>
+            <div className="card-pinkish p-6 rounded-xl">
+              <h2 className="text-xl font-semibold mb-4 text-white">Community Records</h2>
               <RecordList records={communityRecords} emptyMessage="No community records available." />
             </div>
           </div>
 
           <div className="md:col-span-1">
-            <div className="bg-white dark:bg-black border rounded-xl shadow-card p-6">
-              <h2 className="text-xl font-semibold mb-4">Clinic Records</h2>
+            <div className="card-pinkish p-6 rounded-xl">
+              <h2 className="text-xl font-semibold mb-4 text-white">Clinic Records</h2>
               <RecordList records={clinicRecords} emptyMessage="No clinic records available." />
             </div>
           </div>
 
           <div className="md:col-span-1">
-            <div className="bg-white dark:bg-black border rounded-xl shadow-card p-6">
-              <h2 className="text-xl font-semibold mb-4">Imported Records</h2>
+            <div className="card-pinkish p-6 rounded-xl">
+              <h2 className="text-xl font-semibold mb-4 text-white">Imported Records</h2>
               <RecordList records={importedRecords} emptyMessage="No imported records available." />
             </div>
           </div>
+        </div>
+        
+        <div className="footer mt-12 text-center">
+          <p>Record Linkage Application • Powered by Medical Informatics</p>
         </div>
       </div>
     </MatchingConfigProvider>
