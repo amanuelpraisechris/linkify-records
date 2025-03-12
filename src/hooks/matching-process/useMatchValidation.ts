@@ -1,18 +1,22 @@
 
 import { useToast } from '@/components/ui/use-toast';
+import { useRecordData } from '@/contexts/record-data/RecordDataContext';
 
 interface UseMatchValidationProps {
   selectedMatchId: string | null;
   consentGiven: boolean;
   setActiveTab: React.Dispatch<React.SetStateAction<string>>;
+  sourceRecordId?: string;
 }
 
 export function useMatchValidation({
   selectedMatchId,
   consentGiven,
-  setActiveTab
+  setActiveTab,
+  sourceRecordId
 }: UseMatchValidationProps) {
   const { toast } = useToast();
+  const { matchResults } = useRecordData();
 
   const validateMatchSelection = () => {
     if (!selectedMatchId) {
@@ -41,8 +45,20 @@ export function useMatchValidation({
     return true;
   };
 
+  const checkPreviousConsent = (patientId: string): boolean => {
+    // Check if this patient has any previous match results with consent
+    const previousConsents = matchResults.filter(
+      match => 
+        (match.sourceId === patientId || match.matchId === patientId) && 
+        match.consentObtained === true
+    );
+    
+    return previousConsents.length > 0;
+  };
+
   return {
     validateMatchSelection,
-    validateConsent
+    validateConsent,
+    checkPreviousConsent
   };
 }

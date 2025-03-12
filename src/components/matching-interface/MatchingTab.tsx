@@ -2,10 +2,9 @@
 import { useState } from 'react';
 import { RecordMatch } from '@/types';
 import RecordCard from '../RecordCard';
-import { Save } from 'lucide-react';
+import { Save, FileText, UserCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { FileText } from 'lucide-react';
 
 interface MatchingTabProps {
   currentMatch: RecordMatch;
@@ -127,13 +126,24 @@ const MatchingTab = ({
           Skip for Now
         </Button>
         
-        <Button
-          onClick={() => setActiveTab('consent')}
-          disabled={isLoading}
-          variant="default"
-        >
-          Proceed to Consent
-        </Button>
+        <div className="flex space-x-3">
+          <Button
+            variant="secondary"
+            onClick={() => setActiveTab('consent')}
+            className="flex items-center"
+          >
+            <UserCheck className="w-4 h-4 mr-2" />
+            End Session / Check Consent / New Patient
+          </Button>
+          
+          <Button
+            onClick={() => setActiveTab('consent')}
+            disabled={isLoading}
+            variant="default"
+          >
+            Proceed to Consent
+          </Button>
+        </div>
       </div>
     </div>
   );
