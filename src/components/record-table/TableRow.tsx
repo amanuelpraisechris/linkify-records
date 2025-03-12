@@ -28,9 +28,7 @@ const TableRow = ({
   const fullName = getFullName(record, 'firstMiddleLast');
   
   return (
-    <tr 
-      className={`hover:bg-muted/30 transition-colors ${isExpanded ? 'bg-muted/20' : ''}`}
-    >
+    <>
       <td className="px-3 py-4 whitespace-nowrap cursor-pointer" onClick={toggleExpand}>
         {isExpanded ? (
           <ChevronDown className="w-4 h-4 text-muted-foreground" />
@@ -56,7 +54,7 @@ const TableRow = ({
         {getDisplayValue(record, 'village', '-')}
       </td>
       <td className="px-4 py-4 whitespace-nowrap">
-        {getDisplayValue(record, 'district', '-')}
+        {getDisplayValue(record, 'subVillage', '-')}
       </td>
       {showMatchDetail && (
         <td className="px-4 py-4 whitespace-nowrap">
@@ -72,7 +70,7 @@ const TableRow = ({
           />
         </td>
       )}
-    </tr>
+    </>
   );
 };
 
