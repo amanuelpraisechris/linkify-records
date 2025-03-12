@@ -45,6 +45,27 @@ const IdentifiersSection = ({
       latin: 'Study ID',
       amharic: 'የጥናት መታወቂያ',
       tigrinya: 'ናይ መጽናዕቲ መለለዪ'
+    }},
+    // Add the new identifier types
+    {value: 'Tabia Name', label: {
+      latin: 'Tabia Name',
+      amharic: 'የጣቢያ ስም',
+      tigrinya: 'ስም ጣብያ'
+    }},
+    {value: 'Kushet Name', label: {
+      latin: 'Kushet Name',
+      amharic: 'የኩሸት ስም',
+      tigrinya: 'ስም ኩሸት'
+    }},
+    {value: 'Got Name', label: {
+      latin: 'Got Name',
+      amharic: 'የጎት ስም',
+      tigrinya: 'ስም ጎት'
+    }},
+    {value: 'House Number', label: {
+      latin: 'House Number',
+      amharic: 'የቤት ቁጥር',
+      tigrinya: 'ቁጽሪ ገዛ'
     }}
   ];
 
