@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Upload, Database, AlertCircle, Globe, FileSpreadsheet } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
@@ -101,7 +100,7 @@ const DataLoader = ({ onDataLoaded, dataSource }: DataLoaderProps) => {
       firstName: item.firstName || item.first_name || '',
       lastName: item.lastName || item.last_name || '',
       middleName: item.middleName || item.middle_name || '',
-      gender: item.gender || item.sex || '',
+      sex: item.sex || item.gender || '',  // Map either sex or gender to the required sex field
       birthDate: item.birthDate || item.birth_date || item.dob || '',
       village: item.village || '',
       subVillage: item.subVillage || item.sub_village || '',
@@ -166,7 +165,7 @@ const DataLoader = ({ onDataLoaded, dataSource }: DataLoaderProps) => {
           if (/birth.?date/i.test(header)) fieldName = 'birthDate';
           if (/dob/i.test(header)) fieldName = 'birthDate';
           if (/village/i.test(header)) fieldName = 'village';
-          if (/gender|sex/i.test(header)) fieldName = 'gender';
+          if (/gender|sex/i.test(header)) fieldName = 'sex';  // Always map to sex field
           
           record[fieldName] = values[i].trim();
           
@@ -181,7 +180,7 @@ const DataLoader = ({ onDataLoaded, dataSource }: DataLoaderProps) => {
       return {
         firstName: record.firstName || record["FirstName"] || '',
         lastName: record.lastName || record["LastName"] || '',
-        gender: record.gender || record["Sex"] || '',
+        sex: record.sex || record["Sex"] || record.gender || record["Gender"] || '',  // Ensure sex is always set
         birthDate: record.birthDate || record["dob"] || '',
         ...record
       } as Record;
@@ -353,3 +352,4 @@ const DataLoader = ({ onDataLoaded, dataSource }: DataLoaderProps) => {
 };
 
 export default DataLoader;
+
