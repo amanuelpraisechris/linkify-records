@@ -4,7 +4,7 @@ import MatchingConfigAdmin from '@/components/admin/MatchingConfigAdmin';
 import { MatchingConfigProvider } from '@/contexts/MatchingConfigContext';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
-import { InfoCircle } from 'lucide-react';
+import { Info } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 const MatchingConfiguration = () => {
@@ -20,7 +20,7 @@ const MatchingConfiguration = () => {
       </div>
       
       <Alert className="mb-6 bg-amber-50 border-amber-200">
-        <InfoCircle className="h-4 w-4 text-amber-600" />
+        <Info className="h-4 w-4 text-amber-600" />
         <AlertTitle className="text-amber-700">Gold Standard Matching</AlertTitle>
         <AlertDescription className="text-amber-600">
           The default configuration uses the Fellegi-Sunter probabilistic model. This approach calculates match weights using agreement (log2[m/u]) and disagreement (log2[(1-m)/(1-u)]) probabilities, combined with Jaro-Winkler string comparison for names.
