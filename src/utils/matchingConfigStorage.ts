@@ -1,7 +1,7 @@
 
 import { ExtendedMatchingConfig } from '@/types/matchingConfig';
 import { CURRENT_CONFIG_KEY, SAVED_PROFILES_KEY } from '@/types/matchingConfig';
-import { DEFAULT_PROFILES, EXTENDED_DEFAULT_CONFIG } from './matchingConfigDefaults';
+import { DEFAULT_PROFILES, GOLD_STANDARD_CONFIG } from './matchingConfigDefaults';
 
 export const getInitialProfiles = (): Record<string, ExtendedMatchingConfig> => {
   try {
@@ -18,15 +18,8 @@ export const getInitialProfiles = (): Record<string, ExtendedMatchingConfig> => 
 export const getInitialConfig = (): ExtendedMatchingConfig => {
   try {
     const currentConfigJson = localStorage.getItem(CURRENT_CONFIG_KEY);
-    // Modified the default config to have very low thresholds for better match detection
-    const defaultConfig = {
-      ...EXTENDED_DEFAULT_CONFIG,
-      threshold: {
-        high: 60,  // Lowered for better matching
-        medium: 35, // Lowered for better matching
-        low: 15     // Lowered for better matching
-      }
-    };
+    // Use Gold Standard as the default configuration
+    const defaultConfig = GOLD_STANDARD_CONFIG;
     
     const parsedConfig = currentConfigJson ?
       JSON.parse(currentConfigJson) :
@@ -34,13 +27,13 @@ export const getInitialConfig = (): ExtendedMatchingConfig => {
     
     // Ensure algorithmType exists in loaded config
     if (!parsedConfig.algorithmType) {
-      parsedConfig.algorithmType = 'deterministic';
+      parsedConfig.algorithmType = 'probabilistic';
     }
     
     return parsedConfig;
   } catch (error) {
     console.error('Failed to load current matching config:', error);
-    return EXTENDED_DEFAULT_CONFIG;
+    return GOLD_STANDARD_CONFIG;
   }
 };
 

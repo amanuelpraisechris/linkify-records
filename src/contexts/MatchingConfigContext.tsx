@@ -13,7 +13,7 @@ import {
   saveProfilesToStorage,
   saveConfigToStorage
 } from '@/utils/matchingConfigStorage';
-import { EXTENDED_DEFAULT_CONFIG } from '@/utils/matchingConfigDefaults';
+import { GOLD_STANDARD_CONFIG } from '@/utils/matchingConfigDefaults';
 
 const MatchingConfigContext = createContext<MatchingConfigContextType | undefined>(undefined);
 
@@ -78,7 +78,11 @@ export const MatchingConfigProvider: React.FC<MatchingConfigProviderProps> = ({ 
   };
 
   const resetConfig = () => {
-    setConfig(EXTENDED_DEFAULT_CONFIG);
+    setConfig(GOLD_STANDARD_CONFIG);
+    toast({
+      title: "Gold Standard Applied",
+      description: "Reset to Gold Standard matching profile based on Fellegi-Sunter model.",
+    });
   };
 
   const saveConfigProfile = (name: string) => {

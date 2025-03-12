@@ -29,8 +29,41 @@ export const EXTENDED_DEFAULT_CONFIG: ExtendedMatchingConfig = {
   algorithmType: 'deterministic'
 };
 
+// Gold Standard probabilistic matching config
+export const GOLD_STANDARD_CONFIG: ExtendedMatchingConfig = {
+  ...DEFAULT_MATCHING_CONFIG,
+  fieldWeights: {
+    ...UPDATED_FIELD_WEIGHTS,
+    // Enhanced weights for probabilistic matching based on Fellegi-Sunter model
+    firstName: 50,
+    lastName: 50,
+    middleName: 30,
+    birthDate: 35,  // This includes year, month, and day components
+    sex: 20,
+    village: 30,
+    subVillage: 25,
+    oldestHouseholdMember: 35,  // For household member/ten-cell leader
+    tabiaName: 25,
+    kushetName: 20,
+    gotName: 15,
+    houseNumber: 15
+  },
+  threshold: {
+    high: 70,
+    medium: 45,
+    low: 25
+  },
+  fuzzyMatching: true,
+  languageConfig: {
+    defaultLanguage: 'latin',
+    enableScriptDetection: true
+  },
+  algorithmType: 'probabilistic'
+};
+
 // Default profiles with extended config
 export const DEFAULT_PROFILES: Record<string, ExtendedMatchingConfig> = {
+  'Gold Standard': GOLD_STANDARD_CONFIG,  // Add Gold Standard as the first option
   'Default': EXTENDED_DEFAULT_CONFIG,
   'DSS Linkage': {
     ...EXTENDED_DEFAULT_CONFIG,

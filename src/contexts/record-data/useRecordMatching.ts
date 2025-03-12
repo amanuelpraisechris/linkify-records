@@ -18,6 +18,7 @@ export const useRecordMatching = () => {
       console.log(`Total records: ${allRecords.length}`);
       console.log(`Community records: ${communityRecords.length}`);
       console.log(`Imported records: ${importedRecords.length}`);
+      console.log(`Using algorithm type: ${config.algorithmType}`);
       
       let searchPool = communityRecords.length > 0 ? [...communityRecords] : [];
       
@@ -37,47 +38,44 @@ export const useRecordMatching = () => {
         console.log('No records available to search in. Make sure to import HDSS community database.');
         return [];
       }
-      
-      try {
-        const lowThreshold = 10;
-        const matches = findProbabilisticMatches(sourceRecord, searchPool, lowThreshold);
-        
-        console.log(`Found ${matches.length} probabilistic matches`);
-        
-        const enrichedMatches = matches.map(match => {
-          const householdMembers = match.record.householdMembers || [];
-          return {
-            ...match,
-            record: {
-              ...match.record,
-              householdMembers
-            }
-          };
-        });
-        
-        const allMatches = enrichedMatches.map(match => ({
-          score: match.score,
-          matchedOn: match.matchedOn,
-          fieldScores: match.fieldScores,
-          recordInfo: {
-            id: match.record.id,
-            firstName: match.record.firstName,
-            lastName: match.record.lastName,
-            birthDate: match.record.birthDate,
-            village: match.record.village
+
+      // Use probabilistic matching if selected in config
+      if (config.algorithmType === 'probabilistic') {
+        try {
+          // Use threshold from config or fallback to reasonable default
+          const minThreshold = config.threshold.low || 10;
+          console.log(`Using probabilistic matching with minimum threshold: ${minThreshold}`);
+          
+          const matches = findProbabilisticMatches(sourceRecord, searchPool, minThreshold);
+          
+          console.log(`Found ${matches.length} probabilistic matches`);
+          
+          const enrichedMatches = matches.map(match => {
+            const householdMembers = match.record.householdMembers || [];
+            return {
+              ...match,
+              record: {
+                ...match.record,
+                householdMembers
+              }
+            };
+          });
+          
+          if (enrichedMatches.length > 0) {
+            console.log(`Returning ${enrichedMatches.length} probabilistic matches`);
+            return enrichedMatches.sort((a, b) => b.score - a.score);
+          } else {
+            console.log('No probabilistic matches found above threshold, falling back to deterministic matching');
           }
-        }));
-        
-        console.log('All potential matches:', JSON.stringify(allMatches, null, 2));
-        
-        if (enrichedMatches.length > 0) {
-          return enrichedMatches.sort((a, b) => b.score - a.score);
+        } catch (error) {
+          console.error("Error in probabilistic matching:", error);
+          console.log('Falling back to deterministic matching due to error');
         }
-      } catch (error) {
-        console.error("Error in probabilistic matching:", error);
       }
       
+      // Default to deterministic matching if probabilistic is not selected or found no results
       try {
+        console.log('Using deterministic matching');
         const matches = searchPool
           .map(record => {
             const { score, matchedOn } = calculateMatchScore(sourceRecord, record, config);
