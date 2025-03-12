@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Record } from '@/types';
 import RecordCard from './RecordCard';
@@ -8,7 +7,7 @@ import RecordFilters from './RecordFilters';
 import ViewToggle from './ViewToggle';
 import RecordTableView from './RecordTableView';
 import { useToast } from '@/components/ui/use-toast';
-import { useRecordData } from '@/contexts/RecordDataContext';
+import { useRecordData } from '@/contexts/record-data/RecordDataContext';
 
 interface RecordListProps {
   records: Record[];
@@ -40,11 +39,9 @@ const RecordList = ({
     }
   }, [records]);
 
-  // Updated filtering logic to handle more field patterns
   const filteredRecords = records.filter(record => {
     if (!searchQuery) return true;
     
-    // Extract strings from the record that we want to search in
     const fieldsToSearch = [
       record.firstName,
       record.lastName,
@@ -54,14 +51,12 @@ const RecordList = ({
       record.district,
     ];
     
-    // Add identifier values to searchable fields
     if (record.identifiers?.length) {
       record.identifiers.forEach(id => {
         fieldsToSearch.push(id.value);
       });
     }
     
-    // Filter out undefined or null values and perform the comparison
     return fieldsToSearch
       .filter(Boolean)
       .some(field => compareStrings(field || '', searchQuery, searchLanguage));
@@ -94,7 +89,6 @@ const RecordList = ({
   };
   
   const handleSaveNotes = (record: Record, notes: string) => {
-    // This now uses the saveMatchNotes function from the context
     saveMatchNotes(record.id, notes);
     
     toast({

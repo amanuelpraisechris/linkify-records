@@ -4,7 +4,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { Button } from '@/components/ui/button';
 import DataLoader from './DataLoader';
 import { Record } from '@/types';
-import { useRecordData } from '@/contexts/RecordDataContext';
+import { useRecordData } from '@/contexts/record-data/RecordDataContext';
 import { Database, FileUp, RefreshCw, X, Users, Building, CheckCircle } from 'lucide-react';
 
 const ImportDataForMatching = () => {

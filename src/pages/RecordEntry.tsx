@@ -1,5 +1,5 @@
 
-import { RecordDataProvider } from '@/contexts/RecordDataContext';
+import { RecordDataProvider } from '@/contexts/record-data/RecordDataContext';
 import { MatchingConfigProvider } from '@/contexts/MatchingConfigContext';
 import RecordEntryContent from '@/components/record-entry/RecordEntryContent';
 import { Record } from '@/types';

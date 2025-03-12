@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, AlertCircle, FileText } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
-import { useRecordData } from '@/contexts/RecordDataContext';
+import { useRecordData } from '@/contexts/record-data/RecordDataContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import Navbar from '@/components/Navbar';
