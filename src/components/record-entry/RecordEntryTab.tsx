@@ -39,7 +39,7 @@ const RecordEntryTab = ({
               id: "clinic-records",
               name: "Patient Records", 
               recordCount: clinicRecords.length,
-              type: "clinical",
+              type: "facility", // Updated from "clinical" to match the allowed types
               lastUpdated: new Date().toISOString()
             }} 
           />
