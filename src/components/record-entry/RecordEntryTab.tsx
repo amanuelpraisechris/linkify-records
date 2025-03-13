@@ -36,8 +36,11 @@ const RecordEntryTab = ({
           <DataLoader 
             onDataLoaded={handleDataImport} 
             dataSource={{ 
+              id: "clinic-records",
               name: "Patient Records", 
-              recordCount: clinicRecords.length 
+              recordCount: clinicRecords.length,
+              type: "clinical",
+              lastUpdated: new Date().toISOString()
             }} 
           />
         </div>

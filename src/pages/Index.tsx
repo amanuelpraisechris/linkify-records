@@ -9,13 +9,14 @@ import MatchingInterface from '@/components/MatchingInterface';
 import { MatchingConfigProvider } from '@/contexts/MatchingConfigContext';
 import { useToast } from '@/components/ui/use-toast';
 import { dashboardStats, exampleRecords, recordMatches, newRecords } from '@/utils/mockData';
-import { Database, Link2, Search, Filter, FileUp, UserPlus } from 'lucide-react';
+import { Database, Link2, Search, Filter, FileUp, UserPlus, PanelRight, Settings, LogIn } from 'lucide-react';
 
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'matching' | 'records'>('matching');
   const { toast } = useToast();
+  const isAdmin = localStorage.getItem('adminAuth') === 'true';
 
   useEffect(() => {
     // Simulate data loading
@@ -37,6 +38,39 @@ const Index = () => {
       });
     }
   };
+
+  // Navigation cards for main features
+  const navigationCards = [
+    {
+      title: "Manage Records",
+      description: "Upload, view, and manage database records",
+      icon: <FileUp className="w-5 h-5" />,
+      path: "/data-management",
+      color: "bg-blue-100 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400"
+    },
+    {
+      title: "Patient Search",
+      description: "Search and match patient records",
+      icon: <Search className="w-5 h-5" />,
+      path: "/record-entry",
+      color: "bg-green-100 dark:bg-green-900/20 text-green-600 dark:text-green-400"
+    },
+    {
+      title: "Admin Dashboard",
+      description: "Access admin controls and settings",
+      icon: <Settings className="w-5 h-5" />,
+      path: "/admin-dashboard",
+      color: "bg-purple-100 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400",
+      adminOnly: true
+    },
+    {
+      title: "View Reports",
+      description: "Analytics and record matching reports",
+      icon: <PanelRight className="w-5 h-5" />,
+      path: "/reports",
+      color: "bg-orange-100 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400"
+    }
+  ];
 
   return (
     <div className="min-h-screen bg-background">
@@ -63,14 +97,14 @@ const Index = () => {
           <div className="flex gap-4 mt-8">
             <Link 
               to="/data-management" 
-              className="flex items-center px-4 py-2 bg-primary/10 hover:bg-primary/20 text-primary rounded-md transition-all-medium"
+              className="flex items-center px-4 py-2 bg-primary/10 hover:bg-primary/20 text-primary rounded-md transition-all"
             >
               <FileUp className="w-4 h-4 mr-2" />
               Manage Databases
             </Link>
             <Link 
               to="/record-entry" 
-              className="flex items-center px-4 py-2 bg-primary/10 hover:bg-primary/20 text-primary rounded-md transition-all-medium"
+              className="flex items-center px-4 py-2 bg-primary/10 hover:bg-primary/20 text-primary rounded-md transition-all"
             >
               <UserPlus className="w-4 h-4 mr-2" />
               New Patient Record
@@ -109,6 +143,25 @@ const Index = () => {
             isLoading={isLoading}
           />
         </div>
+
+        {/* Navigation cards for main features */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+          {navigationCards
+            .filter(card => !card.adminOnly || isAdmin)
+            .map((card, index) => (
+              <Link 
+                key={index} 
+                to={card.path}
+                className="block bg-card hover:bg-accent/50 border rounded-xl p-6 transition-all duration-200 hover:shadow-md"
+              >
+                <div className={`inline-flex p-3 rounded-full ${card.color} mb-4`}>
+                  {card.icon}
+                </div>
+                <h3 className="text-lg font-medium mb-2">{card.title}</h3>
+                <p className="text-sm text-muted-foreground">{card.description}</p>
+              </Link>
+            ))}
+        </div>
         
         <div className="bg-white dark:bg-black border rounded-xl shadow-card overflow-hidden">
           <div className="border-b">
@@ -119,7 +172,7 @@ const Index = () => {
                   activeTab === 'matching'
                     ? 'border-b-2 border-primary text-primary'
                     : 'text-muted-foreground hover:text-foreground hover:bg-muted/40'
-                } transition-all-medium`}
+                } transition-all`}
               >
                 Record Matching
               </button>
@@ -129,7 +182,7 @@ const Index = () => {
                   activeTab === 'records'
                     ? 'border-b-2 border-primary text-primary'
                     : 'text-muted-foreground hover:text-foreground hover:bg-muted/40'
-                } transition-all-medium`}
+                } transition-all`}
               >
                 All Records
               </button>
