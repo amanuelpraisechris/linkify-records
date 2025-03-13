@@ -4,6 +4,7 @@ import ImportDataForMatching from '@/components/ImportDataForMatching';
 import RecordEntryForm from '@/components/RecordEntryForm';
 import RecordList from '@/components/RecordList';
 import { useToast } from '@/components/ui/use-toast';
+import DataLoader from '@/components/DataLoader';
 
 interface RecordEntryTabProps {
   clinicRecords: Record[];
@@ -31,7 +32,15 @@ const RecordEntryTab = ({
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
       <div className="lg:col-span-1">
-        <ImportDataForMatching onDataImport={handleDataImport} />
+        <div className="mb-8">
+          <DataLoader 
+            onDataLoaded={handleDataImport} 
+            dataSource={{ 
+              name: "Patient Records", 
+              recordCount: clinicRecords.length 
+            }} 
+          />
+        </div>
         <RecordEntryForm 
           onRecordSubmit={onRecordSubmit} 
           onSaveForSearch={onSaveForSearch}

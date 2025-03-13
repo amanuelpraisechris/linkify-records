@@ -1,9 +1,11 @@
+
 import { useState } from 'react';
 import { Upload, Database, AlertCircle, Globe, FileSpreadsheet } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { DataSource, Record } from '@/types';
 import { SupportedLanguage } from '@/utils/languageUtils';
 import * as XLSX from 'xlsx';
+import SQLExportGuide from './sql-export/SQLExportGuide';
 
 interface DataLoaderProps {
   onDataLoaded: (data: Record[]) => void;
@@ -347,9 +349,11 @@ const DataLoader = ({ onDataLoaded, dataSource }: DataLoaderProps) => {
           </span>
         </div>
       )}
+      
+      {/* Add SQL Export Guide */}
+      <SQLExportGuide interfaceLanguage={interfaceLanguage} />
     </div>
   );
 };
 
 export default DataLoader;
-
