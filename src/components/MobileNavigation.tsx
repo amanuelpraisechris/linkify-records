@@ -1,23 +1,25 @@
 
 import { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
   Sheet, 
   SheetContent, 
   SheetTrigger 
 } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
-import { Menu, X, LayoutDashboard, Database, Search, Lock, Settings, LogIn } from 'lucide-react';
+import { Menu, X, LayoutDashboard, Database, Search, Lock, Settings, LogIn, LogOut } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface MobileNavigationProps {
   isAdmin: boolean;
-  isLoggedIn: boolean;
 }
 
-const MobileNavigation = ({ isAdmin, isLoggedIn }: MobileNavigationProps) => {
+const MobileNavigation = ({ isAdmin }: MobileNavigationProps) => {
   const [open, setOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user, signOut } = useAuth();
   
   const navItems = [
     { 
@@ -50,6 +52,12 @@ const MobileNavigation = ({ isAdmin, isLoggedIn }: MobileNavigationProps) => {
     }
   ];
 
+  const handleLogout = async () => {
+    await signOut();
+    setOpen(false);
+    navigate('/auth');
+  };
+
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild className="md:hidden">
@@ -71,7 +79,7 @@ const MobileNavigation = ({ isAdmin, isLoggedIn }: MobileNavigationProps) => {
           
           <div className="flex-1 overflow-auto py-2">
             <nav className="flex flex-col space-y-1 px-2">
-              {navItems.map(item => (
+              {user && navItems.map(item => (
                 <Link
                   key={item.path}
                   to={item.path}
@@ -115,7 +123,7 @@ const MobileNavigation = ({ isAdmin, isLoggedIn }: MobileNavigationProps) => {
             </nav>
           </div>
           
-          {!isLoggedIn && (
+          {!user ? (
             <div className="p-4 border-t">
               <Link 
                 to="/auth"
@@ -125,6 +133,17 @@ const MobileNavigation = ({ isAdmin, isLoggedIn }: MobileNavigationProps) => {
                 <LogIn className="w-4 h-4 mr-2" />
                 Login
               </Link>
+            </div>
+          ) : (
+            <div className="p-4 border-t">
+              <Button 
+                variant="outline"
+                className="flex items-center justify-center w-full"
+                onClick={handleLogout}
+              >
+                <LogOut className="w-4 h-4 mr-2" />
+                Logout
+              </Button>
             </div>
           )}
         </div>
