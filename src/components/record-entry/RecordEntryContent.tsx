@@ -12,20 +12,14 @@ interface RecordEntryContentProps {
   onRecordCreated?: () => void;
 }
 
-// Since RecordEntryTab requires specific props, let's create an interface for it
-interface TabProps {
-  // This is a simple representation - adjust based on the actual requirements
-  name: string;
-}
-
 const RecordEntryContent = ({ onRecordCreated }: RecordEntryContentProps) => {
   const [activeTab, setActiveTab] = useState('personal');
-  const { state } = useRecordData(); // Using 'state' instead of 'recordData'
+  const { records } = useRecordData(); // Using records instead of state
   const { toast } = useToast();
 
   const handleSubmit = () => {
-    if (state) { // Using 'state' instead of 'recordData'
-      console.log('Record Data:', state);
+    if (records) { // Using records instead of state
+      console.log('Record Data:', records);
       toast({
         title: "Success!",
         description: "Record submitted successfully.",
@@ -54,7 +48,7 @@ const RecordEntryContent = ({ onRecordCreated }: RecordEntryContentProps) => {
         </p>
       </div>
 
-      {!state && (
+      {!records && (
         <Alert>
           <Info className="h-4 w-4" />
           <AlertDescription>
@@ -72,16 +66,36 @@ const RecordEntryContent = ({ onRecordCreated }: RecordEntryContentProps) => {
         </TabsList>
 
         <TabsContent value="personal">
-          <RecordEntryTab name="personal" />
+          <RecordEntryTab 
+            clinicRecords={[]}
+            communityRecords={[]}
+            onRecordSubmit={() => {}}
+            onSaveForSearch={() => {}}
+          />
         </TabsContent>
         <TabsContent value="education">
-          <RecordEntryTab name="education" />
+          <RecordEntryTab 
+            clinicRecords={[]}
+            communityRecords={[]}
+            onRecordSubmit={() => {}}
+            onSaveForSearch={() => {}}
+          />
         </TabsContent>
         <TabsContent value="experience">
-          <RecordEntryTab name="experience" />
+          <RecordEntryTab 
+            clinicRecords={[]}
+            communityRecords={[]}
+            onRecordSubmit={() => {}}
+            onSaveForSearch={() => {}}
+          />
         </TabsContent>
         <TabsContent value="skills">
-          <RecordEntryTab name="skills" />
+          <RecordEntryTab 
+            clinicRecords={[]}
+            communityRecords={[]}
+            onRecordSubmit={() => {}}
+            onSaveForSearch={() => {}}
+          />
         </TabsContent>
       </Tabs>
 
