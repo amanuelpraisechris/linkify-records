@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import RecordEntryTab from './RecordEntryTab';
@@ -11,14 +12,20 @@ interface RecordEntryContentProps {
   onRecordCreated?: () => void;
 }
 
+// Since RecordEntryTab requires specific props, let's create an interface for it
+interface TabProps {
+  // This is a simple representation - adjust based on the actual requirements
+  name: string;
+}
+
 const RecordEntryContent = ({ onRecordCreated }: RecordEntryContentProps) => {
   const [activeTab, setActiveTab] = useState('personal');
-  const { recordData } = useRecordData();
+  const { state } = useRecordData(); // Using 'state' instead of 'recordData'
   const { toast } = useToast();
 
   const handleSubmit = () => {
-    if (recordData) {
-      console.log('Record Data:', recordData);
+    if (state) { // Using 'state' instead of 'recordData'
+      console.log('Record Data:', state);
       toast({
         title: "Success!",
         description: "Record submitted successfully.",
@@ -47,7 +54,7 @@ const RecordEntryContent = ({ onRecordCreated }: RecordEntryContentProps) => {
         </p>
       </div>
 
-      {!recordData && (
+      {!state && (
         <Alert>
           <Info className="h-4 w-4" />
           <AlertDescription>
@@ -65,16 +72,16 @@ const RecordEntryContent = ({ onRecordCreated }: RecordEntryContentProps) => {
         </TabsList>
 
         <TabsContent value="personal">
-          <RecordEntryTab tabName="personal" />
+          <RecordEntryTab name="personal" />
         </TabsContent>
         <TabsContent value="education">
-          <RecordEntryTab tabName="education" />
+          <RecordEntryTab name="education" />
         </TabsContent>
         <TabsContent value="experience">
-          <RecordEntryTab tabName="experience" />
+          <RecordEntryTab name="experience" />
         </TabsContent>
         <TabsContent value="skills">
-          <RecordEntryTab tabName="skills" />
+          <RecordEntryTab name="skills" />
         </TabsContent>
       </Tabs>
 

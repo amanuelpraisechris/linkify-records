@@ -1,6 +1,7 @@
-import { useEffect } from 'react';
+
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import Navbar from '@/components/Navbar';
+import { Navbar } from '@/components/navbar';
 import SearchBar from '@/components/SearchBar';
 import StatCard from '@/components/StatCard';
 import RecordList from '@/components/RecordList';
