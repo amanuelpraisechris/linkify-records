@@ -59,6 +59,15 @@ const MobileNavigation = ({ isAdmin, isLoggedIn }: MobileNavigationProps) => {
     navigate('/auth');
   };
 
+  const handleAdminClick = () => {
+    setOpen(false);
+    if (isAdmin) {
+      navigate('/admin-dashboard');
+    } else {
+      navigate('/admin-login');
+    }
+  };
+
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild className="md:hidden">
@@ -120,6 +129,17 @@ const MobileNavigation = ({ isAdmin, isLoggedIn }: MobileNavigationProps) => {
                     </Link>
                   ))}
                 </>
+              )}
+              
+              {!isAdmin && (
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start px-3 py-3 mt-2"
+                  onClick={handleAdminClick}
+                >
+                  <Lock className="w-5 h-5 mr-3" />
+                  Admin Login
+                </Button>
               )}
             </nav>
           </div>
