@@ -13,9 +13,10 @@ import { useAuth } from '@/contexts/AuthContext';
 
 interface MobileNavigationProps {
   isAdmin: boolean;
+  isLoggedIn: boolean;
 }
 
-const MobileNavigation = ({ isAdmin }: MobileNavigationProps) => {
+const MobileNavigation = ({ isAdmin, isLoggedIn }: MobileNavigationProps) => {
   const [open, setOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
@@ -79,7 +80,7 @@ const MobileNavigation = ({ isAdmin }: MobileNavigationProps) => {
           
           <div className="flex-1 overflow-auto py-2">
             <nav className="flex flex-col space-y-1 px-2">
-              {user && navItems.map(item => (
+              {isLoggedIn && navItems.map(item => (
                 <Link
                   key={item.path}
                   to={item.path}
@@ -123,7 +124,7 @@ const MobileNavigation = ({ isAdmin }: MobileNavigationProps) => {
             </nav>
           </div>
           
-          {!user ? (
+          {!isLoggedIn ? (
             <div className="p-4 border-t">
               <Link 
                 to="/auth"
