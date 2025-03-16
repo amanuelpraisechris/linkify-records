@@ -1,50 +1,76 @@
-import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { useRecordData } from '@/contexts/record-data/RecordDataContext';
-import { RecordDataProvider } from '@/contexts/record-data/RecordDataContext';
-import { MatchResult } from '@/types';
-import { DataTable } from "@/components/ui/data-table"
-import { columns } from "@/components/reports/columns"
-import Navbar from '@/components/Navbar';
-import { ArrowLeft } from 'lucide-react';
+import { useState } from 'react';
+import { Progress } from '@/components/ui/progress';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { FileDown } from 'lucide-react';
+import { Navbar } from '@/components/navbar';
 
 const Reports = () => {
-  const { matchResults, clinicRecords, communityRecords } = useRecordData();
-  const [data, setData] = useState<MatchResult[]>([]);
-
-  useEffect(() => {
-    // Prepare data for the table
-    const preparedData: MatchResult[] = matchResults.map(match => {
-      const clinicRecord = clinicRecords.find(record => record.id === match.sourceId);
-      const communityRecord = communityRecords.find(record => record.id === match.matchId);
-
-      return {
-        ...match,
-        clinicFirstName: clinicRecord?.firstName || 'N/A',
-        clinicLastName: clinicRecord?.lastName || 'N/A',
-        communityFirstName: communityRecord?.firstName || 'N/A',
-        communityLastName: communityRecord?.lastName || 'N/A',
-      };
-    });
-
-    setData(preparedData);
-  }, [matchResults, clinicRecords, communityRecords]);
+  const [progress, setProgress] = useState(0);
 
   return (
-    <div className="min-h-screen bg-background">
+    <>
       <Navbar />
       <div className="container mx-auto py-10">
-        <div className="mb-8">
-          <Link to="/" className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-4">
-            <ArrowLeft className="w-4 h-4 mr-1" />
-            Back to Dashboard
-          </Link>
-          <h1 className="text-3xl font-bold tracking-tight">Reports</h1>
-          <p className="text-muted-foreground">A comprehensive overview of matched records.</p>
-        </div>
-        <DataTable columns={columns} data={data} />
+        <h1 className="text-3xl font-semibold mb-5">Reports</h1>
+
+        <Tabs defaultValue="data-quality" className="w-full">
+          <TabsList>
+            <TabsTrigger value="data-quality">Data Quality</TabsTrigger>
+            <TabsTrigger value="usage-analytics">Usage Analytics</TabsTrigger>
+            <TabsTrigger value="custom-reports">Custom Reports</TabsTrigger>
+          </TabsList>
+          <TabsContent value="data-quality">
+            <Card>
+              <CardHeader>
+                <CardTitle>Data Quality Score</CardTitle>
+                <CardDescription>Overall data quality based on completeness and accuracy.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Progress value={progress} className="mb-4" />
+                <p className="text-sm text-muted-foreground">
+                  Current Score: {progress}%
+                </p>
+              </CardContent>
+              <CardFooter>
+                <Button onClick={() => setProgress(progress < 100 ? progress + 10 : 0)}>
+                  Update Score
+                </Button>
+              </CardFooter>
+            </Card>
+          </TabsContent>
+          <TabsContent value="usage-analytics">
+            <Card>
+              <CardHeader>
+                <CardTitle>User Engagement</CardTitle>
+                <CardDescription>Metrics on user activity and feature adoption.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p>Detailed usage analytics will be displayed here.</p>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          <TabsContent value="custom-reports">
+            <Card>
+              <CardHeader>
+                <CardTitle>Generate Custom Report</CardTitle>
+                <CardDescription>Create a report based on specific criteria.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p>Configure and download custom reports.</p>
+              </CardContent>
+              <CardFooter>
+                <Button>
+                  <FileDown className="w-4 h-4 mr-2" />
+                  Download Report
+                </Button>
+              </CardFooter>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </div>
-    </div>
+    </>
   );
 };
 

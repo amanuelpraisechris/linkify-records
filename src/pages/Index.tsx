@@ -1,5 +1,4 @@
-
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import SearchBar from '@/components/SearchBar';
@@ -10,6 +9,7 @@ import { MatchingConfigProvider } from '@/contexts/MatchingConfigContext';
 import { useToast } from '@/components/ui/use-toast';
 import { dashboardStats, exampleRecords, recordMatches, newRecords } from '@/utils/mockData';
 import { Database, Link2, Search, Filter, FileUp, UserPlus, PanelRight, Settings, LogIn } from 'lucide-react';
+import { useRecordData } from '@/contexts/record-data/RecordDataContext';
 
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -17,6 +17,8 @@ const Index = () => {
   const [activeTab, setActiveTab] = useState<'matching' | 'records'>('matching');
   const { toast } = useToast();
   const isAdmin = localStorage.getItem('adminAuth') === 'true';
+
+  const { records } = useRecordData();
 
   useEffect(() => {
     // Simulate data loading

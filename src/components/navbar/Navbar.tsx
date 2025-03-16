@@ -7,7 +7,7 @@ import NavbarLinks from './NavbarLinks';
 import NavbarUserMenu from './NavbarUserMenu';
 import NavbarAdminButton from './NavbarAdminButton';
 import NavbarNewRecordButton from './NavbarNewRecordButton';
-import MobileNavigation from '@/components/MobileNavigation';
+import { MobileNavigation } from '@/components/mobile-navigation';
 
 const Navbar = () => {
   const [isAdmin, setIsAdmin] = useState(false);
