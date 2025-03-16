@@ -30,14 +30,24 @@ const ProtectedRoute = ({ children, adminOnly = false }: ProtectedRouteProps) =>
     return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
   }
 
-  // Redirect to login if not authenticated
-  if (!isAuthenticated) {
-    return <Navigate to="/auth" state={{ from: location }} replace />;
+  // For admin-only routes: Check admin access
+  if (adminOnly) {
+    // Check localStorage for admin auth
+    const adminAuth = localStorage.getItem('adminAuth') === 'true';
+    // Check if user has admin role in profile
+    const isProfileAdmin = profile?.role === 'admin';
+    
+    if (!adminAuth && !isProfileAdmin) {
+      return <Navigate to="/admin-login" state={{ from: location }} replace />;
+    }
+    
+    // Render children if admin
+    return <>{children}</>;
   }
 
-  // Check admin access if adminOnly is true
-  if (adminOnly && !isAdmin) {
-    return <Navigate to="/admin-login" state={{ from: location }} replace />;
+  // For regular protected routes: Check user authentication
+  if (!isAuthenticated) {
+    return <Navigate to="/auth" state={{ from: location }} replace />;
   }
 
   // Render children if authenticated and has proper permissions

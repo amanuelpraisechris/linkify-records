@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
 import { Label } from '@/components/ui/label';
@@ -12,6 +12,14 @@ const AdminLogin = () => {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+
+  // Check if already authenticated as admin
+  useEffect(() => {
+    const adminAuth = localStorage.getItem('adminAuth') === 'true';
+    if (adminAuth) {
+      navigate('/admin-dashboard');
+    }
+  }, [navigate]);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,6 +63,9 @@ const AdminLogin = () => {
           </h2>
           <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
             Please sign in to access the admin dashboard
+          </p>
+          <p className="mt-2 text-xs text-gray-500 dark:text-gray-500">
+            Default login: username: admin, password: admin123
           </p>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleLogin}>
