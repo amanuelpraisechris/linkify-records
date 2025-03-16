@@ -1,6 +1,6 @@
 
 import { useNavigate } from 'react-router-dom';
-import { LogIn, LogOut } from 'lucide-react';
+import { LogIn, LogOut, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Link } from 'react-router-dom';
@@ -42,9 +42,9 @@ export const NavbarUserMenu = () => {
   if (!user) {
     return (
       <Link to="/auth">
-        <Button variant="secondary" size="sm" className="flex items-center">
-          <LogIn className="w-5 h-5 mr-1" />
-          <span>Login</span>
+        <Button variant="ghost" size="sm" className="flex items-center gap-1">
+          <User className="w-5 h-5" />
+          <span className="hidden sm:inline">Login</span>
         </Button>
       </Link>
     );

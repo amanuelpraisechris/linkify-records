@@ -28,9 +28,11 @@ const Navbar = () => {
     <NavbarContainer>
       <MobileNavigation isAdmin={isAdmin} isLoggedIn={!!user} />
       <NavbarLinks isAdmin={isAdmin} />
-      <NavbarNewRecordButton />
-      <NavbarAdminButton isAdmin={isAdmin} />
-      <NavbarUserMenu />
+      <div className="flex items-center gap-2">
+        {user && <NavbarNewRecordButton />}
+        <NavbarAdminButton isAdmin={isAdmin} />
+        <NavbarUserMenu />
+      </div>
     </NavbarContainer>
   );
 };
