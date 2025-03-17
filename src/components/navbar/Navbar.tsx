@@ -7,6 +7,7 @@ import NavbarLinks from './NavbarLinks';
 import NavbarUserMenu from './NavbarUserMenu';
 import NavbarAdminButton from './NavbarAdminButton';
 import NavbarNewRecordButton from './NavbarNewRecordButton';
+import NavbarRoleSwitch from './NavbarRoleSwitch';
 import { MobileNavigation } from '@/components/mobile-navigation';
 
 const Navbar = () => {
@@ -30,6 +31,7 @@ const Navbar = () => {
       <NavbarLinks isAdmin={isAdmin} />
       <div className="flex items-center gap-2">
         {user && <NavbarNewRecordButton />}
+        {user && <NavbarRoleSwitch />}
         <NavbarAdminButton isAdmin={isAdmin} />
         <NavbarUserMenu />
       </div>
