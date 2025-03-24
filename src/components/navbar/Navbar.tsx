@@ -25,13 +25,16 @@ const Navbar = () => {
     checkAdmin();
   }, [location, profile]);
 
+  // Don't hide navbar on admin-login page
+  const isAdminLoginPage = location.pathname === '/admin-login';
+
   return (
     <NavbarContainer>
       <MobileNavigation isAdmin={isAdmin} isLoggedIn={!!user} />
       <NavbarLinks isAdmin={isAdmin} />
       <div className="flex items-center gap-2">
         {user && <NavbarNewRecordButton />}
-        {user && <NavbarRoleSwitch />}
+        {(user || isAdminLoginPage) && <NavbarRoleSwitch />}
         <NavbarAdminButton isAdmin={isAdmin} />
         <NavbarUserMenu />
       </div>

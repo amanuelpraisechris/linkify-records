@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { RecordDataProvider } from "@/contexts/record-data/RecordDataContext";
 import { MatchingConfigProvider } from "@/contexts/MatchingConfigContext";
+import { Navbar } from "@/components/navbar";
 import Index from "./pages/Index";
 import DataManagement from "./pages/DataManagement";
 import RecordEntry from "./pages/RecordEntry";
@@ -37,6 +38,7 @@ const App = () => (
             <Toaster />
             <Sonner />
             <BrowserRouter>
+              <Navbar />
               <Routes>
                 {/* Public Routes - Accessible without login */}
                 <Route path="/auth" element={<Auth />} />

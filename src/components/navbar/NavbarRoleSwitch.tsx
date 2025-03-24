@@ -1,6 +1,6 @@
 
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Shield, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
@@ -16,9 +16,14 @@ import { toast } from '@/hooks/use-toast';
 const NavbarRoleSwitch = () => {
   const { user, profile } = useAuth();
   const navigate = useNavigate();
-  const [isAdmin, setIsAdmin] = useState(
-    localStorage.getItem('adminAuth') === 'true' || profile?.role === 'admin'
-  );
+  const location = useLocation();
+  const [isAdmin, setIsAdmin] = useState(false);
+  
+  useEffect(() => {
+    const adminAuth = localStorage.getItem('adminAuth') === 'true';
+    const isProfileAdmin = profile?.role === 'admin';
+    setIsAdmin(adminAuth || isProfileAdmin);
+  }, [profile, location]);
 
   const toggleAdminMode = () => {
     if (isAdmin) {
@@ -36,8 +41,11 @@ const NavbarRoleSwitch = () => {
     }
   };
 
-  if (!user) {
-    return null; // Don't show role switcher if user is not logged in
+  // Always show the toggle when on admin login page
+  const isAdminLoginPage = location.pathname === '/admin-login';
+  
+  if (!user && !isAdminLoginPage) {
+    return null; // Don't show role switcher if user is not logged in and not on admin login
   }
 
   return (
