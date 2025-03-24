@@ -17,7 +17,6 @@ import AdminLogin from "./components/admin/AdminLogin";
 import AdminDashboard from "./components/admin/AdminDashboard";
 import ProtectedRoute from "./components/admin/ProtectedRoute";
 import Reports from "./pages/Reports";
-import MatchingConfiguration from "./pages/MatchingConfiguration";
 
 // Create a new QueryClient with default error handling
 const queryClient = new QueryClient({
@@ -87,13 +86,11 @@ const App = () => (
                     </ProtectedRoute>
                   } 
                 />
+                
+                {/* Redirect old matching-configuration path to admin dashboard */}
                 <Route 
                   path="/matching-configuration" 
-                  element={
-                    <ProtectedRoute adminOnly={true}>
-                      <MatchingConfiguration />
-                    </ProtectedRoute>
-                  } 
+                  element={<Navigate to="/admin-dashboard" replace />} 
                 />
                 
                 {/* Catch-all route */}

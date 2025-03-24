@@ -32,12 +32,8 @@ export const NavbarLinks = ({ isAdmin }: NavbarLinksProps) => {
     { 
       path: '/admin-dashboard',
       label: 'Admin',
-      icon: <Lock className="w-4 h-4 mr-1.5" />
-    },
-    { 
-      path: '/matching-configuration',
-      label: 'Matching Config',
-      icon: <Settings className="w-4 h-4 mr-1.5" />
+      icon: <Lock className="w-4 h-4 mr-1.5" />,
+      badge: true
     }
   ];
 
@@ -70,7 +66,7 @@ export const NavbarLinks = ({ isAdmin }: NavbarLinksProps) => {
         >
           {item.icon}
           {item.label}
-          {item.path === '/admin-dashboard' && (
+          {item.badge && (
             <Badge className="ml-2 bg-purple-500 text-white text-xs">Admin</Badge>
           )}
         </Link>

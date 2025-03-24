@@ -17,6 +17,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import ChangePasswordForm from './ChangePasswordForm';
 import AlgorithmConfiguration from './AlgorithmConfiguration';
 import UserManagement from './UserManagement';
+import MatchingConfigAdmin from './MatchingConfigAdmin';
 
 const AdminDashboard = () => {
   const [username, setUsername] = useState('');
@@ -59,15 +60,15 @@ const AdminDashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-12">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pt-20 pb-12">
       {/* Admin Header */}
-      <header className="bg-white dark:bg-gray-800 shadow-md">
+      <header className="bg-white dark:bg-gray-800 shadow-md fixed top-16 left-0 right-0 z-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-20 items-center">
+          <div className="flex justify-between h-16 items-center">
             <div className="flex items-center space-x-3">
-              <Shield className="h-9 w-9 text-primary" />
+              <Shield className="h-7 w-7 text-primary" />
               <div>
-                <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Admin Dashboard</h1>
+                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Admin Dashboard</h1>
                 <p className="text-sm text-muted-foreground">Manage system settings and user accounts</p>
               </div>
             </div>
@@ -88,7 +89,7 @@ const AdminDashboard = () => {
       </header>
 
       {/* Admin Content */}
-      <main className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+      <main className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8 mt-16">
         <div className="mb-8">
           <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-6 bg-white dark:bg-gray-800 shadow-sm">
             <div className="flex items-center mb-6">
@@ -115,7 +116,7 @@ const AdminDashboard = () => {
                   </p>
                   <Button 
                     className="w-full" 
-                    onClick={() => navigate('/matching-configuration')}
+                    onClick={() => togglePanel('matching')}
                   >
                     Configure
                   </Button>
@@ -200,6 +201,17 @@ const AdminDashboard = () => {
               </Card>
             </div>
 
+            {/* Matching Configuration Section */}
+            {activePanel === 'matching' && (
+              <div className="mt-12 border-t border-gray-200 dark:border-gray-700 pt-8">
+                <h3 className="text-xl font-semibold mb-6 flex items-center">
+                  <SlidersHorizontal className="h-5 w-5 mr-2 text-primary" />
+                  Matching Configuration
+                </h3>
+                <MatchingConfigAdmin />
+              </div>
+            )}
+            
             {/* Algorithm Configuration Section */}
             {activePanel === 'algorithm' && (
               <div className="mt-12 border-t border-gray-200 dark:border-gray-700 pt-8">
