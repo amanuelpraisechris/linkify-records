@@ -37,65 +37,69 @@ const App = () => (
             <Toaster />
             <Sonner />
             <BrowserRouter>
-              <Navbar />
-              <Routes>
-                {/* Public Routes - Accessible without login */}
-                <Route path="/auth" element={<Auth />} />
-                <Route path="/admin-login" element={<AdminLogin />} />
-                
-                {/* Protected Routes - Require login */}
-                <Route 
-                  path="/" 
-                  element={
-                    <ProtectedRoute>
-                      <Index />
-                    </ProtectedRoute>
-                  } 
-                />
-                <Route 
-                  path="/data-management" 
-                  element={
-                    <ProtectedRoute>
-                      <DataManagement />
-                    </ProtectedRoute>
-                  } 
-                />
-                <Route 
-                  path="/record-entry" 
-                  element={
-                    <ProtectedRoute>
-                      <RecordEntry />
-                    </ProtectedRoute>
-                  } 
-                />
-                <Route 
-                  path="/reports" 
-                  element={
-                    <ProtectedRoute>
-                      <Reports />
-                    </ProtectedRoute>
-                  } 
-                />
-                
-                {/* Admin Routes - Require admin login */}
-                <Route 
-                  path="/admin-dashboard" 
-                  element={
-                    <ProtectedRoute adminOnly={true}>
-                      <AdminDashboard />
-                    </ProtectedRoute>
-                  } 
-                />
-                
-                {/* Redirect old matching-configuration path to admin dashboard */}
-                <Route 
-                  path="/matching-configuration" 
-                  element={<Navigate to="/admin-dashboard" replace />} 
-                />
-                
-                {/* Catch-all route */}
-                <Route path="*" element={<NotFound />} />
-              </Routes>
+              <div className="flex flex-col min-h-screen">
+                <Navbar />
+                <div className="flex-1">
+                  <Routes>
+                    {/* Public Routes - Accessible without login */}
+                    <Route path="/auth" element={<Auth />} />
+                    <Route path="/admin-login" element={<AdminLogin />} />
+                    
+                    {/* Protected Routes - Require login */}
+                    <Route 
+                      path="/" 
+                      element={
+                        <ProtectedRoute>
+                          <Index />
+                        </ProtectedRoute>
+                      } 
+                    />
+                    <Route 
+                      path="/data-management" 
+                      element={
+                        <ProtectedRoute>
+                          <DataManagement />
+                        </ProtectedRoute>
+                      } 
+                    />
+                    <Route 
+                      path="/record-entry" 
+                      element={
+                        <ProtectedRoute>
+                          <RecordEntry />
+                        </ProtectedRoute>
+                      } 
+                    />
+                    <Route 
+                      path="/reports" 
+                      element={
+                        <ProtectedRoute>
+                          <Reports />
+                        </ProtectedRoute>
+                      } 
+                    />
+                    
+                    {/* Admin Routes - Require admin login */}
+                    <Route 
+                      path="/admin-dashboard" 
+                      element={
+                        <ProtectedRoute adminOnly={true}>
+                          <AdminDashboard />
+                        </ProtectedRoute>
+                      } 
+                    />
+                    
+                    {/* Redirect old matching-configuration path to admin dashboard */}
+                    <Route 
+                      path="/matching-configuration" 
+                      element={<Navigate to="/admin-dashboard" replace />} 
+                    />
+                    
+                    {/* Catch-all route */}
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                </div>
+              </div>
             </BrowserRouter>
           </RecordDataProvider>
         </MatchingConfigProvider>

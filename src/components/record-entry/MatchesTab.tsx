@@ -213,7 +213,7 @@ const MatchesTab = ({
                   </div>
                   <div>
                     <span className="text-muted-foreground">Gender:</span>
-                    <p className="font-medium">{submittedRecord.sex}</p>
+                    <p className="font-medium">{submittedRecord.sex || submittedRecord.gender}</p>
                   </div>
                   <div>
                     <span className="text-muted-foreground">Birth Date:</span>
