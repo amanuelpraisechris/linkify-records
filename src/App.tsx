@@ -17,6 +17,7 @@ import AdminLogin from "./components/admin/AdminLogin";
 import AdminDashboard from "./components/admin/AdminDashboard";
 import ProtectedRoute from "./components/admin/ProtectedRoute";
 import Reports from "./pages/Reports";
+import { GOLD_STANDARD_CONFIG } from "./utils/matchingConfigDefaults";
 
 // Create a new QueryClient with default error handling
 const queryClient = new QueryClient({
@@ -32,7 +33,7 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
       <TooltipProvider>
-        <MatchingConfigProvider>
+        <MatchingConfigProvider initialConfig={GOLD_STANDARD_CONFIG}>
           <RecordDataProvider>
             <Toaster />
             <Sonner />

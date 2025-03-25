@@ -5,6 +5,7 @@ import RecordEntryContent from '@/components/record-entry/RecordEntryContent';
 import { Record } from '@/types';
 import { useState, useEffect } from 'react';
 import RecordEntryHeader from '@/components/record-entry/RecordEntryHeader';
+import { GOLD_STANDARD_CONFIG } from '@/utils/matchingConfigDefaults';
 
 const RecordEntry = () => {
   const [initialRecords, setInitialRecords] = useState<Record[]>([]);
@@ -37,7 +38,7 @@ const RecordEntry = () => {
     <div className="container mx-auto py-8 px-4">
       <RecordEntryHeader />
       
-      <MatchingConfigProvider>
+      <MatchingConfigProvider initialConfig={GOLD_STANDARD_CONFIG}>
         <RecordDataProvider initialRecords={initialRecords}>
           <RecordEntryContent />
         </RecordDataProvider>
