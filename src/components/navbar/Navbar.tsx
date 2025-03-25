@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/contexts/auth'; // Updated import path
 import NavbarContainer from './NavbarContainer';
 import NavbarLinks from './NavbarLinks';
 import NavbarUserMenu from './NavbarUserMenu';

@@ -2,7 +2,7 @@
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Shield, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/contexts/auth'; // Updated import path
 import {
   DropdownMenu,
   DropdownMenuContent,
