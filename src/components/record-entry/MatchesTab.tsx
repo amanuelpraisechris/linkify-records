@@ -86,10 +86,10 @@ const MatchesTab = ({
 
   const handleSaveNotes = (record: Record, notes: string) => {
     if (submittedRecord) {
-      const result = {
+      const result: MatchResult = {
         sourceId: submittedRecord.id,
         matchId: record.id,
-        status: 'matched',
+        status: 'matched', // Using the correct union type value
         confidence: record.fuzzyScore || record.metadata?.matchScore || 0,
         matchedBy: 'manual-selection',
         matchedAt: new Date().toISOString(),
@@ -126,11 +126,11 @@ const MatchesTab = ({
       
       setFailedLinkages(prev => [newFailure, ...prev]);
       
-      // Create a match result with status 'no-match'
-      const result = {
+      // Create a match result with status 'manual-review' instead of 'no-match'
+      const result: MatchResult = {
         sourceId: submittedRecord.id,
         matchId: null,
-        status: 'no-match',
+        status: 'manual-review', // Changed from 'no-match' to an allowed value
         confidence: 0,
         matchedBy: 'manual-review',
         matchedAt: new Date().toISOString(),
