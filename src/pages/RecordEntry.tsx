@@ -3,45 +3,24 @@ import { RecordDataProvider } from '@/contexts/record-data/RecordDataContext';
 import { MatchingConfigProvider } from '@/contexts/MatchingConfigContext';
 import RecordEntryContent from '@/components/record-entry/RecordEntryContent';
 import { Record } from '@/types';
-
-const initialRecords: Record[] = [
-  {
-    id: '1',
-    firstName: 'John',
-    lastName: 'Doe',
-    sex: 'Male',
-    birthDate: '1985-03-15',
-    village: 'Central',
-    subVillage: 'Downtown',
-    identifiers: [
-      { type: 'Health ID', value: 'H12345' }
-    ],
-    metadata: {
-      createdAt: '2023-05-10T09:30:00Z',
-      updatedAt: '2023-05-10T09:30:00Z',
-      source: 'Clinical Entry'
-    }
-  },
-  {
-    id: '2',
-    firstName: 'Jane',
-    lastName: 'Smith',
-    sex: 'Female',
-    birthDate: '1990-07-22',
-    village: 'Eastern',
-    subVillage: 'Riverside',
-    identifiers: [
-      { type: 'Health ID', value: 'H54321' }
-    ],
-    metadata: {
-      createdAt: '2023-05-11T14:15:00Z',
-      updatedAt: '2023-05-11T14:15:00Z',
-      source: 'Clinical Entry'
-    }
-  }
-];
+import { useState, useEffect } from 'react';
 
 const RecordEntry = () => {
+  const [initialRecords, setInitialRecords] = useState<Record[]>([]);
+  
+  // Load any existing records from localStorage on component mount
+  useEffect(() => {
+    try {
+      const savedRecords = localStorage.getItem('clinic_records');
+      if (savedRecords) {
+        const parsedRecords = JSON.parse(savedRecords);
+        setInitialRecords(parsedRecords);
+      }
+    } catch (error) {
+      console.error('Error loading saved records:', error);
+    }
+  }, []);
+
   return (
     <MatchingConfigProvider>
       <RecordDataProvider initialRecords={initialRecords}>

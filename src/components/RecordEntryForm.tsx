@@ -53,7 +53,7 @@ const RecordEntryForm = ({ onRecordSubmit, onSaveForSearch }: RecordEntryFormPro
   } = useRecordForm({ onRecordSubmit, onSaveForSearch });
   
   return (
-    <div className="border rounded-xl shadow-subtle p-6 bg-white dark:bg-black">
+    <div className="border rounded-xl shadow-subtle p-4 bg-white dark:bg-black">
       <FormHeader 
         isRepeatPatient={isRepeatPatient}
         inputLanguage={inputLanguage}
@@ -63,7 +63,7 @@ const RecordEntryForm = ({ onRecordSubmit, onSaveForSearch }: RecordEntryFormPro
       <Alert className="mb-4 bg-amber-50 border-amber-300 dark:bg-amber-950/20">
         <InfoIcon className="h-4 w-4 text-amber-600" />
         <AlertDescription className="text-amber-700">
-          <strong>Data Use Notice:</strong> All personal identifiers are used for matching except Balozi information, which is collected for administrative purposes only.
+          <strong>Data Use Notice:</strong> All personal identifiers are used for matching purposes.
         </AlertDescription>
       </Alert>
       
