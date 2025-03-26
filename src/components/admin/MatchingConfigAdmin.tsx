@@ -62,6 +62,16 @@ const MatchingConfigAdmin = () => {
     });
   };
 
+  // Fix the type issue when updating field weights
+  const handleFieldWeightChange = (field: string, value: number) => {
+    // Create a properly typed update
+    const weightUpdate: Partial<FieldWeights> = {};
+    weightUpdate[field as keyof FieldWeights] = value;
+    
+    // Apply the update
+    updateFieldWeights(weightUpdate as FieldWeights);
+  };
+
   return (
     <Card className="w-full">
       <CardHeader>
@@ -117,7 +127,7 @@ const MatchingConfigAdmin = () => {
           <TabsContent value="weights">
             <FieldWeightsTab 
               config={config} 
-              onWeightChange={(field, value) => updateFieldWeights({ [field]: value })} 
+              onWeightChange={(field, value) => handleFieldWeightChange(field, value)} 
             />
           </TabsContent>
           

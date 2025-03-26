@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useMatchingConfig } from '@/contexts/MatchingConfigContext';
 import { Slider } from '@/components/ui/slider';
@@ -53,7 +52,10 @@ const MatchingConfigPanel = () => {
   };
 
   const handleSaveChanges = () => {
+    // Apply field weights changes
     updateFieldWeights(localWeights);
+    
+    // Apply other configuration changes
     updateConfig({
       threshold: localThresholds,
       fuzzyMatching: localFuzzyMatching,
@@ -81,6 +83,7 @@ const MatchingConfigPanel = () => {
     });
   };
 
+  
   return (
     <Card>
       <CardHeader>

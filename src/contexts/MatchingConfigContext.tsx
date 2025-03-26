@@ -4,6 +4,9 @@ import { FieldWeights } from '@/utils/matching';
 import { DEFAULT_PROFILES, EXTENDED_DEFAULT_CONFIG, GOLD_STANDARD_CONFIG } from '@/utils/matchingConfigDefaults';
 import { ExtendedMatchingConfig } from '@/types/matchingConfig';
 
+// Export this type for use in other components
+export type AlgorithmType = 'deterministic' | 'probabilistic';
+
 interface MatchingConfigContextType {
   config: ExtendedMatchingConfig;
   updateFieldWeights: (weights: FieldWeights) => void;
@@ -13,6 +16,9 @@ interface MatchingConfigContextType {
   loadConfigProfile: (name: string) => void;
   availableProfiles: string[];
   defaultConfig: ExtendedMatchingConfig;
+  // Add the missing methods
+  updateConfig: (partialConfig: Partial<ExtendedMatchingConfig>) => void;
+  setAlgorithmType: (type: AlgorithmType) => void;
 }
 
 const MatchingConfigContext = createContext<MatchingConfigContextType | undefined>(undefined);
@@ -67,7 +73,10 @@ export const MatchingConfigProvider: React.FC<MatchingConfigProviderProps> = ({
   const updateFieldWeights = (weights: FieldWeights) => {
     setConfig(prev => ({
       ...prev,
-      fieldWeights: weights
+      fieldWeights: {
+        ...prev.fieldWeights,
+        ...weights
+      }
     }));
   };
   
@@ -79,6 +88,22 @@ export const MatchingConfigProvider: React.FC<MatchingConfigProviderProps> = ({
     setConfig(prev => ({
       ...prev,
       threshold: thresholds
+    }));
+  };
+  
+  // Add the missing updateConfig method
+  const updateConfig = (partialConfig: Partial<ExtendedMatchingConfig>) => {
+    setConfig(prev => ({
+      ...prev,
+      ...partialConfig
+    }));
+  };
+  
+  // Add the missing setAlgorithmType method
+  const setAlgorithmType = (type: AlgorithmType) => {
+    setConfig(prev => ({
+      ...prev,
+      algorithmType: type
     }));
   };
   
@@ -105,7 +130,10 @@ export const MatchingConfigProvider: React.FC<MatchingConfigProviderProps> = ({
         saveConfigProfile,
         loadConfigProfile,
         availableProfiles: Object.keys(profiles),
-        defaultConfig: GOLD_STANDARD_CONFIG
+        defaultConfig: GOLD_STANDARD_CONFIG,
+        // Include the new methods
+        updateConfig,
+        setAlgorithmType
       }}
     >
       {children}
