@@ -8,10 +8,11 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/components/ui/use-toast';
 import { Save, Settings, SlidersHorizontal, BarChart3 } from 'lucide-react';
-import { FieldWeights } from '@/utils/matchingAlgorithms';
+import { FieldWeights } from '@/utils/matching';
 import { FieldWeightsTab } from './matching-config/FieldWeightsTab';
 import { ThresholdsTab } from './matching-config/ThresholdsTab';
 import { AdvancedSettingsTab } from './matching-config/AdvancedSettingsTab';
+import { AlgorithmTypeTab } from './algorithm-config/AlgorithmTypeTab';
 
 const MatchingConfigAdmin = () => {
   const { 
@@ -109,7 +110,7 @@ const MatchingConfigAdmin = () => {
       
       <CardContent>
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="weights" className="flex items-center">
               <SlidersHorizontal className="w-4 h-4 mr-2" />
               Field Weights
@@ -121,6 +122,10 @@ const MatchingConfigAdmin = () => {
             <TabsTrigger value="advanced" className="flex items-center">
               <Settings className="w-4 h-4 mr-2" />
               Advanced Settings
+            </TabsTrigger>
+            <TabsTrigger value="algorithm" className="flex items-center">
+              <Settings className="w-4 h-4 mr-2" />
+              Algorithm Type
             </TabsTrigger>
           </TabsList>
           
@@ -148,6 +153,10 @@ const MatchingConfigAdmin = () => {
               config={config}
               onConfigUpdate={updateConfig}
             />
+          </TabsContent>
+          
+          <TabsContent value="algorithm">
+            <AlgorithmTypeTab />
           </TabsContent>
         </Tabs>
       </CardContent>
