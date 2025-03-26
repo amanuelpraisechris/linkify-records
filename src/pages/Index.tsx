@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Navbar } from '@/components/navbar';
@@ -18,7 +17,6 @@ const Index = () => {
   const { records } = useRecordData();
 
   useEffect(() => {
-    // Simulate data loading
     const timer = setTimeout(() => {
       setIsLoading(false);
     }, 1000);
@@ -26,7 +24,6 @@ const Index = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  // Navigation cards for main features
   const navigationCards = [
     {
       title: "Manage Records",
@@ -68,7 +65,7 @@ const Index = () => {
           <div className="inline-flex items-center justify-center p-2 mb-4 rounded-full bg-primary/10">
             <Link2 className="w-6 h-6 text-primary" />
           </div>
-          <h1 className="text-4xl font-bold tracking-tight mb-3">Kisesa DSS-Clinic Record Linkage System</h1>
+          <h1 className="text-4xl font-bold tracking-tight mb-3">DSS-Clinic Record Linkage System</h1>
           <p className="max-w-2xl text-xl text-muted-foreground">
             Connect and manage patient records with precision and ease
           </p>
@@ -99,7 +96,6 @@ const Index = () => {
           </div>
         </div>
         
-        {/* World Map Demo */}
         <WorldMapDemo />
         
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 my-10">
@@ -134,7 +130,6 @@ const Index = () => {
           />
         </div>
 
-        {/* Navigation cards for main features */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
           {navigationCards.map((card, index) => (
             <Link 
