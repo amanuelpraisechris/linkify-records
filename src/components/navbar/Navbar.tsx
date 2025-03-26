@@ -36,7 +36,6 @@ const Navbar = () => {
       <div className="flex items-center gap-2">
         {user && <NavbarNewRecordButton />}
         {(user || isAdminLoginPage) && <NavbarRoleSwitch />}
-        {/* Only show NavbarUserMenu and remove NavbarAdminButton to avoid duplication */}
         <NavbarUserMenu />
       </div>
     </NavbarContainer>
