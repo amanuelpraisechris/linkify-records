@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useMatchingConfig } from '@/contexts/MatchingConfigContext';
 import { Badge } from '@/components/ui/badge';
 import { useState } from 'react';
+import ConsentSection from './ConsentSection';
 
 interface SearchDSSTabProps {
   inputLanguage: SupportedLanguage;
@@ -31,8 +32,14 @@ const SearchDSSTab = ({
 }: SearchDSSTabProps) => {
   const { config, loadConfigProfile, availableProfiles } = useMatchingConfig();
   const [selectedFacility, setSelectedFacility] = useState('');
+  const [consentGiven, setConsentGiven] = useState(false);
   
   const handleSearch = () => {
+    if (!consentGiven) {
+      // Show consent alert or prevent search
+      return;
+    }
+    
     if (onSaveForSearch) {
       const searchRecord: Record = {
         id: `search-${Date.now()}`,
@@ -62,7 +69,7 @@ const SearchDSSTab = ({
           <div className="flex items-center space-x-2">
             <Settings className="w-4 h-4 text-muted-foreground" />
             <Select 
-              defaultValue=""
+              defaultValue="Gold Standard"
               onValueChange={loadConfigProfile}
             >
               <SelectTrigger className="w-[180px]">
@@ -80,6 +87,7 @@ const SearchDSSTab = ({
             type="button"
             onClick={handleSearch}
             className="inline-flex items-center"
+            disabled={!consentGiven}
           >
             <Search className="w-4 h-4 mr-2" />
             {inputLanguage === 'latin' ? 'Search DSS' : 
@@ -113,6 +121,13 @@ const SearchDSSTab = ({
           </SelectContent>
         </Select>
       </div>
+      
+      {/* Add consent section */}
+      <ConsentSection 
+        inputLanguage={inputLanguage}
+        consentGiven={consentGiven}
+        setConsentGiven={setConsentGiven}
+      />
       
       <div className="border-2 border-dashed rounded-md p-8 text-center">
         {inputLanguage === 'latin' ? 
@@ -150,6 +165,12 @@ const SearchDSSTab = ({
               }
             </div>
           </div>
+        </div>
+        <div className="mt-2">
+          <span className="text-muted-foreground">Algorithm Type:</span>
+          <Badge variant="outline" className="ml-2">
+            {config.algorithmType === 'probabilistic' ? 'Probabilistic (Fellegi-Sunter)' : 'Deterministic'}
+          </Badge>
         </div>
       </div>
     </div>

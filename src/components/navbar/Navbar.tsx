@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/contexts/auth'; // Updated import path
 import NavbarContainer from './NavbarContainer';
 import NavbarLinks from './NavbarLinks';
 import NavbarUserMenu from './NavbarUserMenu';
@@ -36,6 +36,7 @@ const Navbar = () => {
       <div className="flex items-center gap-2">
         {user && <NavbarNewRecordButton />}
         {(user || isAdminLoginPage) && <NavbarRoleSwitch />}
+        {/* Only show NavbarUserMenu and remove NavbarAdminButton to avoid duplication */}
         <NavbarUserMenu />
       </div>
     </NavbarContainer>

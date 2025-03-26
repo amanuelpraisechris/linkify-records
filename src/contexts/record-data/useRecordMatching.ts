@@ -1,7 +1,7 @@
 
 import { Record } from '@/types';
 import { calculateMatchScore } from '@/utils/matching';
-import { findProbabilisticMatches } from '@/utils/probabilisticMatching';
+import { findProbabilisticMatches } from '@/utils/matching/probabilistic';
 import { useMatchingConfig } from '../MatchingConfigContext';
 
 export const useRecordMatching = () => {
@@ -9,9 +9,9 @@ export const useRecordMatching = () => {
 
   const findMatchesForRecord = (
     sourceRecord: Record, 
-    communityRecords: Record[],
-    importedRecords: Record[],
-    allRecords: Record[]
+    communityRecords: Record[] = [],
+    importedRecords: Record[] = [],
+    allRecords: Record[] = []
   ) => {
     try {
       console.log(`Finding matches for record:`, JSON.stringify(sourceRecord, null, 2));
@@ -20,14 +20,16 @@ export const useRecordMatching = () => {
       console.log(`Imported records: ${importedRecords.length}`);
       console.log(`Using algorithm type: ${config.algorithmType}`);
       
-      let searchPool = communityRecords.length > 0 ? [...communityRecords] : [];
+      // Prioritize community records first, then imported records, then all records
+      let searchPool = [];
       
-      if (searchPool.length === 0 && importedRecords.length > 0) {
+      if (communityRecords && communityRecords.length > 0) {
+        console.log('Using community records as primary search pool');
+        searchPool = [...communityRecords];
+      } else if (importedRecords && importedRecords.length > 0) {
         console.log('No community records found, using imported records as search pool');
         searchPool = [...importedRecords];
-      }
-      
-      if (searchPool.length === 0) {
+      } else if (allRecords && allRecords.length > 0) {
         console.log('No community or imported records, using all records as search pool');
         searchPool = allRecords.filter(record => record.id !== sourceRecord.id);
       }
@@ -49,6 +51,13 @@ export const useRecordMatching = () => {
           const matches = findProbabilisticMatches(sourceRecord, searchPool, minThreshold);
           
           console.log(`Found ${matches.length} probabilistic matches`);
+          console.log('Probabilistic match scores:', 
+            matches.slice(0, 5).map(m => ({ 
+              score: m.score, 
+              name: `${m.record.firstName} ${m.record.lastName}`,
+              matchedOn: m.matchedOn
+            }))
+          );
           
           const enrichedMatches = matches.map(match => {
             const householdMembers = match.record.householdMembers || [];
@@ -78,24 +87,26 @@ export const useRecordMatching = () => {
         console.log('Using deterministic matching');
         const matches = searchPool
           .map(record => {
-            const { score, matchedOn } = calculateMatchScore(sourceRecord, record, config);
+            const { score, matchedOn, fieldScores } = calculateMatchScore(sourceRecord, record, config);
             return { 
               record: {
                 ...record, 
                 householdMembers: record.householdMembers || []
               }, 
               score, 
-              matchedOn 
+              matchedOn,
+              fieldScores 
             };
           })
-          .filter(match => match.score > 0)
+          .filter(match => match.score > config.threshold.low)
           .sort((a, b) => b.score - a.score);
         
         console.log(`Found ${matches.length} deterministic matches`);
         console.log('Deterministic match scores:', 
-          matches.slice(0, 10).map(m => ({ 
+          matches.slice(0, 5).map(m => ({ 
             score: m.score, 
-            name: `${m.record.firstName} ${m.record.lastName}` 
+            name: `${m.record.firstName} ${m.record.lastName}`,
+            matchedOn: m.matchedOn
           }))
         );
         
