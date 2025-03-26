@@ -1,7 +1,6 @@
 
 import { Navigate, useLocation } from 'react-router-dom';
-import { useAuth } from '@/contexts/auth';
-import { toast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -11,42 +10,28 @@ interface ProtectedRouteProps {
 const ProtectedRoute = ({ children, adminOnly = false }: ProtectedRouteProps) => {
   const location = useLocation();
   const { user, isAdmin, isLoading } = useAuth();
-  
+
   // Show loading state while checking authentication
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    );
+    return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
   }
 
-  // For admin-only routes, redirect to admin login if not admin
-  if (adminOnly && !isAdmin) {
-    // Only show toast if coming from a user action, not initial route
-    if (location.key) {
-      toast({
-        title: "Admin Access Required",
-        description: "Please login with an admin account to access this page.",
-        variant: "destructive",
-      });
+  // For admin-only routes: Check admin access
+  if (adminOnly) {
+    if (!isAdmin) {
+      return <Navigate to="/admin-login" state={{ from: location }} replace />;
     }
-    return <Navigate to="/admin-login" state={{ from: location }} replace />;
+    
+    // Render children if admin
+    return <>{children}</>;
   }
 
-  // For regular protected routes
+  // For regular protected routes: Check user authentication
   if (!user) {
-    // Only show toast if coming from a user action, not initial route
-    if (location.key) {
-      toast({
-        title: "Authentication Required",
-        description: "Please login to access this page.",
-        variant: "destructive",
-      });
-    }
     return <Navigate to="/auth" state={{ from: location }} replace />;
   }
 
+  // Render children if authenticated and has proper permissions
   return <>{children}</>;
 };
 

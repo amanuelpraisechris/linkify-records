@@ -3,8 +3,7 @@ import React from 'react';
 import { CardContent } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { useMatchingConfig } from '@/contexts/MatchingConfigContext';
-import type { AlgorithmType } from '@/contexts/MatchingConfigContext';
+import { useMatchingConfig, AlgorithmType } from '@/contexts/MatchingConfigContext';
 
 export const AlgorithmTypeTab: React.FC = () => {
   const { config, setAlgorithmType } = useMatchingConfig();

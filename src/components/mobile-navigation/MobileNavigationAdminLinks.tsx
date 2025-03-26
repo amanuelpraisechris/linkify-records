@@ -28,8 +28,11 @@ const MobileNavigationAdminLinks = ({ isAdmin, onClose }: MobileNavigationAdminL
 
   const handleAdminClick = () => {
     onClose();
-    // Always navigate to admin login if not admin
-    navigate('/admin-login');
+    if (isAdmin) {
+      navigate('/admin-dashboard');
+    } else {
+      navigate('/admin-login');
+    }
   };
 
   if (isAdmin) {

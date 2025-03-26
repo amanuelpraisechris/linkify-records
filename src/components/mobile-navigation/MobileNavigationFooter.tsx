@@ -2,7 +2,7 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { LogIn, LogOut } from 'lucide-react';
-import { useAuth } from '@/contexts/auth'; // Updated import path
+import { useAuth } from '@/contexts/AuthContext';
 
 interface MobileNavigationFooterProps {
   isLoggedIn: boolean;

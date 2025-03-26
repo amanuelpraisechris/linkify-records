@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { FieldWeights } from '@/utils/matching';
+import { FieldWeights } from '@/utils/matchingAlgorithms';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Separator } from '@/components/ui/separator';

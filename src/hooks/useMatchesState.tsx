@@ -1,16 +1,13 @@
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 import { Record, MatchResult } from '@/types';
 import { useRecordData } from '@/contexts/record-data/RecordDataContext';
 
 export const useMatchesState = () => {
   const { 
-    records,
-    clinicRecords,
+    findMatchesForRecord, 
     communityRecords,
-    addRecord,
-    findMatchesForRecord,
     saveMatchResult 
   } = useRecordData();
   
@@ -25,55 +22,29 @@ export const useMatchesState = () => {
   const [activeTab, setActiveTab] = useState('entry');
   const { toast } = useToast();
 
-  // Update search attempts status in localStorage when matches are found
-  useEffect(() => {
-    if (submittedRecord && potentialMatches.length > 0) {
-      try {
-        const savedAttempts = localStorage.getItem('searchAttempts');
-        if (savedAttempts) {
-          const attempts = JSON.parse(savedAttempts);
-          // Find the most recent attempt for this record
-          const updatedAttempts = attempts.map((attempt: any) => {
-            if (attempt.query === `${submittedRecord.firstName} ${submittedRecord.lastName}` && !attempt.success) {
-              return { ...attempt, success: true };
-            }
-            return attempt;
-          });
-          localStorage.setItem('searchAttempts', JSON.stringify(updatedAttempts));
-        }
-      } catch (error) {
-        console.error('Error updating search attempts:', error);
-      }
-    }
-  }, [submittedRecord, potentialMatches]);
-
   const handleRecordSubmit = (record: Record) => {
     try {
-      console.log("Record submitted:", record);
-      
-      // Add the clinic record to our records list
-      addRecord(record, 'clinic');
-      
-      // Prepare record with source ID for matching
+      // Add the clinic record
       const recordWithSource = {
         ...record,
-        sourceId: record.id,
+        sourceId: record.id, // Keep track of the source record ID for matching
       };
       
-      setSubmittedRecord(recordWithSource);
-      
-      // If community database is missing, show warning but still proceed
+      // Check if community database is loaded
       if (communityRecords.length === 0) {
+        setPotentialMatches([]);
+        setSubmittedRecord(recordWithSource);
+        
         toast({
-          title: "Warning: No Community Database",
-          description: "HDSS community database is not loaded. Matching will be limited.",
+          title: "No Community Database",
+          description: "Please import the HDSS community database to enable matching.",
           variant: "destructive"
         });
+        return;
       }
       
-      // Find potential matches
+      // Find potential matches in the community database
       const matches = findMatchesForRecord(recordWithSource);
-      console.log(`Found ${matches.length} potential matches for submitted record`);
       
       // Add source ID to potential matches
       const matchesWithSource = matches.map(match => ({
@@ -85,22 +56,7 @@ export const useMatchesState = () => {
       }));
       
       setPotentialMatches(matchesWithSource);
-      
-      // Log search attempt
-      try {
-        const searchAttempt = {
-          timestamp: new Date().toISOString(),
-          query: `${record.firstName} ${record.lastName}`,
-          success: matches.length > 0
-        };
-        
-        const savedAttempts = localStorage.getItem('searchAttempts');
-        let attempts = savedAttempts ? JSON.parse(savedAttempts) : [];
-        attempts = [searchAttempt, ...attempts];
-        localStorage.setItem('searchAttempts', JSON.stringify(attempts));
-      } catch (error) {
-        console.error('Error logging search attempt:', error);
-      }
+      setSubmittedRecord(recordWithSource);
       
       toast({
         title: "Record Submitted",
@@ -125,44 +81,33 @@ export const useMatchesState = () => {
     try {
       console.log("Save for search called with record:", record);
       
-      // Prepare record with ID for matching if it doesn't have one
-      const recordWithId = {
-        ...record,
-        id: record.id || `search-${Date.now()}`,
-      };
-      
-      setSubmittedRecord(recordWithId);
-      
-      // If community database is missing, show warning but still proceed
+      // Check if community database is loaded
       if (communityRecords.length === 0) {
+        setPotentialMatches([]);
+        setSubmittedRecord(record);
+        
         toast({
-          title: "Warning: No Community Database",
-          description: "HDSS community database is not loaded. Matching will be limited.",
+          title: "No Community Database",
+          description: "Please import the HDSS community database to enable matching.",
           variant: "destructive"
         });
+        return;
       }
       
-      // Find potential matches
-      const matches = findMatchesForRecord(recordWithId);
-      console.log(`Found ${matches.length} potential matches for search record`);
+      // Find potential matches in the community database
+      const matches = findMatchesForRecord(record);
       
-      setPotentialMatches(matches);
+      // Add source ID to potential matches
+      const matchesWithSource = matches.map(match => ({
+        ...match,
+        record: {
+          ...match.record,
+          sourceId: record.id
+        }
+      }));
       
-      // Log search attempt
-      try {
-        const searchAttempt = {
-          timestamp: new Date().toISOString(),
-          query: `${record.firstName} ${record.lastName}`,
-          success: matches.length > 0
-        };
-        
-        const savedAttempts = localStorage.getItem('searchAttempts');
-        let attempts = savedAttempts ? JSON.parse(savedAttempts) : [];
-        attempts = [searchAttempt, ...attempts];
-        localStorage.setItem('searchAttempts', JSON.stringify(attempts));
-      } catch (error) {
-        console.error('Error logging search attempt:', error);
-      }
+      setPotentialMatches(matchesWithSource);
+      setSubmittedRecord(record);
       
       toast({
         title: "Search Complete",
@@ -171,6 +116,8 @@ export const useMatchesState = () => {
       
       // Make sure we're in the matches tab
       setActiveTab('matches');
+      
+      console.log("Search results:", matchesWithSource);
     } catch (error) {
       console.error("Error in handleSaveForSearch:", error);
       toast({
@@ -190,11 +137,6 @@ export const useMatchesState = () => {
       description: "The match has been saved successfully and added to your progress report.",
       duration: 3000,
     });
-    
-    // Return to the entry tab to process the next record
-    setActiveTab('entry');
-    setSubmittedRecord(null);
-    setPotentialMatches([]);
   };
 
   return {

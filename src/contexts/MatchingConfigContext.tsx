@@ -1,145 +1,21 @@
 
-import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
+import React, { createContext, useState, useContext, ReactNode, useEffect } from 'react';
 import { FieldWeights } from '@/utils/matching';
-import { DEFAULT_PROFILES, EXTENDED_DEFAULT_CONFIG, GOLD_STANDARD_CONFIG } from '@/utils/matchingConfigDefaults';
-import { ExtendedMatchingConfig } from '@/types/matchingConfig';
-
-// Export this type for use in other components
-export type AlgorithmType = 'deterministic' | 'probabilistic';
-
-interface MatchingConfigContextType {
-  config: ExtendedMatchingConfig;
-  updateFieldWeights: (weights: Partial<FieldWeights>) => void;
-  resetConfig: () => void;
-  updateThresholds: (thresholds: { high: number; medium: number; low: number }) => void;
-  saveConfigProfile: (name: string) => void;
-  loadConfigProfile: (name: string) => void;
-  availableProfiles: string[];
-  defaultConfig: ExtendedMatchingConfig;
-  // Add the missing methods
-  updateConfig: (partialConfig: Partial<ExtendedMatchingConfig>) => void;
-  setAlgorithmType: (type: AlgorithmType) => void;
-}
+import { useToast } from '@/components/ui/use-toast';
+import { 
+  MatchingConfigContextType, 
+  ExtendedMatchingConfig, 
+  AlgorithmType 
+} from '@/types/matchingConfig';
+import { 
+  getInitialConfig, 
+  getInitialProfiles,
+  saveProfilesToStorage,
+  saveConfigToStorage
+} from '@/utils/matchingConfigStorage';
+import { GOLD_STANDARD_CONFIG } from '@/utils/matchingConfigDefaults';
 
 const MatchingConfigContext = createContext<MatchingConfigContextType | undefined>(undefined);
-
-interface MatchingConfigProviderProps {
-  children: ReactNode;
-  initialConfig?: ExtendedMatchingConfig;
-}
-
-export const MatchingConfigProvider: React.FC<MatchingConfigProviderProps> = ({ 
-  children,
-  initialConfig = GOLD_STANDARD_CONFIG // Use Gold Standard as default
-}) => {
-  const [config, setConfig] = useState<ExtendedMatchingConfig>(initialConfig);
-  const [profiles, setProfiles] = useState<Record<string, ExtendedMatchingConfig>>(DEFAULT_PROFILES);
-  
-  // Update config from localStorage if available
-  useEffect(() => {
-    try {
-      const savedConfig = localStorage.getItem('matching_config');
-      if (savedConfig) {
-        setConfig(JSON.parse(savedConfig));
-      }
-      
-      const savedProfiles = localStorage.getItem('matching_profiles');
-      if (savedProfiles) {
-        setProfiles(JSON.parse(savedProfiles));
-      }
-    } catch (error) {
-      console.error('Error loading matching configuration:', error);
-    }
-  }, []);
-  
-  // Save config to localStorage whenever it changes
-  useEffect(() => {
-    try {
-      localStorage.setItem('matching_config', JSON.stringify(config));
-    } catch (error) {
-      console.error('Error saving matching configuration:', error);
-    }
-  }, [config]);
-  
-  // Save profiles to localStorage whenever they change
-  useEffect(() => {
-    try {
-      localStorage.setItem('matching_profiles', JSON.stringify(profiles));
-    } catch (error) {
-      console.error('Error saving matching profiles:', error);
-    }
-  }, [profiles]);
-  
-  const updateFieldWeights = (weights: Partial<FieldWeights>) => {
-    setConfig(prev => ({
-      ...prev,
-      fieldWeights: {
-        ...prev.fieldWeights,
-        ...weights
-      }
-    }));
-  };
-  
-  const resetConfig = () => {
-    setConfig(GOLD_STANDARD_CONFIG);
-  };
-  
-  const updateThresholds = (thresholds: { high: number; medium: number; low: number }) => {
-    setConfig(prev => ({
-      ...prev,
-      threshold: thresholds
-    }));
-  };
-  
-  // Add the missing updateConfig method
-  const updateConfig = (partialConfig: Partial<ExtendedMatchingConfig>) => {
-    setConfig(prev => ({
-      ...prev,
-      ...partialConfig
-    }));
-  };
-  
-  // Add the missing setAlgorithmType method
-  const setAlgorithmType = (type: AlgorithmType) => {
-    setConfig(prev => ({
-      ...prev,
-      algorithmType: type
-    }));
-  };
-  
-  const saveConfigProfile = (name: string) => {
-    setProfiles(prev => ({
-      ...prev,
-      [name]: config
-    }));
-  };
-  
-  const loadConfigProfile = (name: string) => {
-    if (profiles[name]) {
-      setConfig(profiles[name]);
-    }
-  };
-  
-  return (
-    <MatchingConfigContext.Provider 
-      value={{ 
-        config, 
-        updateFieldWeights, 
-        resetConfig,
-        updateThresholds,
-        saveConfigProfile,
-        loadConfigProfile,
-        availableProfiles: Object.keys(profiles),
-        defaultConfig: GOLD_STANDARD_CONFIG,
-        // Include the new methods
-        updateConfig,
-        setAlgorithmType
-      }}
-    >
-      {children}
-    </MatchingConfigContext.Provider>
-  );
-};
 
 export const useMatchingConfig = () => {
   const context = useContext(MatchingConfigContext);
@@ -147,4 +23,165 @@ export const useMatchingConfig = () => {
     throw new Error('useMatchingConfig must be used within a MatchingConfigProvider');
   }
   return context;
+};
+
+// Re-export AlgorithmType so consumers don't need to import from types
+export type { AlgorithmType } from '@/types/matchingConfig';
+
+interface MatchingConfigProviderProps {
+  children: ReactNode;
+}
+
+export const MatchingConfigProvider: React.FC<MatchingConfigProviderProps> = ({ children }) => {
+  const { toast } = useToast();
+  
+  const [config, setConfig] = useState<ExtendedMatchingConfig>(getInitialConfig());
+  const [savedProfiles, setSavedProfiles] = useState<Record<string, ExtendedMatchingConfig>>(getInitialProfiles());
+  
+  // Save profiles to local storage when they change
+  useEffect(() => {
+    try {
+      saveProfilesToStorage(savedProfiles);
+    } catch (error) {
+      toast({
+        title: "Error Saving Profiles",
+        description: "There was an error saving your matching profiles.",
+        variant: "destructive",
+      });
+    }
+  }, [savedProfiles, toast]);
+  
+  // Save current config to local storage when it changes
+  useEffect(() => {
+    try {
+      saveConfigToStorage(config);
+    } catch (error) {
+      console.error('Failed to save current matching config:', error);
+    }
+  }, [config]);
+
+  const updateConfig = (newConfig: Partial<ExtendedMatchingConfig>) => {
+    setConfig(prevConfig => ({
+      ...prevConfig,
+      ...newConfig,
+    }));
+  };
+
+  const updateFieldWeights = (weights: Partial<FieldWeights>) => {
+    setConfig(prevConfig => ({
+      ...prevConfig,
+      fieldWeights: {
+        ...prevConfig.fieldWeights,
+        ...weights,
+      },
+    }));
+  };
+
+  const resetConfig = () => {
+    setConfig(GOLD_STANDARD_CONFIG);
+    toast({
+      title: "Gold Standard Applied",
+      description: "Reset to Gold Standard matching profile based on Fellegi-Sunter model.",
+    });
+  };
+
+  const saveConfigProfile = (name: string) => {
+    setSavedProfiles(prev => ({
+      ...prev,
+      [name]: { ...config }
+    }));
+  };
+
+  const loadConfigProfile = (name: string) => {
+    if (savedProfiles[name]) {
+      setConfig(savedProfiles[name]);
+    }
+  };
+  
+  const deleteConfigProfile = (name: string) => {
+    // Don't allow deletion of default profiles
+    if (Object.keys(savedProfiles).includes(name) && !Object.keys(getInitialProfiles()).includes(name)) {
+      setSavedProfiles(prev => {
+        const newProfiles = { ...prev };
+        delete newProfiles[name];
+        return newProfiles;
+      });
+      
+      toast({
+        title: "Profile Deleted",
+        description: `"${name}" matching profile has been deleted.`,
+      });
+    } else {
+      toast({
+        title: "Cannot Delete Default Profile",
+        description: "Default profiles cannot be deleted.",
+        variant: "destructive",
+      });
+    }
+  };
+  
+  const exportConfigToJson = () => {
+    return JSON.stringify(config, null, 2);
+  };
+  
+  const importConfigFromJson = (jsonString: string) => {
+    try {
+      const importedConfig = JSON.parse(jsonString);
+      
+      // Basic validation that it's a matching config
+      if (!importedConfig.fieldWeights || !importedConfig.threshold) {
+        throw new Error('Invalid configuration format');
+      }
+      
+      // Ensure algorithm type exists
+      if (!importedConfig.algorithmType) {
+        importedConfig.algorithmType = 'deterministic';
+      }
+      
+      setConfig(importedConfig as ExtendedMatchingConfig);
+      toast({
+        title: "Configuration Imported",
+        description: "The matching configuration has been imported successfully.",
+      });
+      return true;
+    } catch (error) {
+      console.error('Failed to import configuration:', error);
+      toast({
+        title: "Import Failed",
+        description: "The configuration could not be imported. Please check the format.",
+        variant: "destructive",
+      });
+      return false;
+    }
+  };
+  
+  const setAlgorithmType = (type: AlgorithmType) => {
+    setConfig(prevConfig => ({
+      ...prevConfig,
+      algorithmType: type
+    }));
+    
+    toast({
+      title: "Algorithm Type Changed",
+      description: `Matching algorithm changed to ${type}.`,
+    });
+  };
+
+  return (
+    <MatchingConfigContext.Provider value={{ 
+      config, 
+      updateConfig, 
+      updateFieldWeights, 
+      resetConfig,
+      saveConfigProfile,
+      loadConfigProfile,
+      availableProfiles: Object.keys(savedProfiles),
+      deleteConfigProfile,
+      exportConfigToJson,
+      importConfigFromJson,
+      setAlgorithmType
+    }}>
+      {children}
+    </MatchingConfigContext.Provider>
+  );
 };

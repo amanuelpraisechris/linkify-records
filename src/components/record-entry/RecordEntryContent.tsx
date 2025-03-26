@@ -1,33 +1,24 @@
 
 import { useState } from 'react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import RecordEntryTab from './RecordEntryTab';
 import { Navbar } from '@/components/navbar';
 import { useRecordData } from '@/contexts/record-data/RecordDataContext';
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/components/ui/use-toast"
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Info } from 'lucide-react';
-import RecordEntryTabs from './RecordEntryTabs';
-import { useMatchesState } from '@/hooks/useMatchesState';
 
 interface RecordEntryContentProps {
   onRecordCreated?: () => void;
 }
 
 const RecordEntryContent = ({ onRecordCreated }: RecordEntryContentProps) => {
-  const { records, matchResults } = useRecordData();
+  const [activeTab, setActiveTab] = useState('personal');
+  const { records } = useRecordData(); // Using records instead of state
   const { toast } = useToast();
-  
-  const {
-    potentialMatches,
-    submittedRecord,
-    activeTab,
-    setActiveTab,
-    handleRecordSubmit,
-    handleSaveForSearch,
-    handleMatchComplete
-  } = useMatchesState();
 
   const handleSubmit = () => {
-    if (records) {
+    if (records) { // Using records instead of state
       console.log('Record Data:', records);
       toast({
         title: "Success!",
@@ -47,13 +38,13 @@ const RecordEntryContent = ({ onRecordCreated }: RecordEntryContentProps) => {
   };
 
   return (
-    <div className="container py-6">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-800 dark:text-white">
+    <div className="container py-10">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-800 dark:text-white">
           Enter New Record
         </h1>
         <p className="text-gray-500 dark:text-gray-400">
-          Fill in the details below to search for and link patient records.
+          Fill in the details below to create a new record.
         </p>
       </div>
 
@@ -61,23 +52,59 @@ const RecordEntryContent = ({ onRecordCreated }: RecordEntryContentProps) => {
         <Alert>
           <Info className="h-4 w-4" />
           <AlertDescription>
-            Please fill out the form to search for existing records.
+            Please fill out all tabs to create a new record.
           </AlertDescription>
         </Alert>
       )}
 
-      <RecordEntryTabs
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-        clinicRecords={records || []}
-        communityRecords={[]}
-        submittedRecord={submittedRecord}
-        potentialMatches={potentialMatches}
-        matchResults={matchResults || []}
-        onRecordSubmit={handleRecordSubmit}
-        onSaveForSearch={handleSaveForSearch}
-        onMatchComplete={handleMatchComplete}
-      />
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="mb-4">
+          <TabsTrigger value="personal">Personal Info</TabsTrigger>
+          <TabsTrigger value="education">Education</TabsTrigger>
+          <TabsTrigger value="experience">Experience</TabsTrigger>
+          <TabsTrigger value="skills">Skills</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="personal">
+          <RecordEntryTab 
+            clinicRecords={[]}
+            communityRecords={[]}
+            onRecordSubmit={() => {}}
+            onSaveForSearch={() => {}}
+          />
+        </TabsContent>
+        <TabsContent value="education">
+          <RecordEntryTab 
+            clinicRecords={[]}
+            communityRecords={[]}
+            onRecordSubmit={() => {}}
+            onSaveForSearch={() => {}}
+          />
+        </TabsContent>
+        <TabsContent value="experience">
+          <RecordEntryTab 
+            clinicRecords={[]}
+            communityRecords={[]}
+            onRecordSubmit={() => {}}
+            onSaveForSearch={() => {}}
+          />
+        </TabsContent>
+        <TabsContent value="skills">
+          <RecordEntryTab 
+            clinicRecords={[]}
+            communityRecords={[]}
+            onRecordSubmit={() => {}}
+            onSaveForSearch={() => {}}
+          />
+        </TabsContent>
+      </Tabs>
+
+      <button
+        onClick={handleSubmit}
+        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-6"
+      >
+        Submit Record
+      </button>
     </div>
   );
 };
