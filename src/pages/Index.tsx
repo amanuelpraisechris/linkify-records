@@ -68,7 +68,7 @@ const Index = () => {
           <div className="inline-flex items-center justify-center p-2 mb-4 rounded-full bg-primary/10">
             <Link2 className="w-6 h-6 text-primary" />
           </div>
-          <h1 className="text-4xl font-bold tracking-tight mb-3">Kisesa DSS-Clinic Record Linkage System</h1>
+          <h1 className="text-4xl font-bold tracking-tight mb-3">DSS-Clinic Record Linkage System</h1>
           <p className="max-w-2xl text-xl text-muted-foreground">
             Connect and manage patient records with precision and ease
           </p>
@@ -154,7 +154,7 @@ const Index = () => {
         <div className="bg-white dark:bg-black border rounded-xl shadow-card p-6">
           <h2 className="text-2xl font-semibold mb-4">About This System</h2>
           <p className="text-muted-foreground mb-4">
-            The Kisesa DSS-Clinic Record Linkage System is designed to connect patient records from
+            The DSS-Clinic Record Linkage System is designed to connect patient records from
             health facilities with demographic surveillance system (DSS) data. This integration enables:
           </p>
           

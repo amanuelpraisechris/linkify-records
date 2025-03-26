@@ -15,6 +15,7 @@ import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
 import AdminLogin from "./components/admin/AdminLogin";
 import AdminDashboard from "./components/admin/AdminDashboard";
+import MatchingConfigAdmin from "./components/admin/MatchingConfigAdmin";
 import ProtectedRoute from "./components/admin/ProtectedRoute";
 import Reports from "./pages/Reports";
 import { GOLD_STANDARD_CONFIG } from "./utils/matchingConfigDefaults";
@@ -93,10 +94,14 @@ const App = () => {
                           } 
                         />
                         
-                        {/* Redirect old matching-configuration path to admin dashboard */}
+                        {/* Add dedicated route for matching configuration */}
                         <Route 
                           path="/matching-configuration" 
-                          element={<Navigate to="/admin-dashboard" replace />} 
+                          element={
+                            <ProtectedRoute adminOnly={true}>
+                              <MatchingConfigAdmin />
+                            </ProtectedRoute>
+                          } 
                         />
                         
                         {/* Catch-all route */}
