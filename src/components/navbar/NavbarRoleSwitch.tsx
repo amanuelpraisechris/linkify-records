@@ -1,4 +1,5 @@
 
+import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Shield, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -13,14 +14,22 @@ import {
 import { toast } from '@/hooks/use-toast';
 
 const NavbarRoleSwitch = () => {
-  const { user, isAdmin } = useAuth();
+  const { user, profile } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const [isAdmin, setIsAdmin] = useState(false);
   
+  useEffect(() => {
+    const adminAuth = localStorage.getItem('adminAuth') === 'true';
+    const isProfileAdmin = profile?.role === 'admin';
+    setIsAdmin(adminAuth || isProfileAdmin);
+  }, [profile, location]);
+
   const toggleAdminMode = () => {
     if (isAdmin) {
       // Switch to user mode
       localStorage.removeItem('adminAuth');
+      setIsAdmin(false);
       toast({
         title: "User mode activated",
         description: "You are now browsing as a regular user",
