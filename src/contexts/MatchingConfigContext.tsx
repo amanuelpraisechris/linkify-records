@@ -9,7 +9,7 @@ export type AlgorithmType = 'deterministic' | 'probabilistic';
 
 interface MatchingConfigContextType {
   config: ExtendedMatchingConfig;
-  updateFieldWeights: (weights: FieldWeights) => void;
+  updateFieldWeights: (weights: Partial<FieldWeights>) => void;
   resetConfig: () => void;
   updateThresholds: (thresholds: { high: number; medium: number; low: number }) => void;
   saveConfigProfile: (name: string) => void;
@@ -70,7 +70,7 @@ export const MatchingConfigProvider: React.FC<MatchingConfigProviderProps> = ({
     }
   }, [profiles]);
   
-  const updateFieldWeights = (weights: FieldWeights) => {
+  const updateFieldWeights = (weights: Partial<FieldWeights>) => {
     setConfig(prev => ({
       ...prev,
       fieldWeights: {
