@@ -16,7 +16,7 @@ const ProtectedRoute = ({ children, adminOnly = false }: ProtectedRouteProps) =>
     return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
   }
 
-  // For admin-only routes: Check admin access and silently redirect without error
+  // For admin-only routes: Silently redirect to login page without error
   if (adminOnly) {
     if (!isAdmin) {
       return <Navigate to="/admin-login" state={{ from: location }} replace />;

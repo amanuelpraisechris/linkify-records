@@ -33,12 +33,16 @@ const SearchDSSTab = ({
   const { config, loadConfigProfile, availableProfiles } = useMatchingConfig();
   const [selectedFacility, setSelectedFacility] = useState('');
   const [consentGiven, setConsentGiven] = useState(false);
+  const [showConsentAlert, setShowConsentAlert] = useState(false);
   
   const handleSearch = () => {
     if (!consentGiven) {
-      // Show consent alert or prevent search
+      // Show consent alert and prevent search
+      setShowConsentAlert(true);
       return;
     }
+    
+    setShowConsentAlert(false);
     
     if (onSaveForSearch) {
       const searchRecord: Record = {
@@ -122,12 +126,39 @@ const SearchDSSTab = ({
         </Select>
       </div>
       
-      {/* Add consent section */}
-      <ConsentSection 
-        inputLanguage={inputLanguage}
-        consentGiven={consentGiven}
-        setConsentGiven={setConsentGiven}
-      />
+      {/* Make the consent section more prominent */}
+      <div className="border-2 border-primary/20 rounded-md p-6 bg-primary/5">
+        <h4 className="font-semibold text-lg mb-4">
+          {inputLanguage === 'latin' ? 'Consent for Data Linkage' : 
+           inputLanguage === 'amharic' ? 'ለዳታ ማገናኘት ፈቃድ' : 'ፍቓድ ንምትእስሳር ሓበሬታ'}
+        </h4>
+        
+        <p className="text-sm mb-5 text-muted-foreground">
+          {inputLanguage === 'latin' ? 
+            'Before searching in the DSS database, you must confirm that the patient has consented to have their clinical data linked with the DSS database for research purposes.' : 
+           inputLanguage === 'amharic' ? 
+            'በDSS ውሂብ ቋት ውስጥ ከመፈለግዎ በፊት፣ ታካሚው የእሱን የሕክምና ዳታ ከDSS ውሂብ ቋት ጋር ለምርምር ዓላማ እንዲያገናኙ ፈቃድ ሰጥቷል የሚለውን ማረጋገጥ አለብዎት።' : 
+            'ቅድሚ ኣብ ዋህዮ ሓበሬታ DSS ምድላይካ፣ እቲ ሕሙም ክሊኒካዊ ሓበሬታኡ ንዕላማ መጽናዕቲ ምስ ዋህዮ ሓበሬታ DSS ንኽተኣሳሰር ፍቓድ ከም ዝሃበ ከተረጋግጽ ኣለካ።'}
+        </p>
+        
+        <ConsentSection 
+          inputLanguage={inputLanguage}
+          consentGiven={consentGiven}
+          setConsentGiven={setConsentGiven}
+        />
+        
+        {showConsentAlert && !consentGiven && (
+          <div className="mt-4 p-3 border border-red-300 bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-400 rounded-md">
+            <p className="text-sm font-medium">
+              {inputLanguage === 'latin' ? 
+                'Patient consent is required before searching the DSS database.' : 
+               inputLanguage === 'amharic' ? 
+                'DSS ውሂብ ቋትን ከመፈለግዎ በፊት የታካሚው ፈቃድ ያስፈልጋል።' : 
+                'ቅድሚ ዋህዮ ሓበሬታ DSS ምድላይካ ፍቓድ ሕሙም የድሊ ኢዩ።'}
+            </p>
+          </div>
+        )}
+      </div>
       
       <div className="border-2 border-dashed rounded-md p-8 text-center">
         {inputLanguage === 'latin' ? 
