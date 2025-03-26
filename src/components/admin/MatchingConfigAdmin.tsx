@@ -62,7 +62,7 @@ const MatchingConfigAdmin = () => {
     });
   };
 
-  // Fix the type issue in onWeightChange with a proper cast
+  // Fixed the type issue by explicitly typing the field parameter
   const handleWeightChange = (field: string, value: number) => {
     const fieldWeight: Partial<FieldWeights> = { [field]: value };
     updateFieldWeights(fieldWeight as FieldWeights);
@@ -123,7 +123,7 @@ const MatchingConfigAdmin = () => {
           <TabsContent value="weights">
             <FieldWeightsTab 
               config={config} 
-              onWeightChange={(field, value) => handleWeightChange(field, value)} 
+              onWeightChange={handleWeightChange} 
             />
           </TabsContent>
           

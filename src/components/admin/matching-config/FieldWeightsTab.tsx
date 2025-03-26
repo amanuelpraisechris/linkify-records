@@ -70,7 +70,7 @@ interface FieldWeightsTabProps {
   config: {
     fieldWeights: FieldWeights;
   };
-  onWeightChange: (field: keyof FieldWeights, value: number) => void;
+  onWeightChange: (field: string, value: number) => void;
 }
 
 export const FieldWeightsTab: React.FC<FieldWeightsTabProps> = ({ config, onWeightChange }) => {
@@ -128,8 +128,8 @@ export const FieldWeightsTab: React.FC<FieldWeightsTabProps> = ({ config, onWeig
           <div className="space-y-4">
             <FieldWeightSlider 
               label="Household Head" 
-              value={config.fieldWeights.householdHead} 
-              onChange={(val) => onWeightChange('householdHead', val)} 
+              value={config.fieldWeights.oldestHouseholdMember} 
+              onChange={(val) => onWeightChange('oldestHouseholdMember', val)} 
             />
             <FieldWeightSlider 
               label="Phone Number" 
@@ -142,11 +142,20 @@ export const FieldWeightsTab: React.FC<FieldWeightsTabProps> = ({ config, onWeig
         <div className="space-y-4">
           <h3 className="font-medium">Location Identifiers</h3>
           <div className="space-y-4">
-            <FieldWeightSlider 
-              label="Balozi" 
-              value={config.fieldWeights.balozi} 
-              onChange={(val) => onWeightChange('balozi', val)} 
-            />
+            {config.fieldWeights.tabiaName !== undefined && (
+              <FieldWeightSlider 
+                label="Tabia" 
+                value={config.fieldWeights.tabiaName} 
+                onChange={(val) => onWeightChange('tabiaName', val)} 
+              />
+            )}
+            {config.fieldWeights.kushetName !== undefined && (
+              <FieldWeightSlider 
+                label="Kushet" 
+                value={config.fieldWeights.kushetName} 
+                onChange={(val) => onWeightChange('kushetName', val)} 
+              />
+            )}
           </div>
         </div>
       </div>
