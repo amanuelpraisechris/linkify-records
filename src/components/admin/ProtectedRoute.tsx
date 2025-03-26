@@ -1,5 +1,4 @@
 
-import { useEffect, useState } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -9,35 +8,17 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute = ({ children, adminOnly = false }: ProtectedRouteProps) => {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
-  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
   const location = useLocation();
-  const { user, profile } = useAuth();
-
-  useEffect(() => {
-    // Check authentication status
-    const authenticated = !!user;
-    setIsAuthenticated(authenticated);
-    
-    // Check if user is admin
-    const adminAuth = localStorage.getItem('adminAuth') === 'true';
-    const isProfileAdmin = profile?.role === 'admin';
-    setIsAdmin(adminAuth || isProfileAdmin);
-  }, [user, profile]);
+  const { user, isAdmin, isLoading } = useAuth();
 
   // Show loading state while checking authentication
-  if (isAuthenticated === null) {
+  if (isLoading) {
     return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
   }
 
   // For admin-only routes: Check admin access
   if (adminOnly) {
-    // Check localStorage for admin auth
-    const adminAuth = localStorage.getItem('adminAuth') === 'true';
-    // Check if user has admin role in profile
-    const isProfileAdmin = profile?.role === 'admin';
-    
-    if (!adminAuth && !isProfileAdmin) {
+    if (!isAdmin) {
       return <Navigate to="/admin-login" state={{ from: location }} replace />;
     }
     
@@ -46,7 +27,7 @@ const ProtectedRoute = ({ children, adminOnly = false }: ProtectedRouteProps) =>
   }
 
   // For regular protected routes: Check user authentication
-  if (!isAuthenticated) {
+  if (!user) {
     return <Navigate to="/auth" state={{ from: location }} replace />;
   }
 
