@@ -11,7 +11,7 @@ interface ProtectedRouteProps {
 const ProtectedRoute = ({ children, adminOnly = false }: ProtectedRouteProps) => {
   const location = useLocation();
   const { user, isAdmin, isLoading } = useAuth();
-
+  
   // Show loading state while checking authentication
   if (isLoading) {
     return (
@@ -21,23 +21,29 @@ const ProtectedRoute = ({ children, adminOnly = false }: ProtectedRouteProps) =>
     );
   }
 
-  // For admin-only routes
+  // For admin-only routes, redirect to admin login if not admin
   if (adminOnly && !isAdmin) {
-    toast({
-      title: "Authentication Required",
-      description: "Please login with an admin account to access this page.",
-      variant: "destructive",
-    });
+    // Only show toast if coming from a user action, not initial route
+    if (location.key) {
+      toast({
+        title: "Admin Access Required",
+        description: "Please login with an admin account to access this page.",
+        variant: "destructive",
+      });
+    }
     return <Navigate to="/admin-login" state={{ from: location }} replace />;
   }
 
   // For regular protected routes
   if (!user) {
-    toast({
-      title: "Authentication Required",
-      description: "Please login to access this page.",
-      variant: "destructive",
-    });
+    // Only show toast if coming from a user action, not initial route
+    if (location.key) {
+      toast({
+        title: "Authentication Required",
+        description: "Please login to access this page.",
+        variant: "destructive",
+      });
+    }
     return <Navigate to="/auth" state={{ from: location }} replace />;
   }
 
