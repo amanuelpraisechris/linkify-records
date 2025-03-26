@@ -2,7 +2,8 @@
 import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
 import { FieldWeights } from '@/utils/matching';
 import { DEFAULT_PROFILES, EXTENDED_DEFAULT_CONFIG, GOLD_STANDARD_CONFIG } from '@/utils/matchingConfigDefaults';
-import { ExtendedMatchingConfig } from '@/types/matchingConfig';
+import { ExtendedMatchingConfig, AlgorithmType } from '@/types/matchingConfig';
+import { saveConfigToStorage, saveProfilesToStorage, getInitialConfig, getInitialProfiles } from '@/utils/matchingConfigStorage';
 
 interface MatchingConfigContextType {
   config: ExtendedMatchingConfig;
@@ -13,6 +14,9 @@ interface MatchingConfigContextType {
   loadConfigProfile: (name: string) => void;
   availableProfiles: string[];
   defaultConfig: ExtendedMatchingConfig;
+  // Add the missing functions
+  updateConfig: (partialConfig: Partial<ExtendedMatchingConfig>) => void;
+  setAlgorithmType: (type: AlgorithmType) => void;
 }
 
 const MatchingConfigContext = createContext<MatchingConfigContextType | undefined>(undefined);
@@ -26,30 +30,13 @@ export const MatchingConfigProvider: React.FC<MatchingConfigProviderProps> = ({
   children,
   initialConfig = GOLD_STANDARD_CONFIG // Use Gold Standard as default
 }) => {
-  const [config, setConfig] = useState<ExtendedMatchingConfig>(initialConfig);
-  const [profiles, setProfiles] = useState<Record<string, ExtendedMatchingConfig>>(DEFAULT_PROFILES);
-  
-  // Update config from localStorage if available
-  useEffect(() => {
-    try {
-      const savedConfig = localStorage.getItem('matching_config');
-      if (savedConfig) {
-        setConfig(JSON.parse(savedConfig));
-      }
-      
-      const savedProfiles = localStorage.getItem('matching_profiles');
-      if (savedProfiles) {
-        setProfiles(JSON.parse(savedProfiles));
-      }
-    } catch (error) {
-      console.error('Error loading matching configuration:', error);
-    }
-  }, []);
+  const [config, setConfig] = useState<ExtendedMatchingConfig>(getInitialConfig());
+  const [profiles, setProfiles] = useState<Record<string, ExtendedMatchingConfig>>(getInitialProfiles());
   
   // Save config to localStorage whenever it changes
   useEffect(() => {
     try {
-      localStorage.setItem('matching_config', JSON.stringify(config));
+      saveConfigToStorage(config);
     } catch (error) {
       console.error('Error saving matching configuration:', error);
     }
@@ -58,7 +45,7 @@ export const MatchingConfigProvider: React.FC<MatchingConfigProviderProps> = ({
   // Save profiles to localStorage whenever they change
   useEffect(() => {
     try {
-      localStorage.setItem('matching_profiles', JSON.stringify(profiles));
+      saveProfilesToStorage(profiles);
     } catch (error) {
       console.error('Error saving matching profiles:', error);
     }
@@ -67,7 +54,17 @@ export const MatchingConfigProvider: React.FC<MatchingConfigProviderProps> = ({
   const updateFieldWeights = (weights: FieldWeights) => {
     setConfig(prev => ({
       ...prev,
-      fieldWeights: weights
+      fieldWeights: {
+        ...prev.fieldWeights,
+        ...weights
+      }
+    }));
+  };
+  
+  const updateConfig = (partialConfig: Partial<ExtendedMatchingConfig>) => {
+    setConfig(prev => ({
+      ...prev,
+      ...partialConfig
     }));
   };
   
@@ -95,17 +92,26 @@ export const MatchingConfigProvider: React.FC<MatchingConfigProviderProps> = ({
     }
   };
   
+  const setAlgorithmType = (type: AlgorithmType) => {
+    setConfig(prev => ({
+      ...prev,
+      algorithmType: type
+    }));
+  };
+  
   return (
     <MatchingConfigContext.Provider 
       value={{ 
         config, 
-        updateFieldWeights, 
+        updateFieldWeights,
+        updateConfig,
         resetConfig,
         updateThresholds,
         saveConfigProfile,
         loadConfigProfile,
         availableProfiles: Object.keys(profiles),
-        defaultConfig: GOLD_STANDARD_CONFIG
+        defaultConfig: GOLD_STANDARD_CONFIG,
+        setAlgorithmType
       }}
     >
       {children}
@@ -120,3 +126,6 @@ export const useMatchingConfig = () => {
   }
   return context;
 };
+
+// Export the AlgorithmType for components that need it
+export type { AlgorithmType };

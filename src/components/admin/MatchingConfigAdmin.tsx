@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/components/ui/use-toast';
 import { Save, Settings, SlidersHorizontal, BarChart3 } from 'lucide-react';
-import { FieldWeights } from '@/utils/matchingAlgorithms';
+import { FieldWeights } from '@/utils/matching/types';
 import { FieldWeightsTab } from './matching-config/FieldWeightsTab';
 import { ThresholdsTab } from './matching-config/ThresholdsTab';
 import { AdvancedSettingsTab } from './matching-config/AdvancedSettingsTab';
@@ -60,6 +60,12 @@ const MatchingConfigAdmin = () => {
       title: "Settings Reset",
       description: "Matching configuration has been reset to default values."
     });
+  };
+
+  // Fix the type issue in onWeightChange with a proper cast
+  const handleWeightChange = (field: string, value: number) => {
+    const fieldWeight: Partial<FieldWeights> = { [field]: value };
+    updateFieldWeights(fieldWeight as FieldWeights);
   };
 
   return (
@@ -117,7 +123,7 @@ const MatchingConfigAdmin = () => {
           <TabsContent value="weights">
             <FieldWeightsTab 
               config={config} 
-              onWeightChange={(field, value) => updateFieldWeights({ [field]: value })} 
+              onWeightChange={(field, value) => handleWeightChange(field, value)} 
             />
           </TabsContent>
           
