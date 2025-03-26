@@ -64,13 +64,13 @@ const MatchingConfigAdmin = () => {
   };
 
   // Fix the type issue when updating field weights
-  const handleFieldWeightChange = (field: string, value: number) => {
+  const handleFieldWeightChange = (field: keyof FieldWeights, value: number) => {
     // Create a properly typed update
     const weightUpdate: Partial<FieldWeights> = {};
-    weightUpdate[field as keyof FieldWeights] = value;
+    weightUpdate[field] = value;
     
     // Apply the update
-    updateFieldWeights(weightUpdate as FieldWeights);
+    updateFieldWeights(weightUpdate);
   };
 
   return (
@@ -132,7 +132,7 @@ const MatchingConfigAdmin = () => {
           <TabsContent value="weights">
             <FieldWeightsTab 
               config={config} 
-              onWeightChange={(field, value) => handleFieldWeightChange(field, value)} 
+              onWeightChange={handleFieldWeightChange} 
             />
           </TabsContent>
           
@@ -183,3 +183,4 @@ const MatchingConfigAdmin = () => {
 };
 
 export default MatchingConfigAdmin;
+
