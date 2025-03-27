@@ -1,3 +1,4 @@
+
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabase';
 import { Profile } from './types';
@@ -11,12 +12,14 @@ const showToast = (props: { title: string; description: string; variant?: "defau
   if (activeToasts.has(key)) return;
   
   activeToasts.add(key);
-  toast({
+  const id = toast({
     ...props,
-    onOpenChange: (open) => {
-      if (!open) activeToasts.delete(key);
-    }
   });
+
+  // Clean up the toast ID from tracking after it's dismissed
+  setTimeout(() => {
+    activeToasts.delete(key);
+  }, 5000); // Assuming 5 seconds duration for toast
 };
 
 export const fetchProfile = async (userId: string): Promise<Profile | null> => {

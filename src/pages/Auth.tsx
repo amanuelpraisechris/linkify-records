@@ -30,7 +30,8 @@ const Auth = () => {
   }, [authUser, navigate, from]);
   
   if (user) {
-    return <Navigate to="/" />;
+    navigate('/', { replace: true });
+    return null;
   }
 
   const handleLogin = async (e: React.FormEvent) => {

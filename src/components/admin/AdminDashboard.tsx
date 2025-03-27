@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
@@ -56,7 +57,7 @@ const AdminDashboard = () => {
               </div>
             </div>
             <div className="flex items-center space-x-4">
-              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Welcome, {user?.username || 'Admin'}</span>
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Welcome, {profile?.full_name || 'Admin'}</span>
               <Button
                 variant="outline"
                 size="sm"
