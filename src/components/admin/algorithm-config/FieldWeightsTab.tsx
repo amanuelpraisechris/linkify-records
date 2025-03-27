@@ -56,7 +56,13 @@ export const FieldWeightsTab: React.FC = () => {
       return;
     }
     
-    saveConfigProfile(profileName);
+    // Pass the current config with updated field weights
+    const configToSave = {
+      ...config,
+      fieldWeights
+    };
+    
+    saveConfigProfile(profileName, configToSave);
     setProfileName('');
     toast({
       title: "Profile Saved",
