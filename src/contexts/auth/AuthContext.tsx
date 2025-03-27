@@ -15,7 +15,7 @@ import {
   updatePassword as updateUserPassword,
   registerAdmin as registerAdminUser,
   signInAdmin as signInAdminUser
-} from './authUtils';
+} from './utils';
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
