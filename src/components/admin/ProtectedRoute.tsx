@@ -19,6 +19,7 @@ const ProtectedRoute = ({ children, adminOnly = false }: ProtectedRouteProps) =>
   // For admin-only routes: Silently redirect to login page without error
   if (adminOnly) {
     if (!isAdmin) {
+      // Pass the current location as state to redirect back after login
       return <Navigate to="/admin-login" state={{ from: location }} replace />;
     }
     
@@ -28,6 +29,7 @@ const ProtectedRoute = ({ children, adminOnly = false }: ProtectedRouteProps) =>
 
   // For regular protected routes: Check user authentication
   if (!user) {
+    // Pass the current location as state to redirect back after login
     return <Navigate to="/auth" state={{ from: location }} replace />;
   }
 

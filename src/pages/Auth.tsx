@@ -1,7 +1,6 @@
-
-import { useState } from 'react';
-import { useNavigate, Navigate } from 'react-router-dom';
-import { useAuth } from '@/contexts/auth'; // Updated import path
+import { useState, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '@/contexts/auth';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -18,9 +17,18 @@ const Auth = () => {
   const [resetEmail, setResetEmail] = useState('');
   const [showResetForm, setShowResetForm] = useState(false);
   const { signIn, signUp, resetPassword, isLoading, user } = useAuth();
+  const location = useLocation();
   const navigate = useNavigate();
-
-  // Redirect if user is already logged in
+  const { user: authUser } = useAuth();
+  
+  const from = location.state?.from?.pathname || '/';
+  
+  useEffect(() => {
+    if (authUser) {
+      navigate(from, { replace: true });
+    }
+  }, [authUser, navigate, from]);
+  
   if (user) {
     return <Navigate to="/" />;
   }

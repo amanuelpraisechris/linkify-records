@@ -1,12 +1,11 @@
-
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Key, LogIn, UserPlus } from 'lucide-react';
-import { useAuth } from '@/contexts/auth'; // Updated import path
+import { useAuth } from '@/contexts/auth';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const AdminLogin = () => {
@@ -16,25 +15,36 @@ const AdminLogin = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<'login' | 'register'>('login');
   const navigate = useNavigate();
+  const location = useLocation();
   const { signInAdmin, registerAdmin, isAdmin } = useAuth();
 
-  // Check if already authenticated as admin
+  const from = location.state?.from?.pathname || '/admin-dashboard';
+
   useEffect(() => {
     if (isAdmin) {
-      navigate('/admin-dashboard');
+      navigate(from, { replace: true });
     }
-  }, [isAdmin, navigate]);
+  }, [isAdmin, navigate, from]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    await signInAdmin(username, password);
-    // Navigation happens automatically in the effect when isAdmin is set to true
+    setIsLoading(true);
+    try {
+      await signInAdmin(username, password);
+    } catch (error) {
+      setIsLoading(false);
+    }
   };
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    await registerAdmin(username, password, fullName);
-    setActiveTab('login');
+    setIsLoading(true);
+    try {
+      await registerAdmin(username, password, fullName);
+      setActiveTab('login');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (

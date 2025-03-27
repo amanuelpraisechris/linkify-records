@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
@@ -14,32 +13,24 @@ import {
   Shield
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useAuth } from '@/contexts/auth';
 import ChangePasswordForm from './ChangePasswordForm';
 import AlgorithmConfiguration from './AlgorithmConfiguration';
 import UserManagement from './UserManagement';
 import MatchingConfigAdmin from './MatchingConfigAdmin';
 
 const AdminDashboard = () => {
-  const [username, setUsername] = useState('');
   const [activePanel, setActivePanel] = useState<string | null>(null);
   const navigate = useNavigate();
+  const { user, profile } = useAuth();
 
-  useEffect(() => {
-    // Check if user is authenticated
-    const isAuthenticated = localStorage.getItem('adminAuth') === 'true';
-    const storedUsername = localStorage.getItem('adminUsername');
-    
-    if (!isAuthenticated) {
-      toast({
-        title: 'Authentication required',
-        description: 'Please login to access this page',
-        variant: 'destructive',
-      });
-      navigate('/admin-login');
+  const togglePanel = (panel: string) => {
+    if (activePanel === panel) {
+      setActivePanel(null);
     } else {
-      setUsername(storedUsername || 'Admin');
+      setActivePanel(panel);
     }
-  }, [navigate]);
+  };
 
   const handleLogout = () => {
     localStorage.removeItem('adminAuth');
@@ -49,14 +40,6 @@ const AdminDashboard = () => {
       description: 'You have been successfully logged out',
     });
     navigate('/admin-login');
-  };
-
-  const togglePanel = (panel: string) => {
-    if (activePanel === panel) {
-      setActivePanel(null);
-    } else {
-      setActivePanel(panel);
-    }
   };
 
   return (
@@ -73,7 +56,7 @@ const AdminDashboard = () => {
               </div>
             </div>
             <div className="flex items-center space-x-4">
-              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Welcome, {username}</span>
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Welcome, {user?.username || 'Admin'}</span>
               <Button
                 variant="outline"
                 size="sm"

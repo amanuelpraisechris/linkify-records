@@ -1,7 +1,23 @@
-
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabase';
 import { Profile } from './types';
+
+// Helper to prevent duplicate toasts
+let activeToasts = new Set();
+
+// Custom toast function that prevents duplicates
+const showToast = (props: { title: string; description: string; variant?: "default" | "destructive" }) => {
+  const key = `${props.title}-${props.description}`;
+  if (activeToasts.has(key)) return;
+  
+  activeToasts.add(key);
+  toast({
+    ...props,
+    onOpenChange: (open) => {
+      if (!open) activeToasts.delete(key);
+    }
+  });
+};
 
 export const fetchProfile = async (userId: string): Promise<Profile | null> => {
   try {
@@ -39,14 +55,14 @@ export const signUp = async (email: string, password: string, fullName: string) 
     }
 
     if (data.user) {
-      toast({
+      showToast({
         title: 'Account created',
         description: 'Your account has been created successfully.',
       });
     }
     return data;
   } catch (error: any) {
-    toast({
+    showToast({
       title: 'Error',
       description: error.message || 'Failed to sign up',
       variant: 'destructive',
@@ -84,14 +100,14 @@ export const registerAdmin = async (email: string, password: string, fullName: s
         console.error('Error updating profile role:', profileError);
       }
 
-      toast({
+      showToast({
         title: 'Admin account created',
         description: 'The admin account has been created successfully.',
       });
     }
     return data;
   } catch (error: any) {
-    toast({
+    showToast({
       title: 'Error',
       description: error.message || 'Failed to create admin account',
       variant: 'destructive',
@@ -111,13 +127,13 @@ export const signIn = async (email: string, password: string) => {
       throw error;
     }
 
-    toast({
+    showToast({
       title: 'Welcome back',
       description: 'You have been logged in successfully.',
     });
     return data;
   } catch (error: any) {
-    toast({
+    showToast({
       title: 'Error',
       description: error.message || 'Failed to sign in',
       variant: 'destructive',
@@ -157,13 +173,13 @@ export const signInAdmin = async (email: string, password: string) => {
     // Store in localStorage for convenience
     localStorage.setItem('adminAuth', 'true');
     
-    toast({
+    showToast({
       title: 'Admin Login Successful',
       description: 'You have been logged in as an administrator.',
     });
     return { data, isAdmin: true };
   } catch (error: any) {
-    toast({
+    showToast({
       title: 'Admin Login Failed',
       description: error.message || 'Failed to sign in as administrator',
       variant: 'destructive',
@@ -178,12 +194,12 @@ export const signOut = async () => {
     localStorage.removeItem('adminAuth');
     
     await supabase.auth.signOut();
-    toast({
+    showToast({
       title: 'Logged out',
       description: 'You have been logged out successfully.',
     });
   } catch (error: any) {
-    toast({
+    showToast({
       title: 'Error',
       description: error.message || 'Failed to sign out',
       variant: 'destructive',
@@ -202,12 +218,12 @@ export const resetPassword = async (email: string) => {
       throw error;
     }
 
-    toast({
+    showToast({
       title: 'Password reset email sent',
       description: 'Check your email for a password reset link.',
     });
   } catch (error: any) {
-    toast({
+    showToast({
       title: 'Error',
       description: error.message || 'Failed to send password reset email',
       variant: 'destructive',
@@ -226,12 +242,12 @@ export const updatePassword = async (password: string) => {
       throw error;
     }
 
-    toast({
+    showToast({
       title: 'Password updated',
       description: 'Your password has been updated successfully.',
     });
   } catch (error: any) {
-    toast({
+    showToast({
       title: 'Error',
       description: error.message || 'Failed to update password',
       variant: 'destructive',
