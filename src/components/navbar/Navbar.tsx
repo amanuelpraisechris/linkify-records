@@ -26,9 +26,7 @@ const Navbar = () => {
 
   // Don't hide navbar on admin-login page
   const isAdminLoginPage = location.pathname === '/admin-login';
-  // Check if we're on admin-dashboard to avoid showing duplicate controls
-  const isAdminDashboard = location.pathname === '/admin-dashboard';
-
+  
   return (
     <NavbarContainer>
       <MobileNavigation isAdmin={isAdmin} isLoggedIn={!!user} />
@@ -36,7 +34,6 @@ const Navbar = () => {
       <div className="flex items-center gap-2">
         {user && <NavbarNewRecordButton />}
         {(user || isAdminLoginPage) && <NavbarRoleSwitch />}
-        {/* Only show NavbarUserMenu and remove NavbarAdminButton to avoid duplication */}
         <NavbarUserMenu />
       </div>
     </NavbarContainer>

@@ -17,6 +17,16 @@ const NavbarRoleSwitch = () => {
   const navigate = useNavigate();
   const location = useLocation();
   
+  const handleAdminAccess = () => {
+    if (isAdmin) {
+      // Already in admin mode, navigate to admin dashboard
+      navigate('/admin-dashboard');
+    } else {
+      // Switch to admin mode by navigating to login
+      navigate('/admin-login');
+    }
+  };
+
   const toggleAdminMode = () => {
     if (isAdmin) {
       // Switch to user mode
@@ -53,9 +63,24 @@ const NavbarRoleSwitch = () => {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <div className="p-2 text-sm font-medium">
-          Switch Role
+          {isAdmin ? 'Admin Actions' : 'Switch Role'}
         </div>
         <DropdownMenuSeparator />
+        
+        {isAdmin && (
+          <>
+            <DropdownMenuItem onClick={() => navigate('/admin-dashboard')}>
+              <Shield className="mr-2 h-4 w-4" />
+              <span>Admin Dashboard</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => navigate('/matching-configuration')}>
+              <Shield className="mr-2 h-4 w-4" />
+              <span>Matching Configuration</span>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+          </>
+        )}
+        
         <DropdownMenuItem onClick={toggleAdminMode}>
           {isAdmin ? (
             <>

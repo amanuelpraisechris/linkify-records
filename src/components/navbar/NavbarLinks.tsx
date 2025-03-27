@@ -1,7 +1,6 @@
 
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Database, Search, Lock, Settings } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
+import { LayoutDashboard, Database, Search } from 'lucide-react';
 
 interface NavbarLinksProps {
   isAdmin: boolean;
@@ -28,15 +27,6 @@ export const NavbarLinks = ({ isAdmin }: NavbarLinksProps) => {
     }
   ];
 
-  const adminNavItems = [
-    { 
-      path: '/admin-dashboard',
-      label: 'Admin',
-      icon: <Lock className="w-4 h-4 mr-1.5" />,
-      badge: true
-    }
-  ];
-
   return (
     <div className="hidden md:flex items-center space-x-1">
       {navItems.map(item => (
@@ -51,24 +41,6 @@ export const NavbarLinks = ({ isAdmin }: NavbarLinksProps) => {
         >
           {item.icon}
           {item.label}
-        </Link>
-      ))}
-      
-      {isAdmin && adminNavItems.map(item => (
-        <Link
-          key={item.path}
-          to={item.path}
-          className={`px-3 py-2 rounded-md text-sm font-medium hover:bg-secondary transition-all flex items-center ${
-            location.pathname === item.path 
-              ? 'bg-primary/10 text-primary' 
-              : 'text-foreground'
-          }`}
-        >
-          {item.icon}
-          {item.label}
-          {item.badge && (
-            <Badge className="ml-2 bg-purple-500 text-white text-xs">Admin</Badge>
-          )}
         </Link>
       ))}
     </div>
