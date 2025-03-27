@@ -10,7 +10,7 @@ interface MatchingConfigContextType {
   updateFieldWeights: (weights: FieldWeights) => void;
   resetConfig: () => void;
   updateThresholds: (thresholds: { high: number; medium: number; low: number }) => void;
-  saveConfigProfile: (name: string) => void;
+  saveConfigProfile: (name: string, config: ExtendedMatchingConfig) => void;
   loadConfigProfile: (name: string) => void;
   availableProfiles: string[];
   defaultConfig: ExtendedMatchingConfig;
@@ -79,10 +79,10 @@ export const MatchingConfigProvider: React.FC<MatchingConfigProviderProps> = ({
     }));
   };
   
-  const saveConfigProfile = (name: string) => {
+  const saveConfigProfile = (name: string, configToSave: ExtendedMatchingConfig) => {
     setProfiles(prev => ({
       ...prev,
-      [name]: config
+      [name]: configToSave
     }));
   };
   
