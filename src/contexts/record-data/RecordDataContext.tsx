@@ -1,9 +1,9 @@
-
 import React, { createContext, useState, useContext, ReactNode, useEffect } from 'react';
 import { Record, MatchResult, Visit } from '@/types';
 import { RecordDataContextType, STORAGE_KEYS } from './recordDataTypes';
 import { getInitialState, updateRecordWithVisit, updateRecordWithNotes } from './recordDataUtils';
 import { useRecordMatching } from './useRecordMatching';
+import { supabase } from '@/integrations/supabase/client';
 
 const RecordDataContext = createContext<RecordDataContextType | undefined>(undefined);
 

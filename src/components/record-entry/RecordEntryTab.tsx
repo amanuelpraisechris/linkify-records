@@ -7,6 +7,7 @@ import { useToast } from '@/components/ui/use-toast';
 import DataLoader from '@/components/DataLoader';
 import { useEffect, useState } from 'react';
 import { useRecordData } from '@/contexts/record-data/RecordDataContext';
+import { databaseService } from '@/services/database';
 
 interface RecordEntryTabProps {
   clinicRecords: Record[];
@@ -29,18 +30,24 @@ const RecordEntryTab = ({
     success: boolean;
   }>>([]);
 
-  // Load search attempts from localStorage on component mount
+  // Load search attempts from database on component mount
   useEffect(() => {
-    const savedAttempts = localStorage.getItem('searchAttempts');
-    if (savedAttempts) {
-      setSearchAttempts(JSON.parse(savedAttempts));
-    }
-  }, []);
+    const loadSearchAttempts = async () => {
+      try {
+        const attempts = await databaseService.getMatchAttempts();
+        setSearchAttempts(attempts);
+      } catch (error) {
+        console.error('Error loading search attempts:', error);
+        // Fallback to localStorage if database fails
+        const savedAttempts = localStorage.getItem('searchAttempts');
+        if (savedAttempts) {
+          setSearchAttempts(JSON.parse(savedAttempts));
+        }
+      }
+    };
 
-  // Save search attempts to localStorage whenever they change
-  useEffect(() => {
-    localStorage.setItem('searchAttempts', JSON.stringify(searchAttempts));
-  }, [searchAttempts]);
+    loadSearchAttempts();
+  }, []);
 
   const handleDataImport = (records: Record[]) => {
     addImportedRecords(records, true);
@@ -50,17 +57,31 @@ const RecordEntryTab = ({
     });
   };
 
-  const handleSaveForSearch = (record: Record) => {
-    // Log search attempt
-    const newAttempt = {
-      timestamp: new Date().toISOString(),
-      query: `${record.firstName} ${record.lastName}`,
-      success: false // Will be updated later if match is found
-    };
-    setSearchAttempts(prev => [newAttempt, ...prev]);
-    
-    // Call the original onSaveForSearch handler
-    onSaveForSearch(record);
+  const handleSaveForSearch = async (record: Record) => {
+    try {
+      // Log search attempt to database
+      const query = `${record.firstName} ${record.lastName}`;
+      await databaseService.saveMatchAttempt(query, false, 0);
+      
+      // Refresh search attempts
+      const attempts = await databaseService.getMatchAttempts();
+      setSearchAttempts(attempts);
+      
+      // Call the original onSaveForSearch handler
+      onSaveForSearch(record);
+    } catch (error) {
+      console.error('Error saving search attempt:', error);
+      // Fallback to localStorage
+      const newAttempt = {
+        timestamp: new Date().toISOString(),
+        query: `${record.firstName} ${record.lastName}`,
+        success: false
+      };
+      setSearchAttempts(prev => [newAttempt, ...prev]);
+      localStorage.setItem('searchAttempts', JSON.stringify([newAttempt, ...searchAttempts]));
+      
+      onSaveForSearch(record);
+    }
   };
 
   return (

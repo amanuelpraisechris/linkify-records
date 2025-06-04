@@ -1,159 +1,22 @@
-
 import { Record, RecordMatch, User, UserActivity, Visit, MatchResult } from '@/types';
 
-// Define missing variables
-export const exampleRecords: Record[] = [
-  {
-    id: '1',
-    firstName: 'John',
-    lastName: 'Doe',
-    sex: 'Male', // Changed from gender to sex
-    birthDate: '1985-03-15',
-    village: 'Central',
-    subVillage: 'Downtown',
-    identifiers: [
-      { type: 'Health ID', value: 'H12345' }
-    ],
-    metadata: {
-      createdAt: '2023-05-10T09:30:00Z',
-      updatedAt: '2023-05-10T09:30:00Z',
-      source: 'Clinical Entry'
-    }
-  },
-  {
-    id: '2',
-    firstName: 'Jane',
-    lastName: 'Smith',
-    sex: 'Female', // Changed from gender to sex
-    birthDate: '1990-07-22',
-    village: 'Eastern',
-    subVillage: 'Riverside',
-    identifiers: [
-      { type: 'Health ID', value: 'H54321' }
-    ],
-    metadata: {
-      createdAt: '2023-05-11T14:15:00Z',
-      updatedAt: '2023-05-11T14:15:00Z',
-      source: 'Clinical Entry'
-    }
-  }
-];
+// Keep minimal example data for fallback/testing purposes only
+export const exampleRecords: Record[] = [];
 
-export const newRecords: Record[] = [
-  {
-    id: '3',
-    firstName: 'Michael',
-    lastName: 'Johnson',
-    sex: 'Male',
-    birthDate: '1978-11-30',
-    village: 'Western',
-    subVillage: 'Hilltop',
-    identifiers: [
-      { type: 'Health ID', value: 'H67890' }
-    ],
-    metadata: {
-      createdAt: '2023-05-12T10:45:00Z',
-      updatedAt: '2023-05-12T10:45:00Z',
-      source: 'Clinical Entry'
-    }
-  },
-  {
-    id: '4',
-    firstName: 'Sarah',
-    lastName: 'Williams',
-    sex: 'Female',
-    birthDate: '1992-04-17',
-    village: 'Northern',
-    subVillage: 'Lakeside',
-    identifiers: [
-      { type: 'Health ID', value: 'H24680' }
-    ],
-    metadata: {
-      createdAt: '2023-05-13T09:15:00Z',
-      updatedAt: '2023-05-13T09:15:00Z',
-      source: 'Clinical Entry'
-    }
-  }
-];
+export const newRecords: Record[] = [];
 
-// Create record matches for demo
-export const recordMatches: RecordMatch[] = newRecords.map(newRecord => {
-  // Find potential matches in the example records
-  const potentialMatches = exampleRecords
-    .filter(record => 
-      record.lastName.toLowerCase().includes(newRecord.lastName.toLowerCase().substring(0, 3)) || 
-      record.firstName.toLowerCase().includes(newRecord.firstName.toLowerCase().substring(0, 3)) ||
-      record.birthDate.substring(0, 7) === newRecord.birthDate.substring(0, 7)
-    )
-    .map(record => {
-      // Calculate a basic similarity score
-      let score = 0;
-      const matchedOn: string[] = [];
-      
-      // Check first name
-      if (record.firstName.toLowerCase() === newRecord.firstName.toLowerCase()) {
-        score += 25;
-        matchedOn.push('firstName');
-      } else if (record.firstName.toLowerCase().startsWith(newRecord.firstName.toLowerCase().substring(0, 3))) {
-        score += 15;
-        matchedOn.push('firstName (partial)');
-      }
-      
-      // Check last name
-      if (record.lastName.toLowerCase() === newRecord.lastName.toLowerCase()) {
-        score += 25;
-        matchedOn.push('lastName');
-      } else if (record.lastName.toLowerCase().startsWith(newRecord.lastName.toLowerCase().substring(0, 3))) {
-        score += 15;
-        matchedOn.push('lastName (partial)');
-      }
-      
-      // Check birth date
-      if (record.birthDate === newRecord.birthDate) {
-        score += 25;
-        matchedOn.push('birthDate');
-      } else if (record.birthDate.substring(0, 7) === newRecord.birthDate.substring(0, 7)) {
-        score += 15;
-        matchedOn.push('birthDate (year/month)');
-      }
-      
-      // Check sex
-      if (record.sex === newRecord.sex) {
-        score += 10;
-        matchedOn.push('sex');
-      }
-      
-      // Check phone
-      if (record.phoneNumber && newRecord.phoneNumber && 
-          record.phoneNumber.replace(/\D/g, '').slice(-4) === newRecord.phoneNumber.replace(/\D/g, '').slice(-4)) {
-        score += 15;
-        matchedOn.push('phoneNumber (last 4 digits)');
-      }
-      
-      return {
-        record,
-        score,
-        matchedOn
-      };
-    })
-    .sort((a, b) => b.score - a.score)
-    .slice(0, 5); // Get top 5 matches
-  
-  return {
-    sourceRecord: newRecord,
-    potentialMatches
-  };
-});
+// Remove the static record matches since we're using real data now
+export const recordMatches: RecordMatch[] = [];
 
-// Add dashboard stats
+// Dashboard stats will be calculated from real data
 export const dashboardStats = {
-  totalRecords: exampleRecords.length + newRecords.length,
-  matchedRecords: 18,
-  pendingMatches: 7,
-  matchRate: 72.5
+  totalRecords: 0,
+  matchedRecords: 0,
+  pendingMatches: 0,
+  matchRate: 0
 };
 
-// User management mock data
+// User management mock data (keep for admin functionality)
 export const mockUsers: User[] = [
   {
     id: 'user_1',
@@ -283,73 +146,7 @@ export const mockUserActivities: UserActivity[] = [
   }
 ];
 
-// Create some record matches for demonstration (this was already here)
+// Removed generateRecordMatches function since we're using real data now
 export const generateRecordMatches = (): RecordMatch[] => {
-  return newRecords.map(newRecord => {
-    // Find potential matches in the example records
-    const potentialMatches = exampleRecords
-      .filter(record => 
-        record.lastName.toLowerCase().includes(newRecord.lastName.toLowerCase().substring(0, 3)) || 
-        record.firstName.toLowerCase().includes(newRecord.firstName.toLowerCase().substring(0, 3)) ||
-        record.birthDate.substring(0, 7) === newRecord.birthDate.substring(0, 7)
-      )
-      .map(record => {
-        // Calculate a basic similarity score
-        let score = 0;
-        const matchedOn: string[] = [];
-        
-        // Check first name
-        if (record.firstName.toLowerCase() === newRecord.firstName.toLowerCase()) {
-          score += 25;
-          matchedOn.push('firstName');
-        } else if (record.firstName.toLowerCase().startsWith(newRecord.firstName.toLowerCase().substring(0, 3))) {
-          score += 15;
-          matchedOn.push('firstName (partial)');
-        }
-        
-        // Check last name
-        if (record.lastName.toLowerCase() === newRecord.lastName.toLowerCase()) {
-          score += 25;
-          matchedOn.push('lastName');
-        } else if (record.lastName.toLowerCase().startsWith(newRecord.lastName.toLowerCase().substring(0, 3))) {
-          score += 15;
-          matchedOn.push('lastName (partial)');
-        }
-        
-        // Check birth date
-        if (record.birthDate === newRecord.birthDate) {
-          score += 25;
-          matchedOn.push('birthDate');
-        } else if (record.birthDate.substring(0, 7) === newRecord.birthDate.substring(0, 7)) {
-          score += 15;
-          matchedOn.push('birthDate (year/month)');
-        }
-        
-        // Check sex (changed from gender)
-        if (record.sex === newRecord.sex) {
-          score += 10;
-          matchedOn.push('sex');
-        }
-        
-        // Check phone
-        if (record.phoneNumber && newRecord.phoneNumber && 
-            record.phoneNumber.replace(/\D/g, '').slice(-4) === newRecord.phoneNumber.replace(/\D/g, '').slice(-4)) {
-          score += 15;
-          matchedOn.push('phoneNumber (last 4 digits)');
-        }
-        
-        return {
-          record,
-          score,
-          matchedOn
-        };
-      })
-      .sort((a, b) => b.score - a.score)
-      .slice(0, 5); // Get top 5 matches
-    
-    return {
-      sourceRecord: newRecord,
-      potentialMatches
-    };
-  });
+  return [];
 };

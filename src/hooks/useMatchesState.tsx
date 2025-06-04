@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 import { Record, MatchResult } from '@/types';
 import { useRecordData } from '@/contexts/record-data/RecordDataContext';
+import { databaseService } from '@/services/database';
 
 export const useMatchesState = () => {
   const { 
@@ -25,34 +26,44 @@ export const useMatchesState = () => {
   const [activeTab, setActiveTab] = useState('entry');
   const { toast } = useToast();
 
-  // Update search attempts status in localStorage when matches are found
+  // Update search attempts status in database when matches are found
   useEffect(() => {
-    if (submittedRecord && potentialMatches.length > 0) {
-      try {
-        const savedAttempts = localStorage.getItem('searchAttempts');
-        if (savedAttempts) {
-          const attempts = JSON.parse(savedAttempts);
-          // Find the most recent attempt for this record
-          const updatedAttempts = attempts.map((attempt: any) => {
-            if (attempt.query === `${submittedRecord.firstName} ${submittedRecord.lastName}` && !attempt.success) {
-              return { ...attempt, success: true };
+    const updateSearchAttempts = async () => {
+      if (submittedRecord && potentialMatches.length > 0) {
+        try {
+          const query = `${submittedRecord.firstName} ${submittedRecord.lastName}`;
+          await databaseService.saveMatchAttempt(query, true, potentialMatches.length);
+        } catch (error) {
+          console.error('Error updating search attempts in database:', error);
+          // Fallback to localStorage
+          try {
+            const savedAttempts = localStorage.getItem('searchAttempts');
+            if (savedAttempts) {
+              const attempts = JSON.parse(savedAttempts);
+              const updatedAttempts = attempts.map((attempt: any) => {
+                if (attempt.query === query && !attempt.success) {
+                  return { ...attempt, success: true };
+                }
+                return attempt;
+              });
+              localStorage.setItem('searchAttempts', JSON.stringify(updatedAttempts));
             }
-            return attempt;
-          });
-          localStorage.setItem('searchAttempts', JSON.stringify(updatedAttempts));
+          } catch (localError) {
+            console.error('Error updating search attempts in localStorage:', localError);
+          }
         }
-      } catch (error) {
-        console.error('Error updating search attempts:', error);
       }
-    }
+    };
+
+    updateSearchAttempts();
   }, [submittedRecord, potentialMatches]);
 
-  const handleRecordSubmit = (record: Record) => {
+  const handleRecordSubmit = async (record: Record) => {
     try {
       console.log("Record submitted:", record);
       
       // Add the clinic record to our records list
-      addRecord(record, 'clinic');
+      await addRecord(record, 'clinic');
       
       // Prepare record with source ID for matching
       const recordWithSource = {
@@ -86,20 +97,27 @@ export const useMatchesState = () => {
       
       setPotentialMatches(matchesWithSource);
       
-      // Log search attempt
+      // Log search attempt to database
       try {
-        const searchAttempt = {
-          timestamp: new Date().toISOString(),
-          query: `${record.firstName} ${record.lastName}`,
-          success: matches.length > 0
-        };
-        
-        const savedAttempts = localStorage.getItem('searchAttempts');
-        let attempts = savedAttempts ? JSON.parse(savedAttempts) : [];
-        attempts = [searchAttempt, ...attempts];
-        localStorage.setItem('searchAttempts', JSON.stringify(attempts));
+        const query = `${record.firstName} ${record.lastName}`;
+        await databaseService.saveMatchAttempt(query, matches.length > 0, matches.length);
       } catch (error) {
-        console.error('Error logging search attempt:', error);
+        console.error('Error logging search attempt to database:', error);
+        // Fallback to localStorage
+        try {
+          const searchAttempt = {
+            timestamp: new Date().toISOString(),
+            query: `${record.firstName} ${record.lastName}`,
+            success: matches.length > 0
+          };
+          
+          const savedAttempts = localStorage.getItem('searchAttempts');
+          let attempts = savedAttempts ? JSON.parse(savedAttempts) : [];
+          attempts = [searchAttempt, ...attempts];
+          localStorage.setItem('searchAttempts', JSON.stringify(attempts));
+        } catch (localError) {
+          console.error('Error logging search attempt to localStorage:', localError);
+        }
       }
       
       toast({
@@ -121,7 +139,7 @@ export const useMatchesState = () => {
     }
   };
   
-  const handleSaveForSearch = (record: Record) => {
+  const handleSaveForSearch = async (record: Record) => {
     try {
       console.log("Save for search called with record:", record);
       
@@ -148,20 +166,27 @@ export const useMatchesState = () => {
       
       setPotentialMatches(matches);
       
-      // Log search attempt
+      // Log search attempt to database
       try {
-        const searchAttempt = {
-          timestamp: new Date().toISOString(),
-          query: `${record.firstName} ${record.lastName}`,
-          success: matches.length > 0
-        };
-        
-        const savedAttempts = localStorage.getItem('searchAttempts');
-        let attempts = savedAttempts ? JSON.parse(savedAttempts) : [];
-        attempts = [searchAttempt, ...attempts];
-        localStorage.setItem('searchAttempts', JSON.stringify(attempts));
+        const query = `${record.firstName} ${record.lastName}`;
+        await databaseService.saveMatchAttempt(query, matches.length > 0, matches.length);
       } catch (error) {
-        console.error('Error logging search attempt:', error);
+        console.error('Error logging search attempt to database:', error);
+        // Fallback to localStorage
+        try {
+          const searchAttempt = {
+            timestamp: new Date().toISOString(),
+            query: `${record.firstName} ${record.lastName}`,
+            success: matches.length > 0
+          };
+          
+          const savedAttempts = localStorage.getItem('searchAttempts');
+          let attempts = savedAttempts ? JSON.parse(savedAttempts) : [];
+          attempts = [searchAttempt, ...attempts];
+          localStorage.setItem('searchAttempts', JSON.stringify(attempts));
+        } catch (localError) {
+          console.error('Error logging search attempt to localStorage:', localError);
+        }
       }
       
       toast({
@@ -181,9 +206,9 @@ export const useMatchesState = () => {
     }
   };
   
-  const handleMatchComplete = (result: MatchResult) => {
+  const handleMatchComplete = async (result: MatchResult) => {
     console.log("Match complete callback with result:", result);
-    saveMatchResult(result);
+    await saveMatchResult(result);
     
     toast({
       title: "Match Saved",
