@@ -40,6 +40,7 @@ export const useMatchesState = () => {
             const savedAttempts = localStorage.getItem('searchAttempts');
             if (savedAttempts) {
               const attempts = JSON.parse(savedAttempts);
+              const query = `${submittedRecord.firstName} ${submittedRecord.lastName}`;
               const updatedAttempts = attempts.map((attempt: any) => {
                 if (attempt.query === query && !attempt.success) {
                   return { ...attempt, success: true };

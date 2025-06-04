@@ -170,13 +170,13 @@ export const databaseService = {
 
     const dbRecord = {
       ...convertRecordToDatabase(record, user.id),
-      visits: record.visits || [],
-      residency_timeline: record.residencyTimeline || []
+      visits: JSON.stringify(record.visits || []),
+      residency_timeline: JSON.stringify(record.residencyTimeline || [])
     };
     
     const { error } = await supabase
       .from('clinic_records')
-      .insert([dbRecord]);
+      .insert(dbRecord);
     
     if (error) {
       console.error('Error inserting clinic record:', error);
@@ -209,7 +209,7 @@ export const databaseService = {
         matched_by: result.matchedBy,
         matched_at: result.matchedAt,
         notes: result.notes,
-        field_scores: result.fieldScores || {},
+        field_scores: JSON.stringify(result.fieldScores || {}),
         consent_obtained: result.consentObtained,
         consent_date: result.consentDate,
         user_id: user.id
@@ -240,7 +240,7 @@ export const databaseService = {
       matchedBy: result.matched_by,
       matchedAt: result.matched_at,
       notes: result.notes,
-      fieldScores: result.field_scores,
+      fieldScores: typeof result.field_scores === 'string' ? JSON.parse(result.field_scores) : (result.field_scores || {}),
       consentObtained: result.consent_obtained,
       consentDate: result.consent_date
     }));
