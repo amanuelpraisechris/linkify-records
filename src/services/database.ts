@@ -283,5 +283,107 @@ export const databaseService = {
       query: attempt.query,
       success: attempt.success
     }));
+  },
+
+  // Unmatched Records Management
+  async saveUnmatchedRecord(clinicRecordId: string, patientData: Record, reason: string): Promise<void> {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('User not authenticated');
+
+    const { error } = await supabase
+      .from('unmatched_records')
+      .insert([{
+        clinic_record_id: clinicRecordId,
+        patient_data: patientData,
+        reason,
+        user_id: user.id
+      }]);
+    
+    if (error) {
+      console.error('Error saving unmatched record:', error);
+      throw error;
+    }
+  },
+
+  async getUnmatchedRecords(): Promise<Array<{
+    id: string;
+    clinicRecordId: string;
+    patientData: Record;
+    reason: string;
+    reviewed: boolean;
+    createdAt: string;
+  }>> {
+    const { data, error } = await supabase
+      .from('unmatched_records')
+      .select('*')
+      .order('created_at', { ascending: false });
+    
+    if (error) {
+      console.error('Error fetching unmatched records:', error);
+      return [];
+    }
+    
+    return (data || []).map(record => ({
+      id: record.id,
+      clinicRecordId: record.clinic_record_id,
+      patientData: record.patient_data as Record,
+      reason: record.reason,
+      reviewed: record.reviewed || false,
+      createdAt: record.created_at
+    }));
+  },
+
+  // Matching Thresholds
+  async getMatchingThresholds(): Promise<{
+    noMatchThreshold: number;
+    lowConfidenceThreshold: number;
+    autoMatchThreshold: number;
+  }> {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('User not authenticated');
+
+    const { data, error } = await supabase
+      .from('matching_thresholds')
+      .select('*')
+      .eq('user_id', user.id)
+      .single();
+    
+    if (error || !data) {
+      // Return default thresholds if none exist
+      return {
+        noMatchThreshold: 0.3,
+        lowConfidenceThreshold: 0.6,
+        autoMatchThreshold: 0.8
+      };
+    }
+    
+    return {
+      noMatchThreshold: data.no_match_threshold || 0.3,
+      lowConfidenceThreshold: data.low_confidence_threshold || 0.6,
+      autoMatchThreshold: data.auto_match_threshold || 0.8
+    };
+  },
+
+  async updateMatchingThresholds(thresholds: {
+    noMatchThreshold: number;
+    lowConfidenceThreshold: number;
+    autoMatchThreshold: number;
+  }): Promise<void> {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('User not authenticated');
+
+    const { error } = await supabase
+      .from('matching_thresholds')
+      .upsert([{
+        no_match_threshold: thresholds.noMatchThreshold,
+        low_confidence_threshold: thresholds.lowConfidenceThreshold,
+        auto_match_threshold: thresholds.autoMatchThreshold,
+        user_id: user.id
+      }]);
+    
+    if (error) {
+      console.error('Error updating matching thresholds:', error);
+      throw error;
+    }
   }
 };

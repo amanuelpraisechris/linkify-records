@@ -13,6 +13,9 @@ export type Database = {
         Row: {
           address: string | null
           birth_date: string
+          consent_date: string | null
+          consent_obtained: boolean | null
+          consent_type: string | null
           created_at: string | null
           district: string | null
           email: string | null
@@ -40,6 +43,9 @@ export type Database = {
         Insert: {
           address?: string | null
           birth_date: string
+          consent_date?: string | null
+          consent_obtained?: boolean | null
+          consent_type?: string | null
           created_at?: string | null
           district?: string | null
           email?: string | null
@@ -67,6 +73,9 @@ export type Database = {
         Update: {
           address?: string | null
           birth_date?: string
+          consent_date?: string | null
+          consent_obtained?: boolean | null
+          consent_type?: string | null
           created_at?: string | null
           district?: string | null
           email?: string | null
@@ -267,6 +276,36 @@ export type Database = {
         }
         Relationships: []
       }
+      matching_thresholds: {
+        Row: {
+          auto_match_threshold: number | null
+          created_at: string
+          id: string
+          low_confidence_threshold: number | null
+          no_match_threshold: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          auto_match_threshold?: number | null
+          created_at?: string
+          id?: string
+          low_confidence_threshold?: number | null
+          no_match_threshold?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          auto_match_threshold?: number | null
+          created_at?: string
+          id?: string
+          low_confidence_threshold?: number | null
+          no_match_threshold?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string | null
@@ -413,6 +452,56 @@ export type Database = {
           year_moved_in?: string | null
         }
         Relationships: []
+      }
+      unmatched_records: {
+        Row: {
+          clinic_record_id: string | null
+          created_at: string
+          id: string
+          patient_data: Json
+          reason: string
+          reviewed: boolean | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          reviewer_notes: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          clinic_record_id?: string | null
+          created_at?: string
+          id?: string
+          patient_data: Json
+          reason: string
+          reviewed?: boolean | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          reviewer_notes?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          clinic_record_id?: string | null
+          created_at?: string
+          id?: string
+          patient_data?: Json
+          reason?: string
+          reviewed?: boolean | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          reviewer_notes?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "unmatched_records_clinic_record_id_fkey"
+            columns: ["clinic_record_id"]
+            isOneToOne: false
+            referencedRelation: "clinic_records"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {

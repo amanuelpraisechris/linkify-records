@@ -1,10 +1,12 @@
 
-import { FileText } from 'lucide-react';
+import { FileText, Shield, Users, BarChart3 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Record, MatchResult } from '@/types';
+import ConsentWorkflowTab from './ConsentWorkflowTab';
 import RecordEntryTab from './RecordEntryTab';
 import MatchesTab from './MatchesTab';
 import ProgressReportTab from './ProgressReportTab';
+import { SupportedLanguage } from '@/utils/languageUtils';
 
 interface RecordEntryTabsProps {
   activeTab: string;
@@ -22,6 +24,17 @@ interface RecordEntryTabsProps {
   onRecordSubmit: (record: Record) => void;
   onSaveForSearch: (record: Record) => void;
   onMatchComplete: (result: MatchResult) => void;
+  inputLanguage?: SupportedLanguage;
+  consentData?: {
+    consentGiven: boolean;
+    consentType: 'written' | 'verbal' | 'previous';
+    consentDate: string;
+  };
+  onConsentComplete?: (consentData: {
+    consentGiven: boolean;
+    consentType: 'written' | 'verbal' | 'previous';
+    consentDate: string;
+  }) => void;
 }
 
 const RecordEntryTabs = ({
@@ -34,18 +47,68 @@ const RecordEntryTabs = ({
   matchResults,
   onRecordSubmit,
   onSaveForSearch,
-  onMatchComplete
+  onMatchComplete,
+  inputLanguage = 'latin',
+  consentData,
+  onConsentComplete
 }: RecordEntryTabsProps) => {
+  const getLocalizedText = (key: string) => {
+    const texts = {
+      latin: {
+        consent: 'Patient Consent',
+        entry: 'Record Entry',
+        matches: 'Matches',
+        progress: 'Progress Report'
+      },
+      amharic: {
+        consent: 'የታካሚ ፈቃድ',
+        entry: 'መዝገብ ግቤት',
+        matches: 'ተዛማጅ',
+        progress: 'የሂደት ሪፖርት'
+      },
+      tigrinya: {
+        consent: 'ፍቓድ ሕሙም',
+        entry: 'ምእታው መዝገብ',
+        matches: 'ምትእስሳር',
+        progress: 'ሪፖርት ሂደት'
+      }
+    };
+    
+    return texts[inputLanguage][key] || texts.latin[key];
+  };
+
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-      <TabsList className="mb-6">
-        <TabsTrigger value="entry">Record Entry</TabsTrigger>
-        <TabsTrigger value="matches">Matches</TabsTrigger>
-        <TabsTrigger value="progress-report">
-          <FileText className="w-4 h-4 mr-2" />
-          Progress Report
+      <TabsList className="mb-6 grid grid-cols-4">
+        <TabsTrigger value="consent" className="flex items-center gap-2">
+          <Shield className="w-4 h-4" />
+          {getLocalizedText('consent')}
+        </TabsTrigger>
+        <TabsTrigger 
+          value="entry" 
+          disabled={!consentData?.consentGiven}
+          className="flex items-center gap-2"
+        >
+          <Users className="w-4 h-4" />
+          {getLocalizedText('entry')}
+        </TabsTrigger>
+        <TabsTrigger value="matches" className="flex items-center gap-2">
+          <FileText className="w-4 h-4" />
+          {getLocalizedText('matches')}
+        </TabsTrigger>
+        <TabsTrigger value="progress-report" className="flex items-center gap-2">
+          <BarChart3 className="w-4 h-4" />
+          {getLocalizedText('progress')}
         </TabsTrigger>
       </TabsList>
+      
+      <TabsContent value="consent">
+        <ConsentWorkflowTab 
+          inputLanguage={inputLanguage}
+          onConsentComplete={onConsentComplete || (() => {})}
+          onProceedToEntry={() => setActiveTab('entry')}
+        />
+      </TabsContent>
       
       <TabsContent value="entry">
         <RecordEntryTab 
@@ -53,6 +116,7 @@ const RecordEntryTabs = ({
           communityRecords={communityRecords}
           onRecordSubmit={onRecordSubmit}
           onSaveForSearch={onSaveForSearch}
+          consentData={consentData}
         />
       </TabsContent>
       
