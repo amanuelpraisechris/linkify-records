@@ -36,6 +36,13 @@ npm i
 npm run dev
 ```
 
+## Environment Variables
+
+Create a `.env` file based on the provided `.env.example` and supply the following variables:
+
+- `VITE_SUPABASE_URL` – your Supabase project URL.
+- `VITE_SUPABASE_KEY` – your Supabase anonymous API key.
+
 **Edit a file directly in GitHub**
 
 - Navigate to the desired file(s).
