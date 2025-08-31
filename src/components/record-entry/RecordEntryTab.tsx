@@ -47,8 +47,6 @@ const RecordEntryTab = ({
       <RecordEntryForm
         onRecordSubmit={onRecordSubmit}
         onSaveForSearch={onSaveForSearch}
-        existingRecords={clinicRecords}
-        communityRecords={communityRecords}
       />
     </div>
   );

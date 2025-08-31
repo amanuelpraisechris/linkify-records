@@ -169,5 +169,5 @@
   background-size: 1000px 100%;
 }
 
-/* Font import */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+/* Font import - load asynchronously to prevent render blocking */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap') layer(fonts);
