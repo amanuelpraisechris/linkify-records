@@ -385,5 +385,26 @@ export const databaseService = {
       console.error('Error updating matching thresholds:', error);
       throw error;
     }
+  },
+
+  // Add missing method for updating clinic records
+  async updateClinicRecord(id: string, updates: Partial<{
+    consent_obtained: boolean;
+    consent_date: string;
+    consent_type: string;
+  }>): Promise<void> {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('User not authenticated');
+
+    const { error } = await supabase
+      .from('clinic_records')
+      .update(updates)
+      .eq('id', id)
+      .eq('user_id', user.id);
+    
+    if (error) {
+      console.error('Error updating clinic record:', error);
+      throw error;
+    }
   }
 };

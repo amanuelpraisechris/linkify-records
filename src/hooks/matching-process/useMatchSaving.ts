@@ -85,11 +85,24 @@ export function useMatchSaving({
     };
   };
 
-  const saveMatchResult = (result: MatchResult) => {
+  const saveMatchResult = async (result: MatchResult) => {
     setIsLoading(true);
     
-    // Simulate processing delay
-    setTimeout(() => {
+    try {
+      // Save to database using the database service
+      const { databaseService } = await import('@/services/database');
+      await databaseService.saveMatchResult(result);
+      
+      // Also save unmatched records if status indicates it
+      if (result.status === 'manual-review' && currentMatch) {
+        await databaseService.saveUnmatchedRecord(
+          currentMatch.sourceRecord.id,
+          currentMatch.sourceRecord,
+          'manual_review_required'
+        );
+      }
+      
+      // Update local state
       setResults([...results, result]);
       
       if (onMatchComplete) {
@@ -101,12 +114,12 @@ export function useMatchSaving({
       
       let toastMessage = "";
       if (result.status === 'matched') {
-        toastMessage = "The selected match has been saved successfully" + 
+        toastMessage = "The selected match has been saved successfully to the database" + 
           (result.confidence ? ` with a ${result.confidence}% confidence score.` : ".");
       } else if (result.status === 'rejected') {
-        toastMessage = "The match has been rejected.";
+        toastMessage = "The match has been rejected and saved to the database.";
       } else {
-        toastMessage = "The records have been sent for manual review.";
+        toastMessage = "The records have been sent for manual review and saved to the database.";  
       }
       
       toast({
@@ -126,8 +139,17 @@ export function useMatchSaving({
         setCurrentIndex(currentIndex + 1);
       }
       
+    } catch (error) {
+      console.error('Error saving match result:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save match result to database. Please try again.",
+        variant: "destructive",
+        duration: 5000,
+      });
+    } finally {
       setIsLoading(false);
-    }, 600);
+    }
   };
 
   return {

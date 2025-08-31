@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { SupportedLanguage } from '@/utils/languageUtils';
+import { useToast } from '@/components/ui/use-toast';
 
 interface ConsentWorkflowTabProps {
   inputLanguage: SupportedLanguage;
@@ -22,6 +23,7 @@ const ConsentWorkflowTab = ({
   onConsentComplete,
   onProceedToEntry
 }: ConsentWorkflowTabProps) => {
+  const { toast } = useToast();
   const [consentGiven, setConsentGiven] = useState(false);
   const [consentType, setConsentType] = useState<'written' | 'verbal' | 'previous'>('written');
   const [showConsentAlert, setShowConsentAlert] = useState(false);
@@ -32,19 +34,37 @@ const ConsentWorkflowTab = ({
     setShowConsentAlert(false);
   };
 
+  const handleConsentSubmit = () => {
+    if (!consentType) {
+      toast({
+        title: "Please select consent type",
+        description: "You need to select how consent was obtained.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const consentData = {
+      consentGiven: true,
+      consentType,
+      consentDate: consentDate + 'T' + new Date().toTimeString().split(' ')[0]
+    };
+
+    onConsentComplete(consentData);
+    
+    toast({
+      title: "Consent Recorded",
+      description: `Patient consent (${consentType}) has been recorded successfully.`,
+    });
+  };
+
   const handleProceed = () => {
     if (!consentGiven) {
       setShowConsentAlert(true);
       return;
     }
 
-    const consentData = {
-      consentGiven,
-      consentType,
-      consentDate: consentDate + 'T' + new Date().toTimeString().split(' ')[0]
-    };
-
-    onConsentComplete(consentData);
+    handleConsentSubmit();
     onProceedToEntry();
   };
 
