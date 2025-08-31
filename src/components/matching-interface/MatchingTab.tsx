@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { RecordMatch } from '@/types';
 import RecordCard from '../RecordCard';
-import { Save, FileText, UserCheck } from 'lucide-react';
+import { Save, FileText, UserCheck, Users, BarChart3 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 
@@ -30,39 +30,96 @@ const MatchingTab = ({
   setActiveTab
 }: MatchingTabProps) => {
   return (
-    <div className="space-y-6">
-      <div className="relative">
-        <div className="absolute -left-3 top-0 bottom-0 w-1 bg-primary rounded-full"></div>
-        <h3 className="text-lg font-medium mb-1">Source Record</h3>
-        <p className="text-sm text-muted-foreground mb-3">
-          This is the new record that needs to be linked.
+    <div className="space-y-8">
+      {/* Premium Header with Status Indicator */}
+      <div className="bg-gradient-to-r from-primary/10 to-secondary/10 p-6 rounded-xl border border-primary/20">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center space-x-3">
+            <div className="w-3 h-3 bg-primary rounded-full animate-pulse"></div>
+            <h2 className="text-xl font-semibold text-foreground">Interactive Record Linkage Session</h2>
+          </div>
+          <div className="bg-primary/20 px-3 py-1 rounded-full">
+            <span className="text-sm font-medium text-primary">Active Matching</span>
+          </div>
+        </div>
+        <p className="text-muted-foreground">
+          Review potential matches below and select the best match, or proceed with manual review if no suitable match is found.
         </p>
+      </div>
+
+      {/* Source Record Section */}
+      <div className="relative bg-card/50 p-6 rounded-xl border border-border/50 backdrop-blur-sm">
+        <div className="absolute -left-2 top-0 bottom-0 w-1 bg-primary rounded-full shadow-lg shadow-primary/20"></div>
+        <div className="flex items-center space-x-3 mb-4">
+          <div className="p-2 bg-primary/10 rounded-lg">
+            <FileText className="w-5 h-5 text-primary" />
+          </div>
+          <div>
+            <h3 className="text-lg font-semibold">Source Record</h3>
+            <p className="text-sm text-muted-foreground">New patient record requiring linkage</p>
+          </div>
+        </div>
         
-        <div className="animate-slide-up">
+        <div className="animate-fade-in">
           <RecordCard record={currentMatch.sourceRecord} isHighlighted />
         </div>
       </div>
       
-      <div>
-        <div className="flex justify-between items-center mb-3">
-          <h3 className="text-lg font-medium">Potential Matches</h3>
+      {/* Potential Matches Section */}
+      <div className="bg-card/30 p-6 rounded-xl border border-border/50">
+        <div className="flex justify-between items-center mb-6">
+          <div className="flex items-center space-x-3">
+            <div className="p-2 bg-secondary/10 rounded-lg">
+              <Users className="w-5 h-5 text-secondary" />
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold">Potential Matches</h3>
+              <p className="text-sm text-muted-foreground">
+                {currentMatch.potentialMatches.length} candidate record(s) found
+              </p>
+            </div>
+          </div>
+          {currentMatch.potentialMatches.length > 0 && (
+            <div className="text-xs text-muted-foreground bg-muted/50 px-3 py-1 rounded-full">
+              Click to select • Confidence scores shown
+            </div>
+          )}
         </div>
-        <p className="text-sm text-muted-foreground mb-3">
-          Select a matching record below and click "Save Selected Match" to save it.
-        </p>
         
-        <div className="space-y-4 animate-slide-up">
+        <div className="space-y-4">
           {currentMatch.potentialMatches.length > 0 ? (
             currentMatch.potentialMatches.map((match, idx) => (
-              <div key={match.record.id} className="relative animate-fade-in" style={{ animationDelay: `${idx * 100}ms` }}>
+              <div 
+                key={match.record.id} 
+                className="relative group animate-fade-in" 
+                style={{ animationDelay: `${idx * 150}ms` }}
+              >
                 <div 
-                  className={`border-2 rounded-lg cursor-pointer transition-all ${
+                  className={`border-2 rounded-xl cursor-pointer transition-all duration-300 hover:shadow-lg ${
                     selectedMatchId === match.record.id 
-                      ? 'border-primary shadow-md' 
-                      : 'border-border hover:border-primary/50'
+                      ? 'border-primary shadow-xl shadow-primary/10 bg-primary/5 ring-2 ring-primary/20' 
+                      : 'border-border hover:border-primary/50 hover:bg-card/50'
                   }`}
                   onClick={() => handleSelectMatch(match.record.id)}
                 >
+                  {/* Premium Match Indicator */}
+                  {selectedMatchId === match.record.id && (
+                    <div className="absolute -top-2 -right-2 bg-primary text-primary-foreground px-3 py-1 rounded-full text-xs font-medium shadow-lg">
+                      ✓ Selected
+                    </div>
+                  )}
+                  
+                  {/* Confidence Score Badge */}
+                  <div className="absolute top-4 right-4 z-10">
+                    <div className={`px-3 py-1 rounded-full text-xs font-bold shadow-sm ${
+                      match.score >= 80 ? 'bg-green-100 text-green-800 border border-green-200' :
+                      match.score >= 60 ? 'bg-yellow-100 text-yellow-800 border border-yellow-200' :
+                      'bg-orange-100 text-orange-800 border border-orange-200'
+                    }`}>
+                      {match.score}% match
+                    </div>
+                  </div>
+
                   <RecordCard 
                     record={match.record}
                     showActions={false}
@@ -73,77 +130,120 @@ const MatchingTab = ({
               </div>
             ))
           ) : (
-            <div className="text-center py-8 bg-muted/30 rounded-lg">
-              <p className="text-muted-foreground">No potential matches found for this record.</p>
-              <button
+            <div className="text-center py-12 bg-muted/20 rounded-xl border border-dashed border-muted-foreground/20">
+              <div className="mb-4">
+                <div className="w-16 h-16 mx-auto bg-muted/40 rounded-full flex items-center justify-center">
+                  <FileText className="w-8 h-8 text-muted-foreground" />
+                </div>
+              </div>
+              <h4 className="text-lg font-medium mb-2">No Potential Matches Found</h4>
+              <p className="text-muted-foreground mb-6">
+                No existing records meet the matching criteria for this patient.
+              </p>
+              <Button
                 onClick={() => handleMatch(null, 0, 'manual-review')}
-                className="mt-4 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-all-medium"
                 disabled={isLoading}
+                className="bg-secondary hover:bg-secondary/90"
               >
+                <UserCheck className="w-4 h-4 mr-2" />
                 Send for Manual Review
-              </button>
+              </Button>
             </div>
           )}
         </div>
         
         {currentMatch.potentialMatches.length > 0 && (
-          <div className="mt-4 flex justify-end">
+          <div className="mt-6 flex justify-end">
             <Button
-              variant="default"
               onClick={handleSaveSelectedMatch}
               disabled={isLoading || !selectedMatchId}
-              className="bg-green-600 hover:bg-green-700"
+              className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300"
             >
-              <Save className="w-4 h-4 mr-2" />
-              Save Selected Match
+              <Save className="w-5 h-5 mr-2" />
+              Confirm Selected Match
             </Button>
           </div>
         )}
       </div>
       
-      <div className="bg-muted/20 p-4 rounded-lg border border-border">
-        <h4 className="font-medium mb-2 flex items-center">
-          <FileText className="w-4 h-4 mr-2" />
-          Match Notes
-        </h4>
+      {/* Premium Notes Section */}
+      <div className="bg-gradient-to-r from-muted/10 to-muted/5 p-6 rounded-xl border border-border/50">
+        <div className="flex items-center space-x-3 mb-4">
+          <div className="p-2 bg-muted/20 rounded-lg">
+            <FileText className="w-5 h-5 text-muted-foreground" />
+          </div>
+          <div>
+            <h4 className="font-semibold">Clinical Notes & Documentation</h4>
+            <p className="text-sm text-muted-foreground">Record any observations or verification details</p>
+          </div>
+        </div>
         <Textarea
-          placeholder="Enter any notes about this match (e.g., discrepancies in names, confirmation method, etc.)"
+          placeholder="Enter clinical notes, verification details, or any discrepancies observed during the matching process..."
           value={matchNotes}
           onChange={(e) => setMatchNotes(e.target.value)}
-          className="min-h-[100px] mb-2"
+          className="min-h-[120px] mb-3 bg-background/80 border-border/50 focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all"
         />
-        <p className="text-xs text-muted-foreground">
-          These notes will be saved with the match record and can be referenced later.
-        </p>
+        <div className="flex items-center justify-between">
+          <p className="text-xs text-muted-foreground">
+            ✓ Notes are automatically saved and can be referenced in audit trails
+          </p>
+          <div className="text-xs text-muted-foreground">
+            {matchNotes.length}/500 characters
+          </div>
+        </div>
       </div>
       
-      <div className="flex justify-between items-center pt-4 border-t">
-        <Button
-          variant="outline"
-          onClick={() => handleMatch(null, 0, 'manual-review')}
-          disabled={isLoading}
-        >
-          Skip for Now
-        </Button>
-        
-        <div className="flex space-x-3">
-          <Button
-            variant="secondary"
-            onClick={() => setActiveTab('consent')}
-            className="flex items-center"
-          >
-            <UserCheck className="w-4 h-4 mr-2" />
-            End Session / Check Consent / New Patient
-          </Button>
+      {/* Premium Action Bar */}
+      <div className="bg-card/50 p-6 rounded-xl border border-border/50 backdrop-blur-sm">
+        <div className="flex justify-between items-center">
+          <div className="flex space-x-3">
+            <Button
+              variant="outline"
+              onClick={() => handleMatch(null, 0, 'manual-review')}
+              disabled={isLoading}
+              className="border-border/50 hover:border-secondary/50 hover:bg-secondary/10"
+            >
+              <FileText className="w-4 h-4 mr-2" />
+              Manual Review
+            </Button>
+            
+            <Button
+              variant="outline"
+              onClick={() => handleMatch(null, 0, 'rejected')}
+              disabled={isLoading}
+              className="border-destructive/30 text-destructive hover:bg-destructive/10 hover:border-destructive/50"
+            >
+              No Match Found
+            </Button>
+          </div>
           
-          <Button
-            onClick={() => setActiveTab('consent')}
-            disabled={isLoading}
-            variant="default"
-          >
-            Proceed to Consent
-          </Button>
+          <div className="flex space-x-3">
+            <Button
+              variant="secondary"
+              onClick={() => setActiveTab('consent')}
+              className="bg-secondary/20 hover:bg-secondary/30 border border-secondary/30"
+            >
+              <UserCheck className="w-4 h-4 mr-2" />
+              Patient Consent
+            </Button>
+            
+            <Button
+              onClick={() => setActiveTab('history')}
+              disabled={isLoading}
+              className="bg-primary hover:bg-primary/90 shadow-lg hover:shadow-xl transition-all duration-300"
+            >
+              <BarChart3 className="w-4 h-4 mr-2" />
+              View History
+            </Button>
+          </div>
         </div>
+        
+        {isLoading && (
+          <div className="mt-4 flex items-center justify-center space-x-2 text-muted-foreground">
+            <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+            <span>Processing match result...</span>
+          </div>
+        )}
       </div>
     </div>
   );

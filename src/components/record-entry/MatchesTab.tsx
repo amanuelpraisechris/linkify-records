@@ -4,6 +4,8 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { FileX, AlertTriangle, Users } from 'lucide-react';
 import MatchingInterface from '@/components/MatchingInterface';
+// For premium experience, you can also use:
+// import PremiumMatchingInterface from '@/components/matching-interface/PremiumMatchingInterface';
 import NoMatchHandler from './NoMatchHandler';
 import { useState } from 'react';
 

@@ -53,7 +53,8 @@ const MatchingInterface = ({ matchData, onMatchComplete }: MatchingInterfaceProp
             <h3 className="text-lg font-medium">Potential Matches</h3>
             <MatchSummary 
               currentIndex={currentIndex} 
-              matchDataLength={matchData.length} 
+              matchDataLength={matchData.length}
+              completedMatches={results.length}
             />
           </div>
           
