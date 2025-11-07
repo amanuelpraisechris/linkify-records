@@ -33,9 +33,9 @@ export interface DatabaseRecord {
   matched_on?: string[];
   source_id?: string;
   household_members?: string[];
-  identifiers?: any;
-  metadata?: any;
-  field_scores?: any;
+  identifiers?: { type: string; value: string; }[];
+  metadata?: { createdAt: string; updatedAt: string; source: string; matchScore?: number; matchNotes?: string; facility?: string; };
+  field_scores?: {[key: string]: number};
   record_type?: string;
   user_id: string;
   created_at?: string;

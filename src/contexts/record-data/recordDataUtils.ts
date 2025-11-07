@@ -1,7 +1,7 @@
 
 import { Record, Visit } from '@/types';
 
-export const getInitialState = <T extends unknown>(key: string, defaultValue: T): T => {
+export const getInitialState = <T>(key: string, defaultValue: T): T => {
   try {
     const saved = localStorage.getItem(key);
     if (saved) {

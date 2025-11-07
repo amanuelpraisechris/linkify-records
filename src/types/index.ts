@@ -47,7 +47,7 @@ export interface Record {
   visits?: Visit[];
   residencyTimeline?: ResidencyPeriod[];
   // Support for imported data with varying property names
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface Visit {

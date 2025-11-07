@@ -37,10 +37,11 @@ export const registerAdmin = async (email: string, password: string, fullName: s
       });
     }
     return data;
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Failed to create admin account';
     showToast({
       title: 'Error',
-      description: error.message || 'Failed to create admin account',
+      description: errorMessage,
       variant: 'destructive',
     });
     throw error;
@@ -83,10 +84,11 @@ export const signInAdmin = async (email: string, password: string) => {
       description: 'You have been logged in as an administrator.',
     });
     return { data, isAdmin: true };
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Failed to sign in as administrator';
     showToast({
       title: 'Admin Login Failed',
-      description: error.message || 'Failed to sign in as administrator',
+      description: errorMessage,
       variant: 'destructive',
     });
     throw error;

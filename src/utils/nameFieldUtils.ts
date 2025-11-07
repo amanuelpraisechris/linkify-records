@@ -19,7 +19,7 @@ export const nonPatientNameFields = [
  * This function checks multiple possible field patterns to ensure names are extracted
  * consistently across different data sources (clinic records and HDSS)
  */
-export const getNameField = (record: Record<string, any>, field: 'firstName' | 'lastName' | 'middleName', defaultValue = '-'): string => {
+export const getNameField = (record: Record<string, unknown>, field: 'firstName' | 'lastName' | 'middleName', defaultValue = '-'): string => {
   if (!record) return defaultValue;
   
   // Define all possible field patterns for each name type
@@ -49,7 +49,7 @@ export const getNameField = (record: Record<string, any>, field: 'firstName' | '
     // Check for exact match
     if (record[pattern] !== undefined && record[pattern] !== null) {
       // Remove quotes if they exist in the value
-      let value = String(record[pattern]);
+      const value = String(record[pattern]);
       return value.replace(/^"(.*)"$/, '$1');
     }
   }
@@ -129,7 +129,7 @@ export const getNameField = (record: Record<string, any>, field: 'firstName' | '
  * @returns Formatted full name
  */
 export const getFullName = (
-  record: Record<string, any>, 
+  record: Record<string, unknown>,
   format: 'firstLast' | 'lastFirst' | 'firstMiddleLast' = 'firstMiddleLast'
 ): string => {
   const firstName = getNameField(record, 'firstName', '');
@@ -168,8 +168,8 @@ export const getFullName = (
  * @returns Object with normalized name fields for both records
  */
 export const normalizeNameFields = (
-  record1: Record<string, any>,
-  record2: Record<string, any>
+  record1: Record<string, unknown>,
+  record2: Record<string, unknown>
 ): { 
   first: { firstName: string; middleName: string; lastName: string; fullName: string; },
   second: { firstName: string; middleName: string; lastName: string; fullName: string; } 

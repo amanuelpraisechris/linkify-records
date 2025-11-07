@@ -5,7 +5,7 @@ import { SupportedLanguage } from '@/utils/languageUtils';
 
 interface NameInputGroupProps {
   prefix: string;
-  formData: Record<string, any>;
+  formData: Record<string, unknown>;
   handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
   inputLanguage: SupportedLanguage;
 }

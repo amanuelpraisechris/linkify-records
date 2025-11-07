@@ -25,10 +25,11 @@ export const signUp = async (email: string, password: string, fullName: string) 
       });
     }
     return data;
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Failed to sign up';
     showToast({
       title: 'Error',
-      description: error.message || 'Failed to sign up',
+      description: errorMessage,
       variant: 'destructive',
     });
     throw error;
@@ -51,10 +52,11 @@ export const signIn = async (email: string, password: string) => {
       description: 'You have been logged in successfully.',
     });
     return data;
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Failed to sign in';
     showToast({
       title: 'Error',
-      description: error.message || 'Failed to sign in',
+      description: errorMessage,
       variant: 'destructive',
     });
     throw error;
@@ -71,10 +73,11 @@ export const signOut = async () => {
       title: 'Logged out',
       description: 'You have been logged out successfully.',
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Failed to sign out';
     showToast({
       title: 'Error',
-      description: error.message || 'Failed to sign out',
+      description: errorMessage,
       variant: 'destructive',
     });
     throw error;
@@ -95,10 +98,11 @@ export const resetPassword = async (email: string) => {
       title: 'Password reset email sent',
       description: 'Check your email for a password reset link.',
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Failed to send password reset email';
     showToast({
       title: 'Error',
-      description: error.message || 'Failed to send password reset email',
+      description: errorMessage,
       variant: 'destructive',
     });
     throw error;
@@ -119,10 +123,11 @@ export const updatePassword = async (password: string) => {
       title: 'Password updated',
       description: 'Your password has been updated successfully.',
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Failed to update password';
     showToast({
       title: 'Error',
-      description: error.message || 'Failed to update password',
+      description: errorMessage,
       variant: 'destructive',
     });
     throw error;

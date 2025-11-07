@@ -35,9 +35,7 @@ const StatCard = ({
 
     if (typeof value === 'number') {
       // Animate count up
-      let startValue = 0;
       const duration = 1000;
-      const step = Math.max(1, Math.floor(targetValue / (duration / 16)));
       let startTime: number | null = null;
       
       const animateValue = (timestamp: number) => {

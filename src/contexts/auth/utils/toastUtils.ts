@@ -2,7 +2,7 @@
 import { toast } from '@/hooks/use-toast';
 
 // Helper to prevent duplicate toasts
-let activeToasts = new Set();
+const activeToasts = new Set();
 
 // Custom toast function that prevents duplicates
 export const showToast = (props: { title: string; description: string; variant?: "default" | "destructive" }) => {

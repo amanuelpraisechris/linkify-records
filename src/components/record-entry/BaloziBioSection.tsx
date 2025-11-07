@@ -7,7 +7,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { InfoIcon, XCircleIcon } from 'lucide-react';
 
 interface BaloziBioSectionProps {
-  formData: Record<string, any>;
+  formData: Record<string, unknown>;
   handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
   inputLanguage: SupportedLanguage;
 }

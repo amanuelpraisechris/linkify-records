@@ -19,8 +19,20 @@ interface UserActivityChartProps {
   activities: UserActivity[];
 }
 
+interface ChartDataPoint {
+  date: string;
+  login: number;
+  logout: number;
+  password_change: number;
+  export_data: number;
+  import_data: number;
+  create_record: number;
+  update_record: number;
+  matching_review: number;
+}
+
 const UserActivityChart: React.FC<UserActivityChartProps> = ({ activities }) => {
-  const [chartData, setChartData] = useState<any[]>([]);
+  const [chartData, setChartData] = useState<ChartDataPoint[]>([]);
   const [timeRange, setTimeRange] = useState<'daily' | 'weekly' | 'monthly'>('daily');
 
   useEffect(() => {
@@ -135,7 +147,7 @@ const UserActivityChart: React.FC<UserActivityChartProps> = ({ activities }) => 
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <Tabs defaultValue={timeRange} onValueChange={(value) => setTimeRange(value as any)}>
+        <Tabs defaultValue={timeRange} onValueChange={(value) => setTimeRange(value as 'daily' | 'weekly' | 'monthly')}>
           <TabsList>
             <TabsTrigger value="daily">Daily</TabsTrigger>
             <TabsTrigger value="weekly">Weekly</TabsTrigger>

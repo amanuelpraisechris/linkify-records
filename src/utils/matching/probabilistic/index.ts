@@ -27,7 +27,7 @@ export const calculateProbabilisticMatch = (
   let totalWeight = 0;
   
   // Determine language based on script detection
-  let language: SupportedLanguage = containsEthiopicScript(record1.firstName) || containsEthiopicScript(record2.firstName) ? 'amharic' : 'latin';
+  const language: SupportedLanguage = containsEthiopicScript(record1.firstName) || containsEthiopicScript(record2.firstName) ? 'amharic' : 'latin';
   
   // First Name comparison
   const firstNameMatch = namesMatch(record1.firstName, record2.firstName, language);

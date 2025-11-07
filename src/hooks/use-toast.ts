@@ -82,7 +82,7 @@ export function useToast(): ToastContextType {
         });
         return;
 
-      case actionTypes.DISMISS_TOAST:
+      case actionTypes.DISMISS_TOAST: {
         const { toastId } = action;
         if (toastId) {
           setState((prevState) => {
@@ -100,8 +100,9 @@ export function useToast(): ToastContextType {
           });
         }
         return;
+      }
 
-      case actionTypes.REMOVE_TOAST:
+      case actionTypes.REMOVE_TOAST: {
         const { toastId: removeId } = action;
         if (removeId) {
           setState((prevState) => {
@@ -114,6 +115,7 @@ export function useToast(): ToastContextType {
           });
         }
         return;
+      }
     }
   }
 

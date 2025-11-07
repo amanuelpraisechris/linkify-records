@@ -5,7 +5,7 @@ import NameInputGroup from './NameInputGroup';
 import ResidenceDetailsHeader from './ResidenceDetailsHeader';
 
 interface OldestMemberSectionProps {
-  formData: Record<string, any>;
+  formData: Record<string, unknown>;
   handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
   inputLanguage: SupportedLanguage;
 }

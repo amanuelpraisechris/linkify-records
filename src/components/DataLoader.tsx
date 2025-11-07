@@ -96,8 +96,8 @@ const DataLoader = ({ onDataLoaded, dataSource }: DataLoaderProps) => {
     }
   };
 
-  const processJsonData = (parsedData: any[]): Record[] => {
-    return parsedData.map((item: any, index: number) => ({
+  const processJsonData = (parsedData: Record<string, unknown>[]): Record[] => {
+    return parsedData.map((item: Record<string, unknown>, index: number) => ({
       id: item.id || `imported-${Date.now()}-${index}`,
       firstName: item.firstName || item.first_name || '',
       lastName: item.lastName || item.last_name || '',
@@ -145,7 +145,7 @@ const DataLoader = ({ onDataLoaded, dataSource }: DataLoaderProps) => {
         }
       }
       
-      const record: any = {
+      const record: Record<string, unknown> = {
         id: `imported-${Date.now()}-${index}`,
         metadata: {
           createdAt: new Date().toISOString(),
@@ -207,7 +207,7 @@ const DataLoader = ({ onDataLoaded, dataSource }: DataLoaderProps) => {
     }, 1000);
   };
 
-  const handleProcessingError = (error: any) => {
+  const handleProcessingError = (error: unknown) => {
     console.error("Error processing file:", error);
     toast({
       title: interfaceLanguage === 'latin' ? "Error Loading Data" :
