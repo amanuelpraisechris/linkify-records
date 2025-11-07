@@ -121,11 +121,12 @@ const RecordEntryTabs = ({
       </TabsContent>
       
       <TabsContent value="matches">
-        <MatchesTab 
+        <MatchesTab
           submittedRecord={submittedRecord}
           potentialMatches={potentialMatches}
           communityRecords={communityRecords}
           onMatchComplete={onMatchComplete}
+          consentData={consentData}
         />
       </TabsContent>
       

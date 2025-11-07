@@ -4,12 +4,13 @@ import { RecordMatch, MatchResult } from '@/types';
 import { UseMatchingProcessProps } from './types';
 import { useMatchSelectionHandlers } from './useMatchSelectionHandlers';
 
-export function useMatchingProcess({ matchData, onMatchComplete }: UseMatchingProcessProps) {
+export function useMatchingProcess({ matchData, onMatchComplete, consentData }: UseMatchingProcessProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [results, setResults] = useState<MatchResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [matchNotes, setMatchNotes] = useState('');
-  const [consentGiven, setConsentGiven] = useState(false);
+  // Initialize consentGiven from consentData if available
+  const [consentGiven, setConsentGiven] = useState(consentData?.consentGiven || false);
   const [activeTab, setActiveTab] = useState('matching');
   const [selectedMatchId, setSelectedMatchId] = useState<string | null>(null);
   

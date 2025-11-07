@@ -12,9 +12,14 @@ import NoMatchesMessage from './matching-interface/NoMatchesMessage';
 interface MatchingInterfaceProps {
   matchData: RecordMatch[];
   onMatchComplete?: (result: MatchResult) => void;
+  consentData?: {
+    consentGiven: boolean;
+    consentType: 'written' | 'verbal' | 'previous';
+    consentDate: string;
+  } | null;
 }
 
-const MatchingInterface = ({ matchData, onMatchComplete }: MatchingInterfaceProps) => {
+const MatchingInterface = ({ matchData, onMatchComplete, consentData }: MatchingInterfaceProps) => {
   const {
     currentIndex,
     results,
@@ -30,7 +35,7 @@ const MatchingInterface = ({ matchData, onMatchComplete }: MatchingInterfaceProp
     handleSelectMatch,
     handleSaveSelectedMatch,
     handleMatch
-  } = useMatchingProcess({ matchData, onMatchComplete });
+  } = useMatchingProcess({ matchData, onMatchComplete, consentData });
 
   if (!currentMatch) {
     return <NoMatchesMessage onManualReview={undefined} isLoading={isLoading} />;

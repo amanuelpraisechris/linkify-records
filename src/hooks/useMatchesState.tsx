@@ -145,16 +145,20 @@ export const useMatchesState = () => {
       };
       
       setSubmittedRecord(recordWithSource);
-      
-      // If community database is missing, show warning but still proceed
+
+      // Block submission if community database is empty
       if (communityRecords.length === 0) {
         toast({
-          title: "Warning: No Community Database",
-          description: "HDSS community database is not loaded. Matching will be limited.",
+          title: "Community Database Required",
+          description: "Please load the HDSS community database before submitting records. Go to Data Management to upload the community database.",
           variant: "destructive"
         });
+        // Reset state and return to entry tab
+        setSubmittedRecord(null);
+        setActiveTab('entry');
+        return;
       }
-      
+
       // Find potential matches
       const matches = findMatchesForRecord(recordWithSource);
       console.log(`Found ${matches.length} potential matches for submitted record`);
@@ -256,16 +260,19 @@ export const useMatchesState = () => {
       };
       
       setSubmittedRecord(recordWithId);
-      
-      // If community database is missing, show warning but still proceed
+
+      // Block search if community database is empty
       if (communityRecords.length === 0) {
         toast({
-          title: "Warning: No Community Database",
-          description: "HDSS community database is not loaded. Matching will be limited.",
+          title: "Community Database Required",
+          description: "Please load the HDSS community database before searching. Go to Data Management to upload the community database.",
           variant: "destructive"
         });
+        // Reset state
+        setSubmittedRecord(null);
+        return;
       }
-      
+
       // Find potential matches
       const matches = findMatchesForRecord(recordWithId);
       console.log(`Found ${matches.length} potential matches for search record`);
@@ -325,27 +332,46 @@ export const useMatchesState = () => {
   
   const handleMatchComplete = async (result: MatchResult) => {
     console.log("Match complete callback with result:", result);
-    
-    // Add consent data to match result
-    const resultWithConsent = {
-      ...result,
-      consentObtained: consentData?.consentGiven || false,
-      consentDate: consentData?.consentDate
-    };
-    
-    await saveMatchResult(resultWithConsent);
-    
-    toast({
-      title: "Match Saved",
-      description: "The match has been saved successfully and added to your progress report.",
-      duration: 3000,
-    });
-    
-    // Return to the consent tab to process the next record
-    setActiveTab('consent');
-    setSubmittedRecord(null);
-    setPotentialMatches([]);
-    setConsentData(null);
+
+    try {
+      // Add consent data to match result
+      const resultWithConsent = {
+        ...result,
+        consentObtained: consentData?.consentGiven || false,
+        consentDate: consentData?.consentDate
+      };
+
+      await saveMatchResult(resultWithConsent);
+
+      toast({
+        title: "Match Saved",
+        description: "The match has been saved successfully and added to your progress report.",
+        duration: 3000,
+      });
+
+      // Return to the consent tab to process the next record
+      setActiveTab('consent');
+      setSubmittedRecord(null);
+      setPotentialMatches([]);
+      setConsentData(null);
+    } catch (error) {
+      console.error("Error saving match result:", error);
+
+      // Check if it's a duplicate match error
+      if (error instanceof Error && error.message.includes('already exists')) {
+        toast({
+          title: "Duplicate Match",
+          description: error.message,
+          variant: "destructive"
+        });
+      } else {
+        toast({
+          title: "Error Saving Match",
+          description: "An error occurred while saving the match result. Please try again.",
+          variant: "destructive"
+        });
+      }
+    }
   };
 
   return {

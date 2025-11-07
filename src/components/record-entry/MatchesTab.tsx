@@ -12,20 +12,26 @@ import { useState } from 'react';
 interface MatchesTabProps {
   submittedRecord: Record | null;
   potentialMatches: Array<{
-    record: Record; 
-    score: number; 
+    record: Record;
+    score: number;
     matchedOn: string[];
     fieldScores?: {[key: string]: number};
   }>;
   communityRecords: Record[];
   onMatchComplete: (result: MatchResult) => void;
+  consentData?: {
+    consentGiven: boolean;
+    consentType: 'written' | 'verbal' | 'previous';
+    consentDate: string;
+  } | null;
 }
 
 const MatchesTab = ({
   submittedRecord,
   potentialMatches,
   communityRecords,
-  onMatchComplete
+  onMatchComplete,
+  consentData
 }: MatchesTabProps) => {
   const [showNoMatchHandler, setShowNoMatchHandler] = useState(false);
 
@@ -96,6 +102,7 @@ const MatchesTab = ({
             potentialMatches
           }]}
           onMatchComplete={onMatchComplete}
+          consentData={consentData}
         />
       </div>
     );
@@ -126,6 +133,7 @@ const MatchesTab = ({
           potentialMatches
         }]}
         onMatchComplete={onMatchComplete}
+        consentData={consentData}
       />
     </div>
   );

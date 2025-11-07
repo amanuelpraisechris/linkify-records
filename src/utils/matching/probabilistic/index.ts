@@ -139,10 +139,67 @@ export const calculateProbabilisticMatch = (
     if (householdMemberMatch) matchedOn.push('Household Member/Ten-Cell Leader');
   }
   
-  // Normalize score to percentage using the approach mentioned in the sample
-  // Convert logarithmic weights to a 0-100 probability scale
-  // Adding 12 and multiplying by 5 is a scaling factor to convert log weights to a reasonable percentage
-  const normalizedScore = Math.min(100, Math.max(0, Math.round((totalWeight + 12) * 5)));
+  // Normalize score to percentage using dynamic range calculation
+  // Calculate theoretical maximum weight (all available fields match)
+  let maxPossibleWeight = 0;
+  let minPossibleWeight = 0;
+
+  // Calculate max/min for always-present fields
+  maxPossibleWeight += calculateFieldWeight(DEFAULT_MATCH_PROBABILITIES.firstName, DEFAULT_UNMATCH_PROBABILITIES.firstName, true);
+  minPossibleWeight += calculateFieldWeight(DEFAULT_MATCH_PROBABILITIES.firstName, DEFAULT_UNMATCH_PROBABILITIES.firstName, false);
+
+  maxPossibleWeight += calculateFieldWeight(DEFAULT_MATCH_PROBABILITIES.lastName, DEFAULT_UNMATCH_PROBABILITIES.lastName, true);
+  minPossibleWeight += calculateFieldWeight(DEFAULT_MATCH_PROBABILITIES.lastName, DEFAULT_UNMATCH_PROBABILITIES.lastName, false);
+
+  maxPossibleWeight += calculateFieldWeight(DEFAULT_MATCH_PROBABILITIES.gender, DEFAULT_UNMATCH_PROBABILITIES.gender, true);
+  minPossibleWeight += calculateFieldWeight(DEFAULT_MATCH_PROBABILITIES.gender, DEFAULT_UNMATCH_PROBABILITIES.gender, false);
+
+  // Add conditional fields if they exist in both records
+  if (record1.middleName && record2.middleName) {
+    maxPossibleWeight += calculateFieldWeight(DEFAULT_MATCH_PROBABILITIES.middleName, DEFAULT_UNMATCH_PROBABILITIES.middleName, true);
+    minPossibleWeight += calculateFieldWeight(DEFAULT_MATCH_PROBABILITIES.middleName, DEFAULT_UNMATCH_PROBABILITIES.middleName, false);
+  }
+
+  if (record1.birthDate && record2.birthDate) {
+    maxPossibleWeight += calculateFieldWeight(DEFAULT_MATCH_PROBABILITIES.birthYear, DEFAULT_UNMATCH_PROBABILITIES.birthYear, true);
+    minPossibleWeight += calculateFieldWeight(DEFAULT_MATCH_PROBABILITIES.birthYear, DEFAULT_UNMATCH_PROBABILITIES.birthYear, false);
+
+    const [, month1, day1] = record1.birthDate.split('-');
+    const [, month2, day2] = record2.birthDate.split('-');
+
+    if (month1 && month2) {
+      maxPossibleWeight += calculateFieldWeight(DEFAULT_MATCH_PROBABILITIES.birthMonth, DEFAULT_UNMATCH_PROBABILITIES.birthMonth, true);
+      minPossibleWeight += calculateFieldWeight(DEFAULT_MATCH_PROBABILITIES.birthMonth, DEFAULT_UNMATCH_PROBABILITIES.birthMonth, false);
+    }
+
+    if (day1 && day2) {
+      maxPossibleWeight += calculateFieldWeight(DEFAULT_MATCH_PROBABILITIES.birthDay, DEFAULT_UNMATCH_PROBABILITIES.birthDay, true);
+      minPossibleWeight += calculateFieldWeight(DEFAULT_MATCH_PROBABILITIES.birthDay, DEFAULT_UNMATCH_PROBABILITIES.birthDay, false);
+    }
+  }
+
+  if (record1.village && record2.village) {
+    maxPossibleWeight += calculateFieldWeight(DEFAULT_MATCH_PROBABILITIES.village, DEFAULT_UNMATCH_PROBABILITIES.village, true);
+    minPossibleWeight += calculateFieldWeight(DEFAULT_MATCH_PROBABILITIES.village, DEFAULT_UNMATCH_PROBABILITIES.village, false);
+  }
+
+  if (record1.subVillage && record2.subVillage) {
+    maxPossibleWeight += calculateFieldWeight(DEFAULT_MATCH_PROBABILITIES.subVillage, DEFAULT_UNMATCH_PROBABILITIES.subVillage, true);
+    minPossibleWeight += calculateFieldWeight(DEFAULT_MATCH_PROBABILITIES.subVillage, DEFAULT_UNMATCH_PROBABILITIES.subVillage, false);
+  }
+
+  if ((record1.oldest_member_first_name || record1.oldest_member_last_name) &&
+      (record2.oldest_member_first_name || record2.oldest_member_last_name)) {
+    maxPossibleWeight += calculateFieldWeight(DEFAULT_MATCH_PROBABILITIES.householdMember, DEFAULT_UNMATCH_PROBABILITIES.householdMember, true);
+    minPossibleWeight += calculateFieldWeight(DEFAULT_MATCH_PROBABILITIES.householdMember, DEFAULT_UNMATCH_PROBABILITIES.householdMember, false);
+  }
+
+  // Normalize to 0-100 scale using the actual range
+  // Map totalWeight from [minPossibleWeight, maxPossibleWeight] to [0, 100]
+  const range = maxPossibleWeight - minPossibleWeight;
+  const normalizedScore = range > 0
+    ? Math.min(100, Math.max(0, Math.round(((totalWeight - minPossibleWeight) / range) * 100)))
+    : 0;
   
   return {
     score: normalizedScore,

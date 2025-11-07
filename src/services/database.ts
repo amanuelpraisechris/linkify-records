@@ -199,6 +199,23 @@ export const databaseService = {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error('User not authenticated');
 
+    // Check if a match already exists for this source_id
+    const { data: existingMatches, error: checkError } = await supabase
+      .from('match_results')
+      .select('id, status')
+      .eq('source_id', result.sourceId)
+      .eq('user_id', user.id);
+
+    if (checkError) {
+      console.error('Error checking for existing matches:', checkError);
+      throw checkError;
+    }
+
+    // If a match already exists, prevent duplicate
+    if (existingMatches && existingMatches.length > 0) {
+      throw new Error(`A match already exists for this record (source_id: ${result.sourceId}). Status: ${existingMatches[0].status}`);
+    }
+
     const { error } = await supabase
       .from('match_results')
       .insert([{
@@ -214,7 +231,7 @@ export const databaseService = {
         consent_date: result.consentDate,
         user_id: user.id
       }]);
-    
+
     if (error) {
       console.error('Error saving match result:', error);
       throw error;

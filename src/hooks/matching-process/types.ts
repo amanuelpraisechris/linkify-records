@@ -4,6 +4,11 @@ import { RecordMatch, MatchResult } from '@/types';
 export interface UseMatchingProcessProps {
   matchData: RecordMatch[];
   onMatchComplete?: (result: MatchResult) => void;
+  consentData?: {
+    consentGiven: boolean;
+    consentType: 'written' | 'verbal' | 'previous';
+    consentDate: string;
+  } | null;
 }
 
 export interface UseMatchingProcessState {
