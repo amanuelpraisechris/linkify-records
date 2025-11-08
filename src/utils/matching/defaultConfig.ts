@@ -4,6 +4,7 @@ import { SupportedLanguage } from '../languageUtils';
 
 /**
  * Default field weights with adjusted priorities
+ * IMPROVED: Added parent names and adjusted weights for better matching
  */
 export const DEFAULT_FIELD_WEIGHTS: FieldWeights = {
   firstName: 40, // Increased priority for firstName
@@ -11,6 +12,8 @@ export const DEFAULT_FIELD_WEIGHTS: FieldWeights = {
   middleName: 15, // Added middleName as secondary attribute
   birthDate: 30,
   gender: 15,
+  fatherName: 25, // NEW: Parent names are important family identifiers
+  motherName: 25, // NEW: Parent names are important family identifiers
   village: 20,
   subVillage: 15,
   phoneNumber: 20,

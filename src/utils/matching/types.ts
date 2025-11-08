@@ -6,6 +6,7 @@ import { SupportedLanguage } from '../languageUtils';
 
 /**
  * Interface for field weight configuration
+ * IMPROVED: Added parent name fields for family-based matching
  */
 export interface FieldWeights {
   firstName: number;
@@ -17,6 +18,9 @@ export interface FieldWeights {
   phoneNumber: number;
   middleName: number;
   oldestHouseholdMember: number;
+  // Family identifiers - NEW!
+  fatherName?: number;
+  motherName?: number;
   // Additional location-based identifiers
   tabiaName?: number;
   kushetName?: number;
