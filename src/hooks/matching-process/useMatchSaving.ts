@@ -4,6 +4,7 @@ import { RecordMatch, MatchResult } from '@/types';
 import { useToast } from '@/components/ui/use-toast';
 import { logAudit } from '@/services/auditService';
 import { trackMatchResult } from '@/services/analyticsService';
+import { logSearchSession, logFailedMatch } from '@/services/searchSessionService';
 
 interface UseMatchSavingProps {
   currentMatch: RecordMatch | null;
@@ -148,6 +149,50 @@ export function useMatchSaving({
 
       // Track in analytics
       trackMatchResult(result);
+
+      // Log search session
+      if (currentMatch) {
+        const searchCriteria = {
+          firstName: currentMatch.sourceRecord.firstName,
+          lastName: currentMatch.sourceRecord.lastName,
+          middleName: currentMatch.sourceRecord.middleName,
+          birthDate: currentMatch.sourceRecord.birthDate,
+          sex: currentMatch.sourceRecord.sex,
+          village: currentMatch.sourceRecord.village,
+          subVillage: currentMatch.sourceRecord.subVillage
+        };
+
+        const outcome = result.status === 'matched' ? 'matched' :
+                       result.status === 'rejected' ? 'not_matched' :
+                       'manual_review';
+
+        logSearchSession({
+          searchCriteria,
+          outcome,
+          matchCount: currentMatch.potentialMatches.length,
+          selectedMatchId: result.matchId || undefined,
+          confidence: result.confidence,
+          notes: result.notes
+        });
+
+        // Log failed match if rejected or no good matches
+        if (result.status === 'rejected' || (result.status === 'manual-review' && result.confidence < 60)) {
+          const highestConfidence = currentMatch.potentialMatches.length > 0
+            ? Math.max(...currentMatch.potentialMatches.map(m => m.score))
+            : 0;
+
+          logFailedMatch({
+            sourceRecord: currentMatch.sourceRecord,
+            searchCriteria,
+            attemptedMatches: currentMatch.potentialMatches.length,
+            highestConfidence,
+            reason: result.status === 'rejected' ? 'user_rejected' :
+                   currentMatch.potentialMatches.length === 0 ? 'no_matches_found' :
+                   'low_confidence',
+            notes: result.notes
+          });
+        }
+      }
 
       if (onMatchComplete) {
         console.log("Calling onMatchComplete with result");

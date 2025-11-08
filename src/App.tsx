@@ -23,6 +23,7 @@ import AuditLogs from "./pages/AuditLogs";
 import EnhancedAnalytics from "./pages/EnhancedAnalytics";
 import DataQuality from "./pages/DataQuality";
 import SetupWizard from "./pages/SetupWizard";
+import SearchSessions from "./pages/SearchSessions";
 import { GOLD_STANDARD_CONFIG } from "./utils/matchingConfigDefaults";
 import React from 'react'; // Explicitly import React
 
@@ -115,6 +116,14 @@ const App = () => {
                         <Route
                           path="/setup"
                           element={<SetupWizard />}
+                        />
+                        <Route
+                          path="/search-sessions"
+                          element={
+                            <ProtectedRoute>
+                              <SearchSessions />
+                            </ProtectedRoute>
+                          }
                         />
 
                         {/* Admin Routes - Require admin login */}
