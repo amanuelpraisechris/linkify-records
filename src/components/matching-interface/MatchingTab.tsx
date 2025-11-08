@@ -2,9 +2,11 @@
 import { useState } from 'react';
 import { RecordMatch } from '@/types';
 import RecordCard from '../RecordCard';
-import { Save, FileText, UserCheck, Users, BarChart3 } from 'lucide-react';
+import { Save, FileText, UserCheck, Users, BarChart3, LayoutList, GitCompare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import PIRLMatchingView from './PIRLMatchingView';
 
 interface MatchingTabProps {
   currentMatch: RecordMatch;
@@ -19,6 +21,80 @@ interface MatchingTabProps {
 }
 
 const MatchingTab = ({
+  currentMatch,
+  selectedMatchId,
+  handleSelectMatch,
+  handleSaveSelectedMatch,
+  matchNotes,
+  setMatchNotes,
+  isLoading,
+  handleMatch,
+  setActiveTab
+}: MatchingTabProps) => {
+  const [interfaceMode, setInterfaceMode] = useState<'pirl' | 'standard'>('pirl');
+
+  return (
+    <div className="space-y-6">
+      {/* Interface Mode Toggle */}
+      <Alert className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20 border-blue-200">
+        <AlertDescription className="flex items-center justify-between">
+          <span className="text-sm font-medium">
+            Choose your preferred matching interface:
+          </span>
+          <div className="flex gap-2">
+            <Button
+              variant={interfaceMode === 'pirl' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setInterfaceMode('pirl')}
+              className="gap-2"
+            >
+              <GitCompare className="w-4 h-4" />
+              PIRL View (Recommended)
+            </Button>
+            <Button
+              variant={interfaceMode === 'standard' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setInterfaceMode('standard')}
+              className="gap-2"
+            >
+              <LayoutList className="w-4 h-4" />
+              Standard View
+            </Button>
+          </div>
+        </AlertDescription>
+      </Alert>
+
+      {/* Render Selected Interface */}
+      {interfaceMode === 'pirl' ? (
+        <PIRLMatchingView
+          currentMatch={currentMatch}
+          selectedMatchId={selectedMatchId}
+          handleSelectMatch={handleSelectMatch}
+          handleSaveSelectedMatch={handleSaveSelectedMatch}
+          matchNotes={matchNotes}
+          setMatchNotes={setMatchNotes}
+          isLoading={isLoading}
+          handleMatch={handleMatch}
+        />
+      ) : (
+        <StandardMatchingView
+          currentMatch={currentMatch}
+          selectedMatchId={selectedMatchId}
+          handleSelectMatch={handleSelectMatch}
+          handleSaveSelectedMatch={handleSaveSelectedMatch}
+          matchNotes={matchNotes}
+          setMatchNotes={setMatchNotes}
+          isLoading={isLoading}
+          handleMatch={handleMatch}
+          setActiveTab={setActiveTab}
+        />
+      )}
+    </div>
+  );
+};
+
+// Original Standard Matching View (moved from main component)
+const StandardMatchingView = ({
   currentMatch,
   selectedMatchId,
   handleSelectMatch,
