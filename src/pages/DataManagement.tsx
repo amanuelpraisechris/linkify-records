@@ -1,61 +1,27 @@
 
-import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/components/ui/use-toast';
 import { RecordDataProvider, useRecordData } from '@/contexts/record-data/RecordDataContext';
 import { MatchingConfigProvider } from '@/contexts/MatchingConfigContext';
 import { Record } from '@/types';
-import ImportDataForMatching from '@/components/ImportDataForMatching';
+import ImportClinicRecords from '@/components/ImportClinicRecords';
 import RecordList from '@/components/RecordList';
-import DataManagementControls from '@/components/admin/DataManagementControls';
-import { databaseService } from '@/services/database';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Building2, Database as DatabaseIcon, AlertCircle, ArrowRight } from 'lucide-react';
 
 const DataManagementContent = () => {
-  const { 
-    records, 
-    communityRecords, 
-    clinicRecords, 
-    importedRecords, 
-    addRecord, 
-    addImportedRecords, 
-    clearImportedRecords 
+  const {
+    clinicRecords,
+    communityRecords,
+    addRecord
   } = useRecordData();
   const { toast } = useToast();
   const navigate = useNavigate();
-  const [isMainCommunityData, setIsMainCommunityData] = useState(false);
 
-  const handleDataImport = async (newRecords: Record[]) => {
-    try {
-      await addImportedRecords(newRecords, isMainCommunityData);
-      toast({
-        title: "Data Imported",
-        description: `Successfully imported ${newRecords.length} records to the database.`,
-      });
-    } catch (error) {
-      console.error('Error importing data:', error);
-      toast({
-        title: "Import Error",
-        description: "Failed to import data to the database.",
-        variant: "destructive"
-      });
-    }
-  };
-
-  const handleClearImportedData = async () => {
-    try {
-      await clearImportedRecords();
-      toast({
-        title: "Imported Data Cleared",
-        description: "All imported records have been cleared from the database.",
-      });
-    } catch (error) {
-      console.error('Error clearing data:', error);
-      toast({
-        title: "Clear Error",
-        description: "Failed to clear data from the database.",
-        variant: "destructive"
-      });
-    }
+  const handleDataImport = (newRecords: Record[]) => {
+    console.log(`Imported ${newRecords.length} clinic records`);
   };
 
   const handleRecordCreation = async (newRecord: Record) => {
@@ -63,84 +29,126 @@ const DataManagementContent = () => {
       await addRecord(newRecord);
       toast({
         title: "Record Created",
-        description: "A new record has been successfully created in the database.",
+        description: "A new clinic record has been successfully created.",
       });
     } catch (error) {
       console.error('Error creating record:', error);
       toast({
         title: "Creation Error",
-        description: "Failed to create record in the database.",
+        description: "Failed to create record.",
         variant: "destructive"
       });
     }
   };
 
-  const handleNavigateToRecordEntry = () => {
-    navigate('/record-entry');
-  };
-
   return (
     <div className="container mx-auto py-10 px-4">
-      <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold mb-3 text-white">Data Management</h1>
-        <p className="text-white/80 max-w-2xl mx-auto">
-          Import, manage, and organize your records for matching and analysis. 
-          All data is stored securely in the database for persistent access.
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold mb-3 flex items-center gap-2">
+          <Building2 className="w-8 h-8" />
+          Clinic Records Management
+        </h1>
+        <p className="text-muted-foreground max-w-2xl">
+          Import and manage clinic patient records (source data) for matching against the community database.
+          For database management, visit the Database module.
         </p>
       </div>
 
-      <DataManagementControls 
-        onClearImportedData={handleClearImportedData}
-        onNavigateToRecordEntry={handleNavigateToRecordEntry}
-        setIsMainCommunityData={setIsMainCommunityData}
-        isMainCommunityData={isMainCommunityData}
-      />
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {/* Alert if community database not loaded */}
+      {communityRecords.length === 0 && (
+        <Alert className="mb-6 border-yellow-600 bg-yellow-50 dark:bg-yellow-950">
+          <AlertCircle className="h-4 w-4 text-yellow-600" />
+          <AlertTitle className="text-yellow-800 dark:text-yellow-200">Community Database Not Loaded</AlertTitle>
+          <AlertDescription className="text-yellow-700 dark:text-yellow-300 flex items-center justify-between">
+            <span>
+              You need to load the community database before matching clinic records.
+            </span>
+            <Button
+              onClick={() => navigate('/database')}
+              variant="outline"
+              size="sm"
+              className="ml-4"
+            >
+              Go to Database
+              <ArrowRight className="w-4 h-4 ml-2" />
+            </Button>
+          </AlertDescription>
+        </Alert>
+      )}
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Import Clinic Records */}
         <div>
-          <ImportDataForMatching onDataImport={handleDataImport} />
+          <ImportClinicRecords onDataImport={handleDataImport} />
         </div>
 
+        {/* Clinic Records List */}
         <div>
-          <div className="card-pinkish p-6 rounded-xl">
-            <h2 className="text-xl font-semibold mb-4 text-white">
-              All Records ({records.length})
-            </h2>
-            <RecordList records={records} emptyMessage="No records available. Import some data to get started." />
-          </div>
+          <Card>
+            <CardHeader>
+              <CardTitle>Clinic Records ({clinicRecords.length})</CardTitle>
+              <CardDescription>
+                All clinic patient records available for matching
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="max-h-[500px] overflow-y-auto">
+                <RecordList
+                  records={clinicRecords}
+                  emptyMessage="No clinic records available. Import patient data to get started."
+                />
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
-        <div className="md:col-span-1">
-          <div className="card-pinkish p-6 rounded-xl">
-            <h2 className="text-xl font-semibold mb-4 text-white">
-              Community Records ({communityRecords.length})
-            </h2>
-            <RecordList records={communityRecords} emptyMessage="No community records available. Import HDSS data." />
-          </div>
-        </div>
+      {/* Quick Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium flex items-center gap-2">
+              <Building2 className="w-4 h-4" />
+              Clinic Records
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{clinicRecords.length}</div>
+            <p className="text-xs text-muted-foreground mt-1">Ready for matching</p>
+          </CardContent>
+        </Card>
 
-        <div className="md:col-span-1">
-          <div className="card-pinkish p-6 rounded-xl">
-            <h2 className="text-xl font-semibold mb-4 text-white">
-              Clinic Records ({clinicRecords.length})
-            </h2>
-            <RecordList records={clinicRecords} emptyMessage="No clinic records available. Enter patient data." />
-          </div>
-        </div>
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium flex items-center gap-2">
+              <DatabaseIcon className="w-4 h-4" />
+              Community Database
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{communityRecords.length}</div>
+            <p className="text-xs text-muted-foreground mt-1">Target records</p>
+          </CardContent>
+        </Card>
 
-        <div className="md:col-span-1">
-          <div className="card-pinkish p-6 rounded-xl">
-            <h2 className="text-xl font-semibold mb-4 text-white">
-              Imported Records ({importedRecords.length})
-            </h2>
-            <RecordList records={importedRecords} emptyMessage="No imported records available." />
-          </div>
-        </div>
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium">Match Readiness</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className={`text-2xl font-bold ${clinicRecords.length > 0 && communityRecords.length > 0 ? 'text-green-600' : 'text-yellow-600'}`}>
+              {clinicRecords.length > 0 && communityRecords.length > 0 ? 'Ready' : 'Not Ready'}
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              {clinicRecords.length > 0 && communityRecords.length > 0
+                ? 'Both datasets loaded'
+                : 'Load both datasets to begin'}
+            </p>
+          </CardContent>
+        </Card>
       </div>
-      
-      <div className="footer mt-12 text-center">
+
+      <div className="footer mt-12 text-center text-muted-foreground">
         <p>Record Linkage Application • Powered by Medical Informatics & Supabase</p>
       </div>
     </div>

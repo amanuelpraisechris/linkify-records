@@ -10,6 +10,7 @@ import { MatchingConfigProvider } from "@/contexts/MatchingConfigContext";
 import { Navbar } from "@/components/navbar";
 import Index from "./pages/Index";
 import DataManagement from "./pages/DataManagement";
+import Database from "./pages/Database";
 import RecordEntry from "./pages/RecordEntry";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
@@ -18,6 +19,12 @@ import AdminDashboard from "./components/admin/AdminDashboard";
 import MatchingConfigAdmin from "./components/admin/MatchingConfigAdmin";
 import ProtectedRoute from "./components/admin/ProtectedRoute";
 import Reports from "./pages/Reports";
+import BatchMatching from "./pages/BatchMatching";
+import AuditLogs from "./pages/AuditLogs";
+import EnhancedAnalytics from "./pages/EnhancedAnalytics";
+import DataQuality from "./pages/DataQuality";
+import SetupWizard from "./pages/SetupWizard";
+import SearchSessions from "./pages/SearchSessions";
 import { GOLD_STANDARD_CONFIG } from "./utils/matchingConfigDefaults";
 import React from 'react'; // Explicitly import React
 
@@ -59,32 +66,84 @@ const App = () => {
                             </ProtectedRoute>
                           } 
                         />
-                        <Route 
-                          path="/data-management" 
+                        <Route
+                          path="/data-management"
                           element={
                             <ProtectedRoute>
                               <DataManagement />
                             </ProtectedRoute>
-                          } 
+                          }
                         />
-                        <Route 
-                          path="/record-entry" 
+                        <Route
+                          path="/database"
+                          element={
+                            <ProtectedRoute>
+                              <Database />
+                            </ProtectedRoute>
+                          }
+                        />
+                        <Route
+                          path="/record-entry"
                           element={
                             <ProtectedRoute>
                               <RecordEntry />
                             </ProtectedRoute>
-                          } 
+                          }
                         />
-                        <Route 
-                          path="/reports" 
+                        <Route
+                          path="/reports"
                           element={
                             <ProtectedRoute>
                               <Reports />
                             </ProtectedRoute>
-                          } 
+                          }
                         />
-                        
+                        <Route
+                          path="/batch-matching"
+                          element={
+                            <ProtectedRoute>
+                              <BatchMatching />
+                            </ProtectedRoute>
+                          }
+                        />
+                        <Route
+                          path="/analytics"
+                          element={
+                            <ProtectedRoute>
+                              <EnhancedAnalytics />
+                            </ProtectedRoute>
+                          }
+                        />
+                        <Route
+                          path="/data-quality"
+                          element={
+                            <ProtectedRoute>
+                              <DataQuality />
+                            </ProtectedRoute>
+                          }
+                        />
+                        <Route
+                          path="/setup"
+                          element={<SetupWizard />}
+                        />
+                        <Route
+                          path="/search-sessions"
+                          element={
+                            <ProtectedRoute>
+                              <SearchSessions />
+                            </ProtectedRoute>
+                          }
+                        />
+
                         {/* Admin Routes - Require admin login */}
+                        <Route
+                          path="/audit-logs"
+                          element={
+                            <ProtectedRoute adminOnly={true}>
+                              <AuditLogs />
+                            </ProtectedRoute>
+                          }
+                        />
                         <Route 
                           path="/admin-dashboard" 
                           element={

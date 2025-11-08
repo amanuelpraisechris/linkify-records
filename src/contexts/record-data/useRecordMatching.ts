@@ -71,8 +71,11 @@ export const useRecordMatching = () => {
           });
           
           if (enrichedMatches.length > 0) {
-            console.log(`Returning ${enrichedMatches.length} probabilistic matches`);
-            return enrichedMatches.sort((a, b) => b.score - a.score);
+            // Limit to top 20 matches as per Fellegi-Sunter specification
+            const sortedMatches = enrichedMatches.sort((a, b) => b.score - a.score);
+            const top20Matches = sortedMatches.slice(0, 20);
+            console.log(`Returning top ${Math.min(enrichedMatches.length, 20)} probabilistic matches out of ${enrichedMatches.length} total`);
+            return top20Matches;
           } else {
             console.log('No probabilistic matches found above threshold, falling back to deterministic matching');
           }
@@ -102,15 +105,19 @@ export const useRecordMatching = () => {
           .sort((a, b) => b.score - a.score);
         
         console.log(`Found ${matches.length} deterministic matches`);
-        console.log('Deterministic match scores:', 
-          matches.slice(0, 5).map(m => ({ 
-            score: m.score, 
+        console.log('Deterministic match scores:',
+          matches.slice(0, 5).map(m => ({
+            score: m.score,
             name: `${m.record.firstName} ${m.record.lastName}`,
             matchedOn: m.matchedOn
           }))
         );
-        
-        return matches;
+
+        // Limit to top 20 matches as per Fellegi-Sunter specification
+        const top20Matches = matches.slice(0, 20);
+        console.log(`Returning top ${Math.min(matches.length, 20)} deterministic matches out of ${matches.length} total`);
+
+        return top20Matches;
       } catch (error) {
         console.error("Error in deterministic matching:", error);
         return [];
