@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { RecordMatch, MatchResult } from '@/types';
 import { useToast } from '@/components/ui/use-toast';
+import { logAudit } from '@/services/auditService';
 
 interface UseMatchSavingProps {
   currentMatch: RecordMatch | null;
@@ -87,12 +88,51 @@ export function useMatchSaving({
 
   const saveMatchResult = async (result: MatchResult) => {
     setIsLoading(true);
-    
+
     try {
       // Save to database using the database service
       const { databaseService } = await import('@/services/database');
       await databaseService.saveMatchResult(result);
-      
+
+      // Log audit trail based on match status
+      if (result.status === 'matched') {
+        logAudit({
+          actionType: 'MATCH_ACCEPT',
+          description: `Matched record ${result.sourceId} with ${result.matchId} (confidence: ${result.confidence}%)`,
+          severity: 'info',
+          entityType: 'match',
+          entityId: result.sourceId,
+          metadata: {
+            matchId: result.matchId,
+            confidence: result.confidence,
+            consentObtained: result.consentObtained,
+            notes: result.notes,
+          },
+        });
+      } else if (result.status === 'rejected') {
+        logAudit({
+          actionType: 'MATCH_REJECT',
+          description: `Rejected match for record ${result.sourceId}`,
+          severity: 'info',
+          entityType: 'match',
+          entityId: result.sourceId,
+          metadata: {
+            notes: result.notes,
+          },
+        });
+      } else if (result.status === 'manual-review') {
+        logAudit({
+          actionType: 'MATCH_MANUAL_REVIEW',
+          description: `Sent record ${result.sourceId} for manual review`,
+          severity: 'warning',
+          entityType: 'match',
+          entityId: result.sourceId,
+          metadata: {
+            notes: result.notes,
+          },
+        });
+      }
+
       // Also save unmatched records if status indicates it
       if (result.status === 'manual-review' && currentMatch) {
         await databaseService.saveUnmatchedRecord(
@@ -101,7 +141,7 @@ export function useMatchSaving({
           'manual_review_required'
         );
       }
-      
+
       // Update local state
       setResults([...results, result]);
       
@@ -141,6 +181,17 @@ export function useMatchSaving({
       
     } catch (error) {
       console.error('Error saving match result:', error);
+
+      // Log error to audit trail
+      logAudit({
+        actionType: 'SYSTEM_ERROR',
+        description: `Failed to save match result for record ${result.sourceId}: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        severity: 'error',
+        entityType: 'match',
+        entityId: result.sourceId,
+        stackTrace: error instanceof Error ? error.stack : undefined,
+      });
+
       toast({
         title: "Error",
         description: "Failed to save match result to database. Please try again.",

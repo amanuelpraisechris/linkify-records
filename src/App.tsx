@@ -18,6 +18,8 @@ import AdminDashboard from "./components/admin/AdminDashboard";
 import MatchingConfigAdmin from "./components/admin/MatchingConfigAdmin";
 import ProtectedRoute from "./components/admin/ProtectedRoute";
 import Reports from "./pages/Reports";
+import BatchMatching from "./pages/BatchMatching";
+import AuditLogs from "./pages/AuditLogs";
 import { GOLD_STANDARD_CONFIG } from "./utils/matchingConfigDefaults";
 import React from 'react'; // Explicitly import React
 
@@ -75,16 +77,32 @@ const App = () => {
                             </ProtectedRoute>
                           } 
                         />
-                        <Route 
-                          path="/reports" 
+                        <Route
+                          path="/reports"
                           element={
                             <ProtectedRoute>
                               <Reports />
                             </ProtectedRoute>
-                          } 
+                          }
                         />
-                        
+                        <Route
+                          path="/batch-matching"
+                          element={
+                            <ProtectedRoute>
+                              <BatchMatching />
+                            </ProtectedRoute>
+                          }
+                        />
+
                         {/* Admin Routes - Require admin login */}
+                        <Route
+                          path="/audit-logs"
+                          element={
+                            <ProtectedRoute adminOnly={true}>
+                              <AuditLogs />
+                            </ProtectedRoute>
+                          }
+                        />
                         <Route 
                           path="/admin-dashboard" 
                           element={
