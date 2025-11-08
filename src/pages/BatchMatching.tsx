@@ -5,7 +5,7 @@
 
 import { useState, useEffect } from 'react';
 import { Record } from '@/types';
-import { useMatchingConfig } from '@/contexts/matching-config/MatchingConfigContext';
+import { useMatchingConfig } from '@/contexts/MatchingConfigContext';
 import { BatchMatchingInterface } from '@/components/batch-matching/BatchMatchingInterface';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';

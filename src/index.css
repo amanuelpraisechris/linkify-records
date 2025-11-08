@@ -1,3 +1,5 @@
+/* Font import - load asynchronously to prevent render blocking */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap') layer(fonts);
 
 @tailwind base;
 @tailwind components;
@@ -168,6 +170,3 @@
   background: linear-gradient(to right, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.5) 50%, rgba(255, 255, 255, 0) 100%);
   background-size: 1000px 100%;
 }
-
-/* Font import - load asynchronously to prevent render blocking */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap') layer(fonts);
