@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { RecordMatch, MatchResult } from '@/types';
 import { useToast } from '@/components/ui/use-toast';
 import { logAudit } from '@/services/auditService';
+import { trackMatchResult } from '@/services/analyticsService';
 
 interface UseMatchSavingProps {
   currentMatch: RecordMatch | null;
@@ -144,7 +145,10 @@ export function useMatchSaving({
 
       // Update local state
       setResults([...results, result]);
-      
+
+      // Track in analytics
+      trackMatchResult(result);
+
       if (onMatchComplete) {
         console.log("Calling onMatchComplete with result");
         onMatchComplete(result);

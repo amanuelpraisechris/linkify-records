@@ -20,6 +20,9 @@ import ProtectedRoute from "./components/admin/ProtectedRoute";
 import Reports from "./pages/Reports";
 import BatchMatching from "./pages/BatchMatching";
 import AuditLogs from "./pages/AuditLogs";
+import EnhancedAnalytics from "./pages/EnhancedAnalytics";
+import DataQuality from "./pages/DataQuality";
+import SetupWizard from "./pages/SetupWizard";
 import { GOLD_STANDARD_CONFIG } from "./utils/matchingConfigDefaults";
 import React from 'react'; // Explicitly import React
 
@@ -92,6 +95,26 @@ const App = () => {
                               <BatchMatching />
                             </ProtectedRoute>
                           }
+                        />
+                        <Route
+                          path="/analytics"
+                          element={
+                            <ProtectedRoute>
+                              <EnhancedAnalytics />
+                            </ProtectedRoute>
+                          }
+                        />
+                        <Route
+                          path="/data-quality"
+                          element={
+                            <ProtectedRoute>
+                              <DataQuality />
+                            </ProtectedRoute>
+                          }
+                        />
+                        <Route
+                          path="/setup"
+                          element={<SetupWizard />}
                         />
 
                         {/* Admin Routes - Require admin login */}

@@ -1,6 +1,6 @@
 
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Database, Search, Zap, FileText } from 'lucide-react';
+import { LayoutDashboard, Database, Search, Zap, FileText, BarChart3, ShieldCheck } from 'lucide-react';
 
 interface NavbarLinksProps {
   isAdmin: boolean;
@@ -29,6 +29,16 @@ export const NavbarLinks = ({ isAdmin }: NavbarLinksProps) => {
       path: '/batch-matching',
       label: 'Batch Match',
       icon: <Zap className="w-4 h-4 mr-1.5" />
+    },
+    {
+      path: '/analytics',
+      label: 'Analytics',
+      icon: <BarChart3 className="w-4 h-4 mr-1.5" />
+    },
+    {
+      path: '/data-quality',
+      label: 'Data Quality',
+      icon: <ShieldCheck className="w-4 h-4 mr-1.5" />
     }
   ];
 
