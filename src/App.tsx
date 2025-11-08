@@ -10,6 +10,7 @@ import { MatchingConfigProvider } from "@/contexts/MatchingConfigContext";
 import { Navbar } from "@/components/navbar";
 import Index from "./pages/Index";
 import DataManagement from "./pages/DataManagement";
+import Database from "./pages/Database";
 import RecordEntry from "./pages/RecordEntry";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
@@ -65,21 +66,29 @@ const App = () => {
                             </ProtectedRoute>
                           } 
                         />
-                        <Route 
-                          path="/data-management" 
+                        <Route
+                          path="/data-management"
                           element={
                             <ProtectedRoute>
                               <DataManagement />
                             </ProtectedRoute>
-                          } 
+                          }
                         />
-                        <Route 
-                          path="/record-entry" 
+                        <Route
+                          path="/database"
+                          element={
+                            <ProtectedRoute>
+                              <Database />
+                            </ProtectedRoute>
+                          }
+                        />
+                        <Route
+                          path="/record-entry"
                           element={
                             <ProtectedRoute>
                               <RecordEntry />
                             </ProtectedRoute>
-                          } 
+                          }
                         />
                         <Route
                           path="/reports"

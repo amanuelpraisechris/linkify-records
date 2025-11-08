@@ -1,6 +1,6 @@
 
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Database, Search, Zap, FileText, BarChart3, ShieldCheck, History } from 'lucide-react';
+import { LayoutDashboard, Database, Building2, Search, Zap, FileText, BarChart3, ShieldCheck, History } from 'lucide-react';
 
 interface NavbarLinksProps {
   isAdmin: boolean;
@@ -16,9 +16,14 @@ export const NavbarLinks = ({ isAdmin }: NavbarLinksProps) => {
       icon: <LayoutDashboard className="w-4 h-4 mr-1.5" />
     },
     {
-      path: '/data-management',
-      label: 'Records',
+      path: '/database',
+      label: 'Database',
       icon: <Database className="w-4 h-4 mr-1.5" />
+    },
+    {
+      path: '/data-management',
+      label: 'Clinic Records',
+      icon: <Building2 className="w-4 h-4 mr-1.5" />
     },
     {
       path: '/record-entry',
