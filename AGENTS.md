@@ -1,0 +1,1 @@
+- Probabilistic matching lives in src/utils/matching/probabilistic (graded Fellegi-Sunter, blocking, prior-based probability); keep rules covered by src/utils/matching/__tests__ — scores feed consent/linkage decisions.

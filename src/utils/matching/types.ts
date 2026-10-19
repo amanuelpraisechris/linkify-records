@@ -40,6 +40,12 @@ export interface MatchingConfig {
     low: number;
   };
   fuzzyMatching: boolean;
+  /** Optional Fellegi-Sunter m/u overrides and prior used by the probabilistic engine */
+  probabilities?: {
+    m?: { [field: string]: number };
+    u?: { [field: string]: number };
+    prior?: number;
+  };
   languageConfig: {
     defaultLanguage: SupportedLanguage;
     enableScriptDetection: boolean;
