@@ -95,7 +95,7 @@ function findPotentialMatches(
       let result;
 
       if (algorithmType === 'probabilistic') {
-        result = calculateProbabilisticMatch(sourceRecord, targetRecord, matchingConfig);
+        result = calculateProbabilisticMatch(sourceRecord, targetRecord, matchingConfig.probabilities || {});
       } else {
         result = calculateMatchScore(sourceRecord, targetRecord, matchingConfig);
       }

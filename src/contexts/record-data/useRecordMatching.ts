@@ -48,7 +48,7 @@ export const useRecordMatching = () => {
           const minThreshold = config.threshold.low || 10;
           console.log(`Using probabilistic matching with minimum threshold: ${minThreshold}`);
           
-          const matches = findProbabilisticMatches(sourceRecord, searchPool, minThreshold);
+          const matches = findProbabilisticMatches(sourceRecord, searchPool, minThreshold, { ...(config.probabilities || {}), limit: 5 });
           
           console.log(`Found ${matches.length} probabilistic matches`);
           console.log('Probabilistic match scores:', 

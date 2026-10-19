@@ -180,7 +180,6 @@ export const findProbabilisticMatches = (
     .slice(0, options.limit ?? 5);
 };
 
-export { calculateJaroWinklerSimilarity };
 export * from './types';
 export * from './defaultProbabilities';
 export * from './stringComparison';

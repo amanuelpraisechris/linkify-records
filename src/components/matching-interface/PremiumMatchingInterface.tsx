@@ -59,7 +59,7 @@ const PremiumMatchingInterface = ({ matchData, onMatchComplete }: PremiumMatchin
             <div className="text-right">
               <div className="text-sm text-muted-foreground">Session Status</div>
               <div className="flex items-center space-x-2">
-                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                <div className="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
                 <span className="font-semibold">Active</span>
               </div>
             </div>
@@ -74,10 +74,10 @@ const PremiumMatchingInterface = ({ matchData, onMatchComplete }: PremiumMatchin
       </div>
 
       {/* Algorithm Status Alert */}
-      <Alert className="border-blue-200 bg-blue-50/50">
-        <TrendingUp className="h-4 w-4 text-blue-600" />
-        <AlertDescription className="text-blue-700 font-medium">
-          Using Fellegi-Sunter probabilistic matching algorithm with Jaro-Winkler string comparison for optimal linkage accuracy.
+      <Alert className="border-primary/30 bg-primary/5">
+        <TrendingUp className="h-4 w-4 text-primary" />
+        <AlertDescription className="text-foreground font-medium">
+          Candidates are ranked by match likelihood. Similar-sounding and swapped names are recognised; blank fields do not count against a match.
         </AlertDescription>
       </Alert>
 
