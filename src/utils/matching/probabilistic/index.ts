@@ -1,191 +1,189 @@
-
 import { Record } from '@/types';
 import { DEFAULT_MATCH_PROBABILITIES, DEFAULT_UNMATCH_PROBABILITIES } from './defaultProbabilities';
 import { calculateFieldWeight } from './stringComparison';
-import { namesMatch, findBestNameMatch, birthYearMatches } from './fieldMatching';
+import { namesMatch, calculateJaroWinklerSimilarity } from './fieldMatching';
 import { containsEthiopicScript, SupportedLanguage } from '../../languageUtils';
-import { ProbabilisticMatchResult } from './types';
+import { ProbabilisticMatchResult, MatchProbabilities, UnmatchProbabilities } from './types';
+import { soundex } from './phonetic';
+import { blockCandidates } from './blocking';
+
+export type NameAgreement = 'exact' | 'close' | 'disagree' | 'missing';
+export type YearAgreement = 'exact' | 'near' | 'far' | 'disagree' | 'missing';
+export type MatchBand = 'high' | 'review' | 'no-match';
+
+export interface ProbabilisticOptions {
+  m?: Partial<MatchProbabilities>;
+  u?: Partial<UnmatchProbabilities>;
+  /** Prior probability that a random candidate pair is a true match */
+  prior?: number;
+}
+
+const DEFAULT_PRIOR = 0.01;
+
+const clean = (v?: string) => (v || '').trim().toLowerCase();
+
+/** Graded name comparison: exact, close (fuzzy or sound-alike), disagree, or missing. */
+export const compareName = (a: string | undefined, b: string | undefined, language: SupportedLanguage): NameAgreement => {
+  const x = clean(a);
+  const y = clean(b);
+  if (!x || !y) return 'missing';
+  if (x === y) return 'exact';
+  if (namesMatch(x, y, language)) return 'close';
+  if (language === 'latin' && soundex(x) && soundex(x) === soundex(y)) return 'close';
+  return 'disagree';
+};
+
+/** Graded birth-year comparison: exact, ±1, ±2–5, beyond 5, or missing. */
+export const compareBirthYear = (a?: string, b?: string): YearAgreement => {
+  const y1 = a ? parseInt(a, 10) : NaN;
+  const y2 = b ? parseInt(b, 10) : NaN;
+  if (isNaN(y1) || isNaN(y2)) return 'missing';
+  const d = Math.abs(y1 - y2);
+  if (d === 0) return 'exact';
+  if (d === 1) return 'near';
+  if (d <= 5) return 'far';
+  return 'disagree';
+};
+
+/** Weight for a graded agreement level. Missing data is neutral (0). */
+export const gradedWeight = (m: number, u: number, level: NameAgreement | YearAgreement): number => {
+  switch (level) {
+    case 'missing': return 0;
+    case 'exact': return calculateFieldWeight(m, u, true);
+    case 'close':
+    case 'near': return calculateFieldWeight(m, u, true) * 0.7;
+    case 'far': return calculateFieldWeight(m, u, true) * 0.3;
+    default: return calculateFieldWeight(m, u, false);
+  }
+};
+
+/** Convert total log2 weight to a match probability (0–100) using a prior. */
+export const weightToProbability = (totalWeight: number, prior: number = DEFAULT_PRIOR): number => {
+  const priorOdds = Math.log2(prior / (1 - prior));
+  const p = 1 / (1 + Math.pow(2, -(totalWeight + priorOdds)));
+  return Math.round(p * 1000) / 10;
+};
+
+/** Band a score using thresholds (high ≥ high, review ≥ low, otherwise no match). */
+export const bandScore = (score: number, thresholds: { high: number; low: number }): MatchBand =>
+  score >= thresholds.high ? 'high' : score >= thresholds.low ? 'review' : 'no-match';
 
 /**
- * Calculate probabilistic match score between two records using Fellegi-Sunter model
- * 
- * This implementation is based on probabilistic record linkage principles where:
- * - m-probability: probability that a field matches for true matches
- * - u-probability: probability that a field matches by chance for non-matches
- * - Weight calculation: log2(m/u) for matches, log2((1-m)/(1-u)) for non-matches
- * 
- * @param record1 Source record
- * @param record2 Target record
- * @returns Match result with score, matched fields, and field-level scores
+ * Fellegi-Sunter probabilistic match with graded agreement, name-swap
+ * detection, neutral missing data, and a calibrated probability score.
  */
 export const calculateProbabilisticMatch = (
   record1: Record,
-  record2: Record
+  record2: Record,
+  options: ProbabilisticOptions | unknown = {}
 ): ProbabilisticMatchResult => {
+  const opts = (options && typeof options === 'object' && ('m' in options || 'u' in options || 'prior' in options))
+    ? options as ProbabilisticOptions : {};
+  const M = { ...DEFAULT_MATCH_PROBABILITIES, ...(opts.m || {}) };
+  const U = { ...DEFAULT_UNMATCH_PROBABILITIES, ...(opts.u || {}) };
+
   const matchedOn: string[] = [];
-  const fieldScores: {[key: string]: number} = {};
+  const fieldScores: { [key: string]: number } = {};
   let totalWeight = 0;
-  
-  // Determine language based on script detection
-  let language: SupportedLanguage = containsEthiopicScript(record1.firstName) || containsEthiopicScript(record2.firstName) ? 'amharic' : 'latin';
-  
-  // First Name comparison
-  const firstNameMatch = namesMatch(record1.firstName, record2.firstName, language);
-  const firstNameWeight = calculateFieldWeight(DEFAULT_MATCH_PROBABILITIES.firstName, DEFAULT_UNMATCH_PROBABILITIES.firstName, firstNameMatch);
-  totalWeight += firstNameWeight;
-  fieldScores['firstName'] = firstNameWeight;
-  if (firstNameMatch) matchedOn.push('First Name');
-  
-  // Last Name comparison
-  const lastNameMatch = namesMatch(record1.lastName, record2.lastName, language);
-  const lastNameWeight = calculateFieldWeight(DEFAULT_MATCH_PROBABILITIES.lastName, DEFAULT_UNMATCH_PROBABILITIES.lastName, lastNameMatch);
-  totalWeight += lastNameWeight;
-  fieldScores['lastName'] = lastNameWeight;
-  if (lastNameMatch) matchedOn.push('Last Name');
-  
-  // Middle Name comparison
-  if (record1.middleName && record2.middleName) {
-    const middleNameMatch = namesMatch(record1.middleName, record2.middleName, language);
-    const middleNameWeight = calculateFieldWeight(DEFAULT_MATCH_PROBABILITIES.middleName, DEFAULT_UNMATCH_PROBABILITIES.middleName, middleNameMatch);
-    totalWeight += middleNameWeight;
-    fieldScores['middleName'] = middleNameWeight;
-    if (middleNameMatch) matchedOn.push('Middle Name');
+  const add = (key: string, label: string, w: number, agreed: boolean) => {
+    fieldScores[key] = w;
+    totalWeight += w;
+    if (agreed) matchedOn.push(label);
+  };
+
+  const language: SupportedLanguage =
+    containsEthiopicScript(record1.firstName) || containsEthiopicScript(record2.firstName) ? 'amharic' : 'latin';
+
+  // Names, with first/last swap detection
+  let fn = compareName(record1.firstName, record2.firstName, language);
+  let ln = compareName(record1.lastName, record2.lastName, language);
+  const direct = gradedWeight(M.firstName, U.firstName, fn) + gradedWeight(M.lastName, U.lastName, ln);
+  const sfn = compareName(record1.firstName, record2.lastName, language);
+  const sln = compareName(record1.lastName, record2.firstName, language);
+  const swapped = gradedWeight(M.firstName, U.firstName, sfn) + gradedWeight(M.lastName, U.lastName, sln);
+  let swap = false;
+  if (swapped > direct) {
+    fn = sfn; ln = sln; swap = true;
   }
-  
-  // Birth Date components - Handling year separately for flexible matching
-  if (record1.birthDate && record2.birthDate) {
-    const [year1, month1, day1] = record1.birthDate.split('-');
-    const [year2, month2, day2] = record2.birthDate.split('-');
-    
-    // Year comparison - allowing up to 10 years difference as mentioned in the sample
-    const yearMatch = birthYearMatches(year1, year2, 10); // Updated to 10 years as per sample
-    const yearWeight = calculateFieldWeight(DEFAULT_MATCH_PROBABILITIES.birthYear, DEFAULT_UNMATCH_PROBABILITIES.birthYear, yearMatch);
-    totalWeight += yearWeight;
-    fieldScores['birthYear'] = yearWeight;
-    if (yearMatch) matchedOn.push('Birth Year');
-    
-    // Month comparison
-    if (month1 && month2) {
-      const monthMatch = month1 === month2;
-      const monthWeight = calculateFieldWeight(DEFAULT_MATCH_PROBABILITIES.birthMonth, DEFAULT_UNMATCH_PROBABILITIES.birthMonth, monthMatch);
-      totalWeight += monthWeight;
-      fieldScores['birthMonth'] = monthWeight;
-      if (monthMatch) matchedOn.push('Birth Month');
-    }
-    
-    // Day comparison
-    if (day1 && day2) {
-      const dayMatch = day1 === day2;
-      const dayWeight = calculateFieldWeight(DEFAULT_MATCH_PROBABILITIES.birthDay, DEFAULT_UNMATCH_PROBABILITIES.birthDay, dayMatch);
-      totalWeight += dayWeight;
-      fieldScores['birthDay'] = dayWeight;
-      if (dayMatch) matchedOn.push('Birth Day');
-    }
+  add('firstName', 'First Name', gradedWeight(M.firstName, U.firstName, fn), fn === 'exact' || fn === 'close');
+  add('lastName', 'Last Name', gradedWeight(M.lastName, U.lastName, ln), ln === 'exact' || ln === 'close');
+  if (swap) matchedOn.push('Names Swapped');
+
+  const mn = compareName(record1.middleName, record2.middleName, language);
+  add('middleName', 'Middle Name', gradedWeight(M.middleName, U.middleName, mn), mn === 'exact' || mn === 'close');
+
+  // Birth date
+  const [y1, mo1, d1] = (record1.birthDate || '').split('-');
+  const [y2, mo2, d2] = (record2.birthDate || '').split('-');
+  const yr = compareBirthYear(y1, y2);
+  add('birthYear', 'Birth Year', gradedWeight(M.birthYear, U.birthYear, yr), yr === 'exact' || yr === 'near');
+  if (mo1 && mo2) {
+    const ok = mo1 === mo2;
+    add('birthMonth', 'Birth Month', calculateFieldWeight(M.birthMonth, U.birthMonth, ok), ok);
   }
-  
-  // Gender comparison
-  const genderMatch = record1.gender?.toLowerCase() === record2.gender?.toLowerCase();
-  const genderWeight = calculateFieldWeight(DEFAULT_MATCH_PROBABILITIES.gender, DEFAULT_UNMATCH_PROBABILITIES.gender, genderMatch);
-  totalWeight += genderWeight;
-  fieldScores['gender'] = genderWeight;
-  if (genderMatch) matchedOn.push('Gender');
-  
-  // Village comparison
-  if (record1.village && record2.village) {
-    const villageMatch = namesMatch(record1.village, record2.village, language);
-    const villageWeight = calculateFieldWeight(DEFAULT_MATCH_PROBABILITIES.village, DEFAULT_UNMATCH_PROBABILITIES.village, villageMatch);
-    totalWeight += villageWeight;
-    fieldScores['village'] = villageWeight;
-    if (villageMatch) matchedOn.push('Village');
+  if (d1 && d2) {
+    const ok = d1 === d2;
+    add('birthDay', 'Birth Day', calculateFieldWeight(M.birthDay, U.birthDay, ok), ok);
   }
-  
-  // Sub-village comparison
-  if (record1.subVillage && record2.subVillage) {
-    const subVillageMatch = namesMatch(record1.subVillage, record2.subVillage, language);
-    const subVillageWeight = calculateFieldWeight(DEFAULT_MATCH_PROBABILITIES.subVillage, DEFAULT_UNMATCH_PROBABILITIES.subVillage, subVillageMatch);
-    totalWeight += subVillageWeight;
-    fieldScores['subVillage'] = subVillageWeight;
-    if (subVillageMatch) matchedOn.push('Sub-Village');
+
+  // Sex (neutral when missing)
+  const g1 = clean(record1.gender);
+  const g2 = clean(record2.gender);
+  if (g1 && g2) {
+    const ok = g1 === g2;
+    add('gender', 'Gender', calculateFieldWeight(M.gender, U.gender, ok), ok);
   }
-  
-  // Ten Cell Leader comparison (as mentioned in the sample)
-  // Using oldest_member fields as a proxy for ten-cell leader
-  if ((record1.oldest_member_first_name || record1.oldest_member_last_name) && 
-      (record2.oldest_member_first_name || record2.oldest_member_last_name)) {
-    
-    // Compare first names
-    const tenCellLeaderFirstNameMatch = namesMatch(
-      record1.oldest_member_first_name, 
-      record2.oldest_member_first_name,
-      language
-    );
-    
-    // Compare last names
-    const tenCellLeaderLastNameMatch = namesMatch(
-      record1.oldest_member_last_name,
-      record2.oldest_member_last_name,
-      language
-    );
-    
-    const householdMemberMatch = tenCellLeaderFirstNameMatch || tenCellLeaderLastNameMatch;
-    const householdMemberWeight = calculateFieldWeight(
-      DEFAULT_MATCH_PROBABILITIES.householdMember,
-      DEFAULT_UNMATCH_PROBABILITIES.householdMember,
-      householdMemberMatch
-    );
-    
-    totalWeight += householdMemberWeight;
-    fieldScores['householdMember'] = householdMemberWeight;
-    if (householdMemberMatch) matchedOn.push('Household Member/Ten-Cell Leader');
+
+  const vil = compareName(record1.village, record2.village, language);
+  add('village', 'Village', gradedWeight(M.village, U.village, vil), vil === 'exact' || vil === 'close');
+  const sv = compareName(record1.subVillage, record2.subVillage, language);
+  add('subVillage', 'Sub-Village', gradedWeight(M.subVillage, U.subVillage, sv), sv === 'exact' || sv === 'close');
+
+  // Ten-cell leader / oldest household member
+  const h1 = `${record1.oldest_member_first_name || ''} ${record1.oldest_member_last_name || ''}`.trim();
+  const h2 = `${record2.oldest_member_first_name || ''} ${record2.oldest_member_last_name || ''}`.trim();
+  if (h1 && h2) {
+    const hf = compareName(record1.oldest_member_first_name, record2.oldest_member_first_name, language);
+    const hl = compareName(record1.oldest_member_last_name, record2.oldest_member_last_name, language);
+    const best = [hf, hl].includes('exact') ? 'exact' : [hf, hl].includes('close') ? 'close' : 'disagree';
+    add('householdMember', 'Household Member/Ten-Cell Leader',
+      gradedWeight(M.householdMember, U.householdMember, best), best !== 'disagree');
   }
-  
-  // Normalize score to percentage using the approach mentioned in the sample
-  // Convert logarithmic weights to a 0-100 probability scale
-  // Adding 12 and multiplying by 5 is a scaling factor to convert log weights to a reasonable percentage
-  const normalizedScore = Math.min(100, Math.max(0, Math.round((totalWeight + 12) * 5)));
-  
+
+  for (const k of Object.keys(fieldScores)) fieldScores[k] = Math.round(fieldScores[k] * 100) / 100;
+
   return {
-    score: normalizedScore,
+    score: weightToProbability(totalWeight, opts.prior ?? DEFAULT_PRIOR),
     matchedOn,
     fieldScores,
-    totalWeight
+    totalWeight,
   };
 };
 
 /**
- * Find potential matches for a source record using probabilistic matching
- * 
- * This function implements a thresholding approach similar to the sample:
- * - Creates multiple thresholds based on match score distribution
- * - Returns all matches above the specified minimum threshold
- * 
- * @param sourceRecord Source record to find matches for
- * @param targetRecords Pool of records to search for matches
- * @param minScore Minimum score threshold (default: 40)
- * @returns Array of potential matches with scores
+ * Find candidates: blocking → scoring → filter by minimum → top N, sorted.
  */
 export const findProbabilisticMatches = (
   sourceRecord: Record,
   targetRecords: Record[],
-  minScore: number = 40
-): Array<{ record: Record; score: number; matchedOn: string[]; fieldScores: {[key: string]: number}; }> => {
-  console.log(`Finding matches for ${sourceRecord.firstName} ${sourceRecord.lastName} against ${targetRecords.length} records`);
-  
-  const matches = targetRecords
+  minScore: number = 40,
+  options: ProbabilisticOptions & { limit?: number } = {}
+): Array<{ record: Record; score: number; matchedOn: string[]; fieldScores: { [key: string]: number } }> => {
+  const candidates = blockCandidates(sourceRecord, targetRecords);
+  return candidates
     .map(record => {
-      const { score, matchedOn, fieldScores } = calculateProbabilisticMatch(sourceRecord, record);
+      const { score, matchedOn, fieldScores } = calculateProbabilisticMatch(sourceRecord, record, options);
       return { record, score, matchedOn, fieldScores };
     })
-    .filter(match => match.score >= minScore)
-    .sort((a, b) => b.score - a.score);
-  
-  console.log(`Found ${matches.length} matches with score >= ${minScore}`);
-  
-  return matches;
+    .filter(m => m.score >= minScore)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, options.limit ?? 5);
 };
 
-// Re-export everything for backward compatibility
+export { calculateJaroWinklerSimilarity };
 export * from './types';
 export * from './defaultProbabilities';
 export * from './stringComparison';
 export * from './fieldMatching';
+export * from './phonetic';
+export * from './blocking';
