@@ -19,6 +19,9 @@ export interface ProbabilisticOptions {
 }
 
 const DEFAULT_PRIOR = 0.01;
+/** Mother's name m/u (MCH/ANC context): usually recorded consistently, rarely shared by chance. */
+const MOTHER_M = 0.85;
+const MOTHER_U = 0.02;
 
 const clean = (v?: string) => (v || '').trim().toLowerCase();
 
