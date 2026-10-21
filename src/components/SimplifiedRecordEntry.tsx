@@ -200,12 +200,12 @@ const SimplifiedRecordEntry = () => {
         <CardHeader>
           <div className="flex items-center gap-3">
             <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-              submittedRecord ? 'bg-green-600' : currentStep === 'entry' ? 'bg-primary' : 'bg-muted'
+              submittedRecord || currentStep === 'entry' ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
             }`}>
               {submittedRecord ? (
                 <CheckCircle2 className="w-5 h-5" />
               ) : (
-                <span className="text-white font-bold">2</span>
+                <span className="font-semibold">2</span>
               )}
             </div>
             <div>
@@ -240,7 +240,7 @@ const SimplifiedRecordEntry = () => {
           <CardHeader>
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
-                <span className="text-white font-bold">3</span>
+                <span className="font-semibold">3</span>
               </div>
               <div>
                 <CardTitle>Match with HDSS Database</CardTitle>
