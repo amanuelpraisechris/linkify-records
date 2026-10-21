@@ -1,299 +1,163 @@
-
-import { useState } from 'react';
+import { useMemo } from 'react';
 import { ResidencyPeriod } from '@/types';
 import { SupportedLanguage } from '@/utils/languageUtils';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { 
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { PlusCircle, Trash2, Calendar } from 'lucide-react';
+import { useLocations } from '@/hooks/useLocations';
+import SearchablePicker from './SearchablePicker';
+import { ethiopianYearToGregorian } from '@/utils/ethiopianCalendar';
 
-interface ResidencyTimelineSectionProps {
+interface Props {
   residencyPeriods: ResidencyPeriod[];
   onResidencyPeriodsChange: (periods: ResidencyPeriod[]) => void;
   inputLanguage: SupportedLanguage;
 }
 
-const ResidencyTimelineSection = ({
-  residencyPeriods,
-  onResidencyPeriodsChange,
-  inputLanguage
-}: ResidencyTimelineSectionProps) => {
-  // Village Options (mock data - would come from backend in real app)
-  const villageOptions = ['Kisesa', 'Kanyama', 'Kitumba', 'Ihayabuyaga', 'Igekemaja', 'Welamasonga', 'Bukandwe'];
-  
-  // Subvillage Options (would be dynamic based on village selected in real app)
-  const subVillageOptions = {
-    'Kisesa': ['Kisesa Kati', 'Kitongoji A', 'Kitongoji B', 'Kitongoji C'],
-    'Kanyama': ['Kanyama A', 'Kanyama B', 'Kanyama Centre'],
-    'Kitumba': ['Kitumba Main', 'Kitumba East', 'Kitumba West'],
-    'Ihayabuyaga': ['Ihayabuyaga Centre', 'Ihayabuyaga North', 'Ihayabuyaga South'],
-    'Igekemaja': ['Igekemaja Main', 'Igekemaja East', 'Igekemaja West'],
-    'Welamasonga': ['Welamasonga Main', 'Welamasonga East', 'Welamasonga West'],
-    'Bukandwe': ['Bukandwe Main', 'Bukandwe North', 'Bukandwe South']
+type L = SupportedLanguage;
+const t = (lang: L, en: string, am: string, ti: string) => (lang === 'latin' ? en : lang === 'amharic' ? am : ti);
+
+const REASONS = [
+  { v: 'birth', en: 'Born here', ti: 'ኣብዚ ዝተወለደት' },
+  { v: 'marriage', en: 'Marriage', ti: 'መርዓ' },
+  { v: 'maternal_home', en: 'Returned to maternal home (pregnancy/delivery)', ti: 'ናብ ገዛ ስድራ (ጥንሲ/ሕርሲ)' },
+  { v: 'work', en: 'Work / seasonal', ti: 'ስራሕ' },
+  { v: 'education', en: 'Education', ti: 'ትምህርቲ' },
+  { v: 'displacement', en: 'Displacement', ti: 'ምፍንቓል' },
+  { v: 'other', en: 'Other', ti: 'ካልእ' },
+];
+
+const ResidencyTimelineSection = ({ residencyPeriods, onResidencyPeriodsChange, inputLanguage: lang }: Props) => {
+  const { areas } = useLocations();
+  const tabias = useMemo(() => areas.filter(a => a.level === 'tabia'), [areas]);
+  const now = new Date().getFullYear();
+  const gcYears = Array.from({ length: now - 1949 }, (_, i) => String(now - i));
+  const ecYears = Array.from({ length: now - 1957 }, (_, i) => String(now - 8 - i));
+
+  const update = (i: number, patch: Partial<ResidencyPeriod>) =>
+    onResidencyPeriodsChange(residencyPeriods.map((p, idx) => (idx === i ? { ...p, ...patch } : p)));
+
+  const add = () => onResidencyPeriodsChange([...residencyPeriods, {
+    woreda: 'Kilte Awlaelo', village: '', subVillage: '', tabia: '', kushet: '', startYear: '',
+    current: residencyPeriods.length === 0, insideHdss: true, calendar: 'EC',
+  }]);
+
+  // Store Gregorian year; E.C. year Y begins Sept of Y+7.
+  const toGc = (y: string, cal?: string) => (cal === 'EC' && y ? String(ethiopianYearToGregorian(Number(y))) : y);
+
+  const yearSelect = (p: ResidencyPeriod, i: number, field: 'startYear' | 'endYear', label: string) => {
+    const display = p.calendar === 'EC' ? (p as any)[`${field}Ec`] : p[field];
+    return (
+      <div>
+        <label className="block text-sm font-medium mb-1">{label}</label>
+        <Select value={display || ''} onValueChange={v => update(i, { [field]: toGc(v, p.calendar), [`${field}Ec`]: p.calendar === 'EC' ? v : undefined } as any)}>
+          <SelectTrigger className="h-11"><SelectValue placeholder={t(lang, 'Year', 'ዓመት', 'ዓመት')} /></SelectTrigger>
+          <SelectContent>{(p.calendar === 'EC' ? ecYears : gcYears).map(y => <SelectItem key={y} value={y}>{y}</SelectItem>)}</SelectContent>
+        </Select>
+      </div>
+    );
   };
-  
-  // Generate years (1994 to current year)
-  const currentYear = new Date().getFullYear();
-  const years = Array.from({ length: currentYear - 1993 }, (_, i) => (1994 + i).toString());
-  
-  const handleAddPeriod = () => {
-    onResidencyPeriodsChange([
-      ...residencyPeriods,
-      {
-        village: '',
-        subVillage: '',
-        startYear: '',
-        balozi: {
-          firstName: '',
-          middleName: '',
-          lastName: ''
-        },
-        oldestMember: {
-          firstName: '',
-          middleName: '',
-          lastName: ''
-        }
-      }
-    ]);
-  };
-  
-  const handleRemovePeriod = (index: number) => {
-    const newPeriods = [...residencyPeriods];
-    newPeriods.splice(index, 1);
-    onResidencyPeriodsChange(newPeriods);
-  };
-  
-  const handlePeriodChange = (index: number, field: string, value: string) => {
-    const newPeriods = [...residencyPeriods];
-    
-    // Handle nested fields
-    if (field.includes('.')) {
-      const [parent, child] = field.split('.');
-      newPeriods[index] = {
-        ...newPeriods[index],
-        [parent]: {
-          ...newPeriods[index][parent as keyof ResidencyPeriod] as Record<string, unknown>,
-          [child]: value
-        }
-      };
-    } else {
-      // Reset subVillage if village changes
-      if (field === 'village') {
-        newPeriods[index] = {
-          ...newPeriods[index],
-          village: value,
-          subVillage: ''
-        };
-      } else {
-        newPeriods[index] = {
-          ...newPeriods[index],
-          [field]: value
-        };
-      }
-    }
-    
-    onResidencyPeriodsChange(newPeriods);
-  };
-  
+
   return (
     <div className="bg-muted/20 p-4 rounded-lg mb-4">
-      <div className="flex justify-between items-center mb-3">
-        <h4 className="text-md font-medium text-primary flex items-center">
-          <Calendar className="w-4 h-4 mr-2" />
-          {inputLanguage === 'latin' ? 'Residency Timeline' : 
-           inputLanguage === 'amharic' ? 'የመኖሪያ ጊዜ መስመር' : 'መደብ ግዜ መንበሪ'}
+      <div className="flex justify-between items-center mb-1 gap-2">
+        <h4 className="font-medium text-primary flex items-center">
+          <Calendar className="w-4 h-4 mr-2" />{t(lang, 'Residency history', 'የመኖሪያ ታሪክ', 'ታሪኽ መንበሪ')}
         </h4>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={handleAddPeriod}
-          className="text-xs"
-        >
-          <PlusCircle className="w-3 h-3 mr-1" />
-          {inputLanguage === 'latin' ? 'Add Residency Period' : 
-           inputLanguage === 'amharic' ? 'የመኖሪያ ጊዜ ጨምር' : 'ግዜ መንበሪ ወስኽ'}
+        <Button type="button" variant="outline" size="sm" onClick={add} className="text-xs">
+          <PlusCircle className="w-3 h-3 mr-1" />{t(lang, 'Add place', 'ቦታ ጨምር', 'ቦታ ወስኽ')}
         </Button>
       </div>
-      
+      <p className="text-xs text-muted-foreground mb-3">
+        {t(lang, 'Add every tabia/kushet she has lived in, newest first. Include her parents’ home if she came back for ANC or delivery.',
+          'የኖረችባቸውን ጣብያዎች ሁሉ ይጨምሩ።', 'ዝነበረትሉ ጣብያታት ኩሎም ወስኽ፣ ሓድሽ ቅድሚ።')}
+      </p>
+
       {residencyPeriods.length === 0 ? (
-        <div className="text-center py-6 text-muted-foreground border border-dashed rounded-md">
-          {inputLanguage === 'latin' ? 'No residency periods added yet. Click the button above to add one.' : 
-           inputLanguage === 'amharic' ? 'እስካሁን ምንም የመኖሪያ ጊዜ አልተጨመረም። አንድ ለመጨመር ከላይ ያለውን አዝራር ጠቅ ያድርጉ።' : 
-           'ክሳብ ሕጂ ዝኾነ ግዜ መንበሪ ኣይተወሰኸን። ሓደ ንምውሳኽ ኣብ ላዕሊ ዘሎ መልጎም ጠውቕ።'}
+        <div className="text-center py-6 text-sm text-muted-foreground border border-dashed rounded-md">
+          {t(lang, 'No places added yet.', 'ገና ቦታ አልተጨመረም።', 'ገና ቦታ ኣይተወሰኸን።')}
         </div>
-      ) : (
-        residencyPeriods.map((period, index) => (
-          <div key={index} className="border rounded-md p-3 mb-3">
-            <div className="flex justify-between mb-2">
-              <h5 className="font-medium">
-                {inputLanguage === 'latin' ? `Residency Period ${index + 1}` : 
-                 inputLanguage === 'amharic' ? `የመኖሪያ ጊዜ ${index + 1}` : 
-                 `ግዜ መንበሪ ${index + 1}`}
-              </h5>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => handleRemovePeriod(index)}
-                className="h-6 text-destructive hover:text-destructive hover:bg-destructive/10"
-              >
-                <Trash2 className="w-3.5 h-3.5" />
-              </Button>
+      ) : residencyPeriods.map((p, i) => {
+        const tabia = tabias.find(a => a.name_en === (p.tabia || p.village));
+        const kushets = tabia ? areas.filter(a => a.level === 'kushet' && a.parent_id === tabia.id) : [];
+        const inside = p.insideHdss !== false;
+        return (
+          <div key={i} className="border rounded-md p-3 mb-3 bg-card space-y-3">
+            <div className="flex justify-between items-center">
+              <h5 className="font-medium text-sm">{t(lang, `Place ${i + 1}`, `ቦታ ${i + 1}`, `ቦታ ${i + 1}`)}</h5>
+              <Button type="button" variant="ghost" size="sm" onClick={() => onResidencyPeriodsChange(residencyPeriods.filter((_, x) => x !== i))}
+                className="h-7 text-destructive hover:bg-destructive/10" aria-label="Remove place"><Trash2 className="w-3.5 h-3.5" /></Button>
             </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
+
+            <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm">
+              <label className="flex items-center gap-2"><Switch checked={inside} onCheckedChange={v => update(i, { insideHdss: v })} />
+                {t(lang, 'Inside HDSS area', 'በHDSS ክልል ውስጥ', 'ኣብ ውሽጢ HDSS')}</label>
+              <label className="flex items-center gap-2"><Switch checked={!!p.current} onCheckedChange={v => update(i, { current: v, endYear: v ? '' : p.endYear })} />
+                {t(lang, 'Lives here now', 'አሁን እዚህ ትኖራለች', 'ሕጂ ኣብዚ ትነብር')}</label>
+              <label className="flex items-center gap-2"><Switch checked={p.calendar === 'EC'} onCheckedChange={v => update(i, { calendar: v ? 'EC' : 'GC', startYear: '', endYear: '' })} />
+                {t(lang, 'Years in E.C.', 'ዓመት በዓ.ም.', 'ዓመት ብዓ.ም.')}</label>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              {inside ? (<>
+                <div>
+                  <label className="block text-sm font-medium mb-1">{t(lang, 'Tabia', 'ቀበሌ', 'ጣብያ')}</label>
+                  <SearchablePicker value={p.tabia || p.village} ariaLabel="Tabia"
+                    options={tabias.map(a => ({ value: a.name_en, label: a.name_ti ? `${a.name_en} · ${a.name_ti}` : a.name_en, pending: a.status === 'pending' }))}
+                    onChange={v => update(i, { tabia: v, village: v, kushet: '', subVillage: '' })}
+                    onAddNew={v => update(i, { tabia: v, village: v, kushet: '', subVillage: '' })}
+                    placeholder={t(lang, 'Select tabia', 'ቀበሌ ይምረጡ', 'ጣብያ ምረጽ')} searchPlaceholder="Search…" addLabel="Use" pendingLabel="pending" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">{t(lang, 'Kushet / Got', 'ጎጥ', 'ቁሸት / ጎጥ')}</label>
+                  <SearchablePicker value={p.kushet || p.subVillage} ariaLabel="Kushet" disabled={!(p.tabia || p.village)}
+                    options={kushets.map(a => ({ value: a.name_en, label: a.name_en }))}
+                    onChange={v => update(i, { kushet: v, subVillage: v })}
+                    onAddNew={v => update(i, { kushet: v, subVillage: v })}
+                    placeholder={t(lang, 'Select kushet', 'ጎጥ ይምረጡ', 'ቁሸት ምረጽ')} searchPlaceholder="Search…" addLabel="Use" pendingLabel="pending" />
+                </div>
+              </>) : (
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium mb-1">{t(lang, 'Place outside HDSS (woreda / town / region)', 'ቦታ', 'ቦታ ካብ HDSS ወጻኢ')}</label>
+                  <Input className="h-11" value={p.outsidePlace || ''} placeholder="e.g. Mekelle, Adigrat, Addis Ababa"
+                    onChange={e => update(i, { outsidePlace: e.target.value, village: e.target.value })} />
+                </div>
+              )}
               <div>
-                <label className="block text-sm font-medium mb-1">
-                  {inputLanguage === 'latin' ? 'Village' : 
-                   inputLanguage === 'amharic' ? 'መንደር' : 'ዓዲ'}
-                </label>
-                <Select 
-                  value={period.village} 
-                  onValueChange={(value) => handlePeriodChange(index, 'village', value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder={
-                      inputLanguage === 'latin' ? 'Select Village' : 
-                      inputLanguage === 'amharic' ? 'መንደር ይምረጡ' : 'ዓዲ ምረጽ'
-                    } />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {villageOptions.map(village => (
-                      <SelectItem key={village} value={village}>{village}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <label className="block text-sm font-medium mb-1">{t(lang, 'House no.', 'የቤት ቁ.', 'ቁ. ገዛ')}</label>
+                <Input className="h-11" value={p.houseNumber || ''} onChange={e => update(i, { houseNumber: e.target.value })} />
               </div>
-              
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              {yearSelect(p, i, 'startYear', t(lang, 'Year moved in', 'የገባችበት ዓመት', 'ዝኣተወትሉ ዓመት'))}
+              {!p.current && yearSelect(p, i, 'endYear', t(lang, 'Year moved out', 'የወጣችበት ዓመት', 'ዝወጸትሉ ዓመት'))}
               <div>
-                <label className="block text-sm font-medium mb-1">
-                  {inputLanguage === 'latin' ? 'Subvillage' : 
-                   inputLanguage === 'amharic' ? 'ንዑስ መንደር' : 'ንኡስ ዓዲ'}
-                </label>
-                <Select 
-                  value={period.subVillage} 
-                  onValueChange={(value) => handlePeriodChange(index, 'subVillage', value)}
-                  disabled={!period.village}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder={
-                      inputLanguage === 'latin' ? 'Select Subvillage' : 
-                      inputLanguage === 'amharic' ? 'ንዑስ መንደር ይምረጡ' : 'ንኡስ ዓዲ ምረጽ'
-                    } />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {period.village && (subVillageOptions[period.village as keyof typeof subVillageOptions] || []).map(subVillage => (
-                      <SelectItem key={subVillage} value={subVillage}>{subVillage}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium mb-1">
-                  {inputLanguage === 'latin' ? 'Year Moved In' : 
-                   inputLanguage === 'amharic' ? 'የገቡበት ዓመት' : 'ዓመት ምምጻእ'}
-                </label>
-                <Select 
-                  value={period.startYear} 
-                  onValueChange={(value) => handlePeriodChange(index, 'startYear', value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder={
-                      inputLanguage === 'latin' ? 'Select Year' : 
-                      inputLanguage === 'amharic' ? 'ዓመት ይምረጡ' : 'ዓመት ምረጽ'
-                    } />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {years.map(year => (
-                      <SelectItem key={year} value={year}>{year}</SelectItem>
-                    ))}
-                  </SelectContent>
+                <label className="block text-sm font-medium mb-1">{t(lang, 'Reason for move', 'የመዛወር ምክንያት', 'ምኽንያት ምግዓዝ')}</label>
+                <Select value={p.moveReason || ''} onValueChange={v => update(i, { moveReason: v })}>
+                  <SelectTrigger className="h-11"><SelectValue placeholder={t(lang, 'Optional', 'አማራጭ', 'ኣማራጺ')} /></SelectTrigger>
+                  <SelectContent>{REASONS.map(r => <SelectItem key={r.v} value={r.v}>{lang === 'latin' ? r.en : r.ti}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
             </div>
-            
-            <div className="mb-3">
-              <h6 className="text-sm font-medium mb-1">
-                {inputLanguage === 'latin' ? 'Ten Cell Leader/Balozi' : 
-                 inputLanguage === 'amharic' ? 'የአስር ቤት መሪ/ባሎዚ' : 'ዓሰርተ ስድራ መራሒ/ባሎዚ'}
-              </h6>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                <Input 
-                  placeholder={
-                    inputLanguage === 'latin' ? 'First Name' : 
-                    inputLanguage === 'amharic' ? 'መጠሪያ ስም' : 'ቀዳማይ ሽም'
-                  } 
-                  value={period.balozi?.firstName || ''}
-                  onChange={(e) => handlePeriodChange(index, 'balozi.firstName', e.target.value)}
-                  dir={inputLanguage === 'latin' ? 'ltr' : 'rtl'}
-                />
-                <Input 
-                  placeholder={
-                    inputLanguage === 'latin' ? 'Middle Name' : 
-                    inputLanguage === 'amharic' ? 'የአባት ስም' : 'ማእከላይ ሽም'
-                  } 
-                  value={period.balozi?.middleName || ''}
-                  onChange={(e) => handlePeriodChange(index, 'balozi.middleName', e.target.value)}
-                  dir={inputLanguage === 'latin' ? 'ltr' : 'rtl'}
-                />
-                <Input 
-                  placeholder={
-                    inputLanguage === 'latin' ? 'Last Name' : 
-                    inputLanguage === 'amharic' ? 'የአያት ስም' : 'ዳሓራይ ሽም'
-                  } 
-                  value={period.balozi?.lastName || ''}
-                  onChange={(e) => handlePeriodChange(index, 'balozi.lastName', e.target.value)}
-                  dir={inputLanguage === 'latin' ? 'ltr' : 'rtl'}
-                />
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div>
+                <label className="block text-sm font-medium mb-1">{t(lang, 'Household head (ሓላፊ ስድራ)', 'የቤተሰብ ኃላፊ', 'ሓላፊ ስድራ')}</label>
+                <Input className="h-11" value={p.householdHead || ''} placeholder={t(lang, 'Full name', 'ሙሉ ስም', 'ምሉእ ሽም')}
+                  onChange={e => update(i, { householdHead: e.target.value })} />
               </div>
-            </div>
-            
-            <div>
-              <h6 className="text-sm font-medium mb-1">
-                {inputLanguage === 'latin' ? 'Oldest Household Member' : 
-                 inputLanguage === 'amharic' ? 'የቤተሰብ ታላቅ አባል' : 'ዓበይ ኣባል ስድራ'}
-              </h6>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                <Input 
-                  placeholder={
-                    inputLanguage === 'latin' ? 'First Name' : 
-                    inputLanguage === 'amharic' ? 'መጠሪያ ስም' : 'ቀዳማይ ሽም'
-                  } 
-                  value={period.oldestMember?.firstName || ''}
-                  onChange={(e) => handlePeriodChange(index, 'oldestMember.firstName', e.target.value)}
-                  dir={inputLanguage === 'latin' ? 'ltr' : 'rtl'}
-                />
-                <Input 
-                  placeholder={
-                    inputLanguage === 'latin' ? 'Middle Name' : 
-                    inputLanguage === 'amharic' ? 'የአባት ስም' : 'ማእከላይ ሽም'
-                  } 
-                  value={period.oldestMember?.middleName || ''}
-                  onChange={(e) => handlePeriodChange(index, 'oldestMember.middleName', e.target.value)}
-                  dir={inputLanguage === 'latin' ? 'ltr' : 'rtl'}
-                />
-                <Input 
-                  placeholder={
-                    inputLanguage === 'latin' ? 'Last Name' : 
-                    inputLanguage === 'amharic' ? 'የአያት ስም' : 'ዳሓራይ ሽም'
-                  } 
-                  value={period.oldestMember?.lastName || ''}
-                  onChange={(e) => handlePeriodChange(index, 'oldestMember.lastName', e.target.value)}
-                  dir={inputLanguage === 'latin' ? 'ltr' : 'rtl'}
-                />
+              <div>
+                <label className="block text-sm font-medium mb-1">{t(lang, 'Got / development group leader', 'የልማት ቡድን መሪ', 'ሓላፊ ጎጥ / ጉጅለ ልምዓት')}</label>
+                <Input className="h-11" value={p.gotLeader || ''} placeholder={t(lang, 'Optional', 'አማራጭ', 'ኣማራጺ')}
+                  onChange={e => update(i, { gotLeader: e.target.value })} />
               </div>
             </div>
           </div>
-        ))
-      )}
+        );
+      })}
     </div>
   );
 };

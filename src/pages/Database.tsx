@@ -12,6 +12,7 @@ import RecordList from '@/components/RecordList';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Database as DatabaseIcon, Upload, RefreshCw, Trash2, CheckCircle2, AlertCircle } from 'lucide-react';
+import { generateKahdssDemoRecords } from '@/utils/kahdssDemoData';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 const Database = () => {
@@ -45,6 +46,15 @@ const Database = () => {
         description: "Failed to import community database.",
         variant: "destructive"
       });
+    }
+  };
+
+  const handleLoadDemo = async () => {
+    try {
+      await addImportedRecords(generateKahdssDemoRecords(100), true);
+      toast({ title: 'Demo data loaded', description: '100 fake KAHDSS residents added for practice.' });
+    } catch {
+      toast({ title: 'Could not load demo data', description: 'Please sign in and try again.', variant: 'destructive' });
     }
   };
 
@@ -126,6 +136,11 @@ const Database = () => {
                   >
                     <Upload className="w-4 h-4 mr-2" />
                     {communityRecords.length > 0 ? 'Update Database' : 'Import Database'}
+                  </Button>
+
+                  <Button onClick={handleLoadDemo} variant="outline" className="w-full">
+                    <DatabaseIcon className="w-4 h-4 mr-2" />
+                    Load 100 demo KAHDSS records
                   </Button>
 
                   {communityRecords.length > 0 && (
