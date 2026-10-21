@@ -65,7 +65,7 @@ const Auth = () => {
     <div className="flex min-h-screen items-center justify-center bg-gray-50 dark:bg-gray-900 p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold text-center">RecLink</CardTitle>
+          <CardTitle className="text-2xl font-bold text-center">LinkRec</CardTitle>
           <CardDescription className="text-center">
             {showResetForm 
               ? 'Reset your password'
