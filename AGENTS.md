@@ -1,1 +1,3 @@
 - Probabilistic matching lives in src/utils/matching/probabilistic (graded Fellegi-Sunter, blocking, prior-based probability); keep rules covered by src/utils/matching/__tests__ — scores feed consent/linkage decisions.
+- Match decisions are captured atomically by a database trigger into append-only history; UI history reads Supabase rather than local audit storage so collector identity and server time remain authoritative.
+- Persist decisions through databaseService.saveMatchResult; carry the returned persistenceId through completion callbacks to avoid recording the same save twice.

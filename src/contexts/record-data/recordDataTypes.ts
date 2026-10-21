@@ -10,7 +10,7 @@ export interface RecordDataContextType {
   addImportedRecords: (records: Record[], isMainCommunityData?: boolean) => void;
   findMatchesForRecord: (record: Record) => Array<{record: Record; score: number; matchedOn: string[]; fieldScores?: {[key: string]: number}}>;
   clearImportedRecords: () => void;
-  saveMatchResult: (result: MatchResult) => void;
+   saveMatchResult: (result: MatchResult) => Promise<void>;
   matchResults: MatchResult[];
   addVisitToRecord: (recordId: string, visit: Visit) => void;
   saveMatchNotes: (recordId: string, notes: string) => void;

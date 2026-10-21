@@ -87,7 +87,7 @@ export function useMatchSelectionHandlers({
       return;
     }
     
-    const result = createMatchResult(matchId, status, confidence);
+    const result = createMatchResult(matchId ?? (status === 'manual-review' ? selectedMatchId : null), status, confidence);
     if (result) {
       saveMatchResult(result);
       setActiveTab('matching');

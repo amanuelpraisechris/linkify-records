@@ -4,6 +4,7 @@ import { RecordDataContextType, STORAGE_KEYS } from './recordDataTypes';
 import { getInitialState, updateRecordWithVisit, updateRecordWithNotes } from './recordDataUtils';
 import { useRecordMatching } from './useRecordMatching';
 import { supabase } from '@/integrations/supabase/client';
+import { databaseService } from '@/services/database';
 
 const RecordDataContext = createContext<RecordDataContextType | undefined>(undefined);
 
@@ -121,11 +122,10 @@ export const RecordDataProvider: React.FC<RecordDataProviderProps> = ({
     console.log('Cleared all imported records from state and localStorage');
   };
 
-  const saveMatchResult = (result: MatchResult) => {
+  const saveMatchResult = async (result: MatchResult) => {
+    await databaseService.saveMatchResult(result);
     const enrichedResult = {
       ...result,
-      consentObtained: true,
-      consentDate: result.consentDate || new Date().toISOString()
     };
     
     setMatchResults(prev => [...prev, enrichedResult]);

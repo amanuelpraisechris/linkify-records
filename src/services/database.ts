@@ -206,29 +206,32 @@ export const databaseService = {
 
   // Match Results
   async saveMatchResult(result: MatchResult): Promise<void> {
+    if (result.persistenceId) return;
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error('User not authenticated');
 
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from('match_results')
       .insert([{
         source_id: result.sourceId,
         match_id: result.matchId,
         status: result.status,
         confidence: result.confidence,
-        matched_by: result.matchedBy,
+        matched_by: user.id,
         matched_at: result.matchedAt,
         notes: result.notes,
         field_scores: JSON.stringify(result.fieldScores || {}),
         consent_obtained: result.consentObtained,
         consent_date: result.consentDate,
         user_id: user.id
-      }]);
+      }]).select('id').single();
     
     if (error) {
       console.error('Error saving match result:', error);
       throw error;
     }
+    result.persistenceId = data.id;
+    result.matchedBy = user.id;
   },
 
   async getMatchResults(): Promise<MatchResult[]> {

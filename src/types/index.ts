@@ -86,6 +86,7 @@ export interface RecordMatch {
 }
 
 export interface MatchResult {
+  persistenceId?: string;
   sourceId: string;
   matchId: string | null;
   status: 'matched' | 'rejected' | 'manual-review';
