@@ -31,13 +31,11 @@ const ethiopianToJdn = ({ year, month, day }: SimpleDate): number =>
   ETHIOPIC_EPOCH - 1 + 365 * (year - 1) + Math.floor(year / 4) + 30 * (month - 1) + day;
 
 const jdnToEthiopian = (jdn: number): SimpleDate => {
-  const r = (jdn - ETHIOPIC_EPOCH) % 1461;
-  const n = (r % 365) + 365 * Math.floor(r / 1460);
-  return {
-    year: 4 * Math.floor((jdn - ETHIOPIC_EPOCH) / 1461) + Math.floor(r / 365) - Math.floor(r / 1460) + 1,
-    month: Math.floor(n / 30) + 1,
-    day: (n % 30) + 1,
-  };
+  // Find the Ethiopian year whose 1 Meskerem is on or before the given day
+  let year = jdnToGregorian(jdn).year - 7;
+  while (ethiopianToJdn({ year, month: 1, day: 1 }) > jdn) year--;
+  const offset = jdn - ethiopianToJdn({ year, month: 1, day: 1 });
+  return { year, month: Math.floor(offset / 30) + 1, day: (offset % 30) + 1 };
 };
 
 export const isValidEthiopian = ({ year, month, day }: SimpleDate): boolean => {
