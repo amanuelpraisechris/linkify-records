@@ -158,3 +158,9 @@
   background: linear-gradient(to right, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.5) 50%, rgba(255, 255, 255, 0) 100%);
   background-size: 1000px 100%;
 }
+
+@media print {
+  nav, header, [data-print-hide] { display: none !important; }
+  body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  @page { size: A4; margin: 12mm; }
+}

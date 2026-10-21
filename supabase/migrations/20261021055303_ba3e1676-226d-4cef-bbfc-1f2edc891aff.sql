@@ -1,0 +1,10 @@
+CREATE POLICY "Admins read all match results" ON public.match_results FOR SELECT TO authenticated USING (public.has_role(auth.uid(),'admin'));
+CREATE POLICY "Admins read all decision history" ON public.match_decision_history FOR SELECT TO authenticated USING (public.has_role(auth.uid(),'admin'));
+CREATE POLICY "Admins read all clinic records" ON public.clinic_records FOR SELECT TO authenticated USING (public.has_role(auth.uid(),'admin'));
+CREATE POLICY "Admins read all unmatched records" ON public.unmatched_records FOR SELECT TO authenticated USING (public.has_role(auth.uid(),'admin'));
+CREATE TABLE public.export_log (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), user_id uuid NOT NULL, export_type text NOT NULL, filters jsonb NOT NULL DEFAULT '{}'::jsonb, row_count integer NOT NULL DEFAULT 0, created_at timestamptz NOT NULL DEFAULT now());
+GRANT SELECT, INSERT ON public.export_log TO authenticated;
+GRANT ALL ON public.export_log TO service_role;
+ALTER TABLE public.export_log ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Admins log own exports" ON public.export_log FOR INSERT TO authenticated WITH CHECK (user_id = auth.uid() AND public.has_role(auth.uid(),'admin'));
+CREATE POLICY "Admins read export log" ON public.export_log FOR SELECT TO authenticated USING (public.has_role(auth.uid(),'admin'));

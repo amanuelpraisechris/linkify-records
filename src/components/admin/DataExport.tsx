@@ -6,27 +6,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { useRecordData } from '@/contexts/record-data/RecordDataContext';
 import { DatabaseIcon, FileDownIcon, ShieldIcon } from 'lucide-react';
 import { generateSessionId, exportDataToCSV } from '@/utils/exportDataUtils';
-import { visitByOptions } from '@/utils/recordConstants';
 import { Visit } from '@/types';
-
-// Generate mock visits for testing
-const generateMockVisits = (count: number): Visit[] => {
-  return Array.from({ length: count }).map((_, index) => {
-    const randomDate = new Date();
-    randomDate.setDate(randomDate.getDate() - Math.floor(Math.random() * 365));
-    
-    // Ensure we use the correct type for visitBy
-    const visitByOption = Math.random() > 0.5 ? 'PATIENT' : 'TREATMENT SUPPORTER';
-    
-    return {
-      id: `visit-${index}`,
-      date: randomDate.toISOString().split('T')[0],
-      visitBy: visitByOption as 'PATIENT' | 'TREATMENT SUPPORTER',
-      clinicId: `clinic-${Math.floor(Math.random() * 100)}`,
-      facility: Math.random() > 0.5 ? 'Clinic A' : 'Clinic B'
-    };
-  });
-};
 
 const DataExport = () => {
   const { toast } = useToast();
@@ -37,8 +17,8 @@ const DataExport = () => {
   const [includeVisits, setIncludeVisits] = useState(true);
   const [isExporting, setIsExporting] = useState(false);
   
-  // For demo purposes, generate mock visits
-  const mockVisits = generateMockVisits(clinicRecords.length * 2);
+  // Visits are not stored separately yet; no demo data is exported.
+  const mockVisits: Visit[] = [];
   
   const handleExport = async () => {
     if (!includeRegistry && !includeMatches && !includeNotes && !includeVisits) {
