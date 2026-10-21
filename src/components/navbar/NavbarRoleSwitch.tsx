@@ -54,7 +54,7 @@ const NavbarRoleSwitch = () => {
       <DropdownMenuTrigger asChild>
         <Button variant="outline" size="sm" className="flex items-center gap-1">
           {isAdmin ? (
-            <Shield className="h-4 w-4 text-purple-500" />
+            <Shield className="h-4 w-4 text-primary" />
           ) : (
             <User className="h-4 w-4" />
           )}

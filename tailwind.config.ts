@@ -125,6 +125,7 @@ export default {
 				'scale-in': 'scale-in 0.3s ease-out'
 			},
 			boxShadow: {
+				'soft': 'var(--shadow-soft)',
 				'subtle': '0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.1)',
 				'card': '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
 				'elevated': '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',

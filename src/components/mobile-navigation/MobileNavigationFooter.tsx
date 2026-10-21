@@ -11,7 +11,7 @@ interface MobileNavigationFooterProps {
 
 const MobileNavigationFooter = ({ isLoggedIn, onClose }: MobileNavigationFooterProps) => {
   const navigate = useNavigate();
-  const { signOut } = useAuth();
+  const { signOut, user, profile } = useAuth();
 
   const handleLogout = async () => {
     await signOut();
@@ -35,12 +35,12 @@ const MobileNavigationFooter = ({ isLoggedIn, onClose }: MobileNavigationFooterP
   }
 
   return (
-    <div className="p-4 border-t">
-      <Button 
-        variant="outline"
-        className="flex items-center justify-center w-full"
-        onClick={handleLogout}
-      >
+    <div className="p-4 border-t flex items-center gap-3">
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-medium truncate">{profile?.full_name || 'Signed in'}</p>
+        <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
+      </div>
+      <Button variant="ghost" size="sm" onClick={handleLogout}>
         <LogOut className="w-4 h-4 mr-2" />
         Logout
       </Button>
