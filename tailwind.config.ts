@@ -20,7 +20,8 @@ export default {
 		},
 		extend: {
 			fontFamily: {
-				sans: ['Inter var', 'sans-serif'],
+				sans: ['Manrope', 'Noto Sans Ethiopic', 'sans-serif'],
+				display: ['Sora', 'Noto Sans Ethiopic', 'sans-serif'],
 			},
 			colors: {
 				border: 'hsl(var(--border))',
