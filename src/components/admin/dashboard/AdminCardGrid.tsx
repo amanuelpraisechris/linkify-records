@@ -1,24 +1,25 @@
 
-import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { SlidersHorizontal, Users, BarChart4, FileText, MapPin } from 'lucide-react';
 import AdminCard from './AdminCard';
 
 interface AdminCardGridProps {
   onTogglePanel: (panel: string) => void;
+  activePanel?: string | null;
 }
 
-const AdminCardGrid = ({ onTogglePanel }: AdminCardGridProps) => {
+const AdminCardGrid = ({ onTogglePanel, activePanel }: AdminCardGridProps) => {
   const navigate = useNavigate();
   
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
+    <div className="rounded-xl border bg-card shadow-soft divide-y overflow-hidden">
       <AdminCard
         title="Matching Configuration"
         description="Configure matching algorithms and parameters"
         icon={SlidersHorizontal}
         buttonText="Configure"
         onClick={() => onTogglePanel('matching')}
+        active={activePanel === 'matching'}
       />
       
       <AdminCard
@@ -27,6 +28,7 @@ const AdminCardGrid = ({ onTogglePanel }: AdminCardGridProps) => {
         icon={SlidersHorizontal}
         buttonText="Manage Settings"
         onClick={() => onTogglePanel('algorithm')}
+        active={activePanel === 'algorithm'}
       />
       
       <AdminCard
@@ -43,6 +45,7 @@ const AdminCardGrid = ({ onTogglePanel }: AdminCardGridProps) => {
         icon={Users}
         buttonText="Manage Users"
         onClick={() => onTogglePanel('users')}
+        active={activePanel === 'users'}
       />
       
       <AdminCard

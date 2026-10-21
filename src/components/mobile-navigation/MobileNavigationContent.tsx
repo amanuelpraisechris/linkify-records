@@ -17,11 +17,11 @@ const MobileNavigationContent = ({
   onClose 
 }: MobileNavigationContentProps) => {
   return (
-    <SheetContent side="left" className="w-[250px] sm:w-[300px] p-0">
+    <SheetContent side="left" className="w-[290px] sm:w-[320px] p-0">
       <div className="flex flex-col h-full">
         <MobileNavigationHeader onClose={onClose} />
         
-        <div className="flex-1 overflow-auto py-2">
+        <div className="flex-1 overflow-auto py-4">
           <MobileNavigationLinks isLoggedIn={isLoggedIn} onClose={onClose} />
           <MobileNavigationAdminLinks isAdmin={isAdmin} onClose={onClose} />
         </div>

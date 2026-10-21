@@ -33,8 +33,8 @@ const Navbar = () => {
       <NavbarLinks isAdmin={isAdmin} />
       <div className="flex items-center gap-2">
         {user && <NavbarNewRecordButton />}
-        {(user || isAdminLoginPage) && <NavbarRoleSwitch />}
-        <NavbarUserMenu />
+        {(user || isAdminLoginPage) && <div className="hidden md:block"><NavbarRoleSwitch /></div>}
+        <NavbarUserMenu isAdmin={isAdmin} />
       </div>
     </NavbarContainer>
   );

@@ -1,186 +1,100 @@
-
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Navbar } from '@/components/navbar';
-import { WorldMapDemo } from '@/components/ui/world-map-demo';
-import SearchBar from '@/components/SearchBar';
+import { ArrowRight, FilePlus2, Search, Building2, BarChart3, Database, ShieldCheck } from 'lucide-react';
 import StatCard from '@/components/StatCard';
-import { Button } from '@/components/ui/button';
 import { dashboardStats } from '@/utils/mockData';
-import { Database, Link2, Search, Filter, FileUp, UserPlus } from 'lucide-react';
-import { useRecordData } from '@/contexts/record-data/RecordDataContext';
+import { Link2, Filter } from 'lucide-react';
+import { useAuth } from '@/contexts/auth';
+import {
+  Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger,
+} from '@/components/ui/dialog';
+
+const shortcuts = [
+  { title: 'Clinic records', icon: Building2, path: '/data-management' },
+  { title: 'HDSS database', icon: Database, path: '/database' },
+  { title: 'Analytics', icon: BarChart3, path: '/analytics' },
+  { title: 'Data quality', icon: ShieldCheck, path: '/data-quality' },
+];
 
 const Index = () => {
   const [isLoading, setIsLoading] = useState(true);
-  const { toast } = { toast: () => {} };
-  const isAdmin = localStorage.getItem('adminAuth') === 'true';
-
-  const { records } = useRecordData();
+  const { profile } = useAuth();
 
   useEffect(() => {
-    // Simulate data loading
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 1000);
-
-    return () => clearTimeout(timer);
+    const t = setTimeout(() => setIsLoading(false), 600);
+    return () => clearTimeout(t);
   }, []);
 
-  // Navigation cards for main features
-  const navigationCards = [
-    {
-      title: "Manage Records",
-      description: "Upload, view, and manage database records",
-      icon: <FileUp className="w-5 h-5" />,
-      path: "/data-management",
-      color: "bg-blue-100 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400"
-    },
-    {
-      title: "Patient Search",
-      description: "Search and match patient records",
-      icon: <Search className="w-5 h-5" />,
-      path: "/record-entry",
-      color: "bg-green-100 dark:bg-green-900/20 text-green-600 dark:text-green-400"
-    },
-    {
-      title: "View Reports",
-      description: "Analytics and record matching reports",
-      icon: <Filter className="w-5 h-5" />,
-      path: "/reports",
-      color: "bg-orange-100 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400"
-    }
-  ];
-
-  if (isAdmin) {
-    navigationCards.push({
-      title: "Admin Dashboard",
-      description: "Access admin controls and settings",
-      icon: <Database className="w-5 h-5" />,
-      path: "/admin-dashboard",
-      color: "bg-purple-100 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400"
-    });
-  }
+  const firstName = profile?.full_name?.split(' ')[0];
 
   return (
-    <div className="min-h-screen bg-background">
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
-        <div className="flex flex-col items-center text-center mt-10 mb-6 animate-fade-in">
-          <div className="inline-flex items-center justify-center p-2 mb-4 rounded-full bg-primary/10">
-            <Link2 className="w-6 h-6 text-primary" />
-          </div>
-          <h1 className="text-4xl font-bold tracking-tight mb-3">DSS-Clinic Record Linkage System</h1>
-          <p className="max-w-2xl text-xl text-muted-foreground">
-            Connect and manage patient records with precision and ease
-          </p>
-          
-          <div className="w-full max-w-xl mt-8">
-            <SearchBar 
-              placeholder="Search by name, ID, or facility..." 
-              onSearch={() => {}}
-              className="animate-slide-up"
-            />
-          </div>
-          
-          <div className="flex gap-4 mt-8">
-            <Link 
-              to="/data-management" 
-              className="flex items-center px-4 py-2 bg-primary/10 hover:bg-primary/20 text-primary rounded-md transition-all"
-            >
-              <FileUp className="w-4 h-4 mr-2" />
-              Manage Databases
-            </Link>
-            <Link 
-              to="/record-entry" 
-              className="flex items-center px-4 py-2 bg-primary/10 hover:bg-primary/20 text-primary rounded-md transition-all"
-            >
-              <UserPlus className="w-4 h-4 mr-2" />
-              New Patient Record
-            </Link>
-          </div>
-        </div>
-        
-        {/* World Map Demo */}
-        <WorldMapDemo />
-        
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 my-10">
-          <StatCard 
-            title="Total Records" 
-            value={dashboardStats.totalRecords}
-            icon={<Database className="w-5 h-5" />}
-            isLoading={isLoading}
-          />
-          <StatCard 
-            title="Matched Records" 
-            value={dashboardStats.matchedRecords}
-            color="success"
-            icon={<Link2 className="w-5 h-5" />}
-            isLoading={isLoading}
-          />
-          <StatCard 
-            title="Pending Matches" 
-            value={dashboardStats.pendingMatches}
-            color="warning"
-            icon={<Filter className="w-5 h-5" />}
-            isLoading={isLoading}
-          />
-          <StatCard 
-            title="Match Rate" 
-            value={dashboardStats.matchRate}
-            description="Average success rate"
-            color="neutral"
-            icon={<Search className="w-5 h-5" />}
-            isPercentage
-            isLoading={isLoading}
-          />
-        </div>
+    <main className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-10 space-y-8">
+      <header>
+        <p className="text-sm text-muted-foreground">Kilte Awlaelo HDSS · MCH / ANC linkage</p>
+        <h1 className="text-3xl sm:text-4xl font-semibold mt-1">
+          {firstName ? `Selam, ${firstName}` : 'Welcome to LinkRec'}
+        </h1>
+      </header>
 
-        {/* Navigation cards for main features */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-          {navigationCards.map((card, index) => (
-            <Link 
-              key={index} 
-              to={card.path}
-              className="block bg-card hover:bg-accent/50 border rounded-xl p-6 transition-all duration-200 hover:shadow-md"
-            >
-              <div className={`inline-flex p-3 rounded-full ${card.color} mb-4`}>
-                {card.icon}
-              </div>
-              <h3 className="text-lg font-medium mb-2">{card.title}</h3>
-              <p className="text-sm text-muted-foreground">{card.description}</p>
+      <section className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <Link to="/record-entry"
+          className="group flex items-center gap-4 rounded-2xl bg-primary p-5 text-primary-foreground shadow-soft transition-transform hover:-translate-y-0.5">
+          <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary-foreground/15">
+            <FilePlus2 className="h-6 w-6" />
+          </span>
+          <span className="flex-1">
+            <span className="block font-display text-lg font-semibold">New clinic record</span>
+            <span className="block text-sm opacity-80">Consent, details, then find matches</span>
+          </span>
+          <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
+        </Link>
+        <Link to="/record-entry"
+          className="group flex items-center gap-4 rounded-2xl border bg-card p-5 shadow-soft transition-transform hover:-translate-y-0.5">
+          <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-accent text-accent-foreground">
+            <Search className="h-6 w-6" />
+          </span>
+          <span className="flex-1">
+            <span className="block font-display text-lg font-semibold">Search HDSS</span>
+            <span className="block text-sm text-muted-foreground">Look up a person in the community data</span>
+          </span>
+          <ArrowRight className="h-5 w-5 text-muted-foreground transition-transform group-hover:translate-x-1" />
+        </Link>
+      </section>
+
+      <section className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <StatCard title="Total records" value={dashboardStats.totalRecords} icon={<Database className="w-5 h-5" />} isLoading={isLoading} />
+        <StatCard title="Matched" value={dashboardStats.matchedRecords} color="success" icon={<Link2 className="w-5 h-5" />} isLoading={isLoading} />
+        <StatCard title="Needs review" value={dashboardStats.pendingMatches} color="warning" icon={<Filter className="w-5 h-5" />} isLoading={isLoading} />
+        <StatCard title="Match rate" value={dashboardStats.matchRate} color="neutral" icon={<Search className="w-5 h-5" />} isPercentage isLoading={isLoading} />
+      </section>
+
+      <section>
+        <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-3">Go to</h2>
+        <div className="rounded-xl border bg-card shadow-soft divide-y overflow-hidden">
+          {shortcuts.map(({ title, icon: Icon, path }) => (
+            <Link key={path} to={path} className="flex items-center gap-3 px-4 py-3.5 hover:bg-muted/60 transition-colors">
+              <Icon className="h-5 w-5 text-primary" />
+              <span className="flex-1 font-medium">{title}</span>
+              <ArrowRight className="h-4 w-4 text-muted-foreground" />
             </Link>
           ))}
         </div>
-        
-        <div className="bg-white dark:bg-black border rounded-xl shadow-card p-6">
-          <h2 className="text-2xl font-semibold mb-4">About This System</h2>
-          <p className="text-muted-foreground mb-4">
-            The DSS-Clinic Record Linkage System is designed to connect patient records from
-            health facilities with demographic surveillance system (DSS) data. This integration enables:
-          </p>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
-            <div className="bg-muted/30 p-4 rounded-lg">
-              <h3 className="font-medium mb-2">Improved Patient Tracking</h3>
-              <p className="text-sm text-muted-foreground">
-                Match clinic visits to community records for comprehensive care history.
-              </p>
-            </div>
-            <div className="bg-muted/30 p-4 rounded-lg">
-              <h3 className="font-medium mb-2">Enhanced Data Quality</h3>
-              <p className="text-sm text-muted-foreground">
-                Reduce duplicate records and improve data accuracy for healthcare research.
-              </p>
-            </div>
-            <div className="bg-muted/30 p-4 rounded-lg">
-              <h3 className="font-medium mb-2">Better Health Outcomes</h3>
-              <p className="text-sm text-muted-foreground">
-                Enable continuity of care and more informed clinical decision-making.
-              </p>
-            </div>
-          </div>
-        </div>
-      </main>
-    </div>
+      </section>
+
+      <Dialog>
+        <DialogTrigger className="text-sm text-muted-foreground underline-offset-4 hover:underline">About this system</DialogTrigger>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>About LinkRec</DialogTitle>
+            <DialogDescription>
+              LinkRec connects MCH and ANC clinic records with HDSS community records, so each mother and child's
+              care history can be followed across clinic visits and the surveillance census. It is benchmarked on
+              the PIRL record linkage software.
+            </DialogDescription>
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>
+    </main>
   );
 };
 

@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LogIn, LogOut, User, KeyRound } from 'lucide-react';
+import { LogIn, LogOut, KeyRound, Shield, SlidersHorizontal } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Link } from 'react-router-dom';
@@ -23,7 +23,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 
-export const NavbarUserMenu = () => {
+export const NavbarUserMenu = ({ isAdmin = false }: { isAdmin?: boolean }) => {
   const navigate = useNavigate();
   const { user, profile, signOut, updatePassword } = useAuth();
   const [showChangePassword, setShowChangePassword] = useState(false);
@@ -96,6 +96,23 @@ export const NavbarUserMenu = () => {
             </div>
           </div>
           <DropdownMenuSeparator />
+          <div className="md:hidden">
+            {isAdmin ? (
+              <>
+                <DropdownMenuItem onClick={() => navigate('/admin-dashboard')}>
+                  <Shield className="mr-2 h-4 w-4" /><span>Admin dashboard</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate('/matching-configuration')}>
+                  <SlidersHorizontal className="mr-2 h-4 w-4" /><span>Matching settings</span>
+                </DropdownMenuItem>
+              </>
+            ) : (
+              <DropdownMenuItem onClick={() => navigate('/admin-login')}>
+                <Shield className="mr-2 h-4 w-4" /><span>Switch to admin</span>
+              </DropdownMenuItem>
+            )}
+            <DropdownMenuSeparator />
+          </div>
           <DropdownMenuItem 
             onClick={() => setShowChangePassword(true)}
           >

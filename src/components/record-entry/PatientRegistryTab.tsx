@@ -73,7 +73,13 @@ const PatientRegistryTab = (p: PatientRegistryTabProps) => {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-6">
       <form className="space-y-6" onKeyDown={onKeyDown} onSubmit={e => e.preventDefault()}>
-        <ol className="grid grid-cols-4 gap-2" aria-label="Entry steps">
+        <div className="sm:hidden space-y-2">
+          <p className="text-sm font-medium"><span className="text-muted-foreground">Step {step + 1} of {STEPS.length} · </span>{STEPS[step].title}</p>
+          <div className="h-1.5 rounded-full bg-muted overflow-hidden">
+            <div className="h-full bg-primary transition-all" style={{ width: `${((step + 1) / STEPS.length) * 100}%` }} />
+          </div>
+        </div>
+        <ol className="hidden sm:grid grid-cols-4 gap-2" aria-label="Entry steps">
           {STEPS.map((s, i) => (
             <li key={s.id}>
               <button type="button" onClick={() => setStep(i)} aria-current={i === step ? 'step' : undefined}
@@ -92,7 +98,7 @@ const PatientRegistryTab = (p: PatientRegistryTabProps) => {
           ))}
         </ol>
 
-        <section className="rounded-xl border bg-card p-5 space-y-5">
+        <section className="rounded-xl border bg-card p-4 sm:p-5 space-y-5 shadow-soft">
           {step === 0 && (
             <>
               <HealthFacilitySection healthFacility={p.healthFacility} handleHealthFacilityChange={p.handleHealthFacilityChange} inputLanguage={p.inputLanguage} />
@@ -124,12 +130,12 @@ const PatientRegistryTab = (p: PatientRegistryTabProps) => {
           )}
         </section>
 
-        <div className="flex items-center justify-between">
+        <div className="sticky bottom-0 -mx-4 px-4 py-3 bg-background/95 backdrop-blur border-t sm:static sm:mx-0 sm:px-0 sm:py-0 sm:border-0 sm:bg-transparent flex items-center justify-between gap-2">
           <Button type="button" variant="ghost" onClick={() => setStep(s => Math.max(0, s - 1))} disabled={step === 0}>
             <ArrowLeft className="w-4 h-4 mr-2" /> Back
           </Button>
           <div className="flex gap-2">
-            <Button type="button" variant="outline" onClick={p.handleNextToLinkage}>Save for later search</Button>
+            <Button type="button" variant="outline" className="hidden sm:inline-flex" onClick={p.handleNextToLinkage}>Save for later search</Button>
             {last ? (
               <Button type="button" size="lg" onClick={p.handleSubmit}>
                 <Search className="w-4 h-4 mr-2" /> Find HDSS matches

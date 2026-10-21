@@ -61,18 +61,13 @@ const MatchingConfigAdmin = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h3 className="text-xl font-semibold flex items-center">
-          <Settings className="mr-2 h-5 w-5" />
-          Matching Configuration
-        </h3>
-        
-        <div className="flex items-center space-x-3">
+      <div className="rounded-xl border bg-card p-4 shadow-soft">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3">
           <Select
             value={selectedAlgorithm}
             onValueChange={(value: 'deterministic' | 'probabilistic') => setSelectedAlgorithm(value)}
           >
-            <SelectTrigger className="w-[180px]">
+            <SelectTrigger className="w-full sm:w-[180px]" aria-label="Algorithm">
               <SelectValue placeholder="Algorithm Type" />
             </SelectTrigger>
             <SelectContent>
@@ -81,12 +76,12 @@ const MatchingConfigAdmin = () => {
             </SelectContent>
           </Select>
           
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center gap-2 flex-1">
             <Input
               value={profileName}
               onChange={(e) => setProfileName(e.target.value)}
               placeholder="Profile name"
-              className="w-[200px]"
+              className="flex-1 min-w-0"
             />
             <Button onClick={handleSaveProfile} size="sm">
               <Save className="mr-2 h-4 w-4" />
@@ -97,7 +92,7 @@ const MatchingConfigAdmin = () => {
       </div>
       
       <Tabs defaultValue="thresholds">
-        <TabsList>
+        <TabsList className="w-full justify-start overflow-x-auto">
           <TabsTrigger value="thresholds">Matching Thresholds</TabsTrigger>
           <TabsTrigger value="field-weights">Field Weights</TabsTrigger>
           <TabsTrigger value="advanced">Advanced Settings</TabsTrigger>
@@ -116,7 +111,7 @@ const MatchingConfigAdmin = () => {
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <Label>High Match Threshold</Label>
-                  <Badge className="bg-green-500">{thresholds.high}%</Badge>
+                  <Badge className="bg-success text-success-foreground">{thresholds.high}%</Badge>
                 </div>
                 <Slider
                   value={[thresholds.high]}

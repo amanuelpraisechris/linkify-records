@@ -1,77 +1,34 @@
-
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Lock, Settings } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import { Link, useLocation } from 'react-router-dom';
+import { Shield, SlidersHorizontal, MapPin, FileText, Lock } from 'lucide-react';
+import { mobileLinkClass } from './MobileNavigationLinks';
 
 interface MobileNavigationAdminLinksProps {
   isAdmin: boolean;
   onClose: () => void;
 }
 
+const items = [
+  { path: '/admin-dashboard', label: 'Admin dashboard', icon: Shield },
+  { path: '/matching-configuration', label: 'Matching settings', icon: SlidersHorizontal },
+  { path: '/locations', label: 'Locations & facilities', icon: MapPin },
+  { path: '/audit-logs', label: 'Audit logs', icon: FileText },
+];
+
 const MobileNavigationAdminLinks = ({ isAdmin, onClose }: MobileNavigationAdminLinksProps) => {
-  const location = useLocation();
-  const navigate = useNavigate();
-  
-  const adminNavItems = [
-    { 
-      path: '/admin-dashboard',
-      label: 'Admin Dashboard',
-      icon: <Lock className="w-5 h-5 mr-3" />
-    },
-    { 
-      path: '/matching-configuration',
-      label: 'Matching Configuration',
-      icon: <Settings className="w-5 h-5 mr-3" />
-    }
-  ];
-
-  const handleAdminClick = () => {
-    onClose();
-    if (isAdmin) {
-      navigate('/admin-dashboard');
-    } else {
-      navigate('/admin-login');
-    }
-  };
-
-  if (isAdmin) {
-    return (
-      <>
-        <div className="mt-6 mb-2 px-3">
-          <Badge variant="outline" className="w-full justify-center py-1 bg-secondary/50">
-            Admin
-          </Badge>
-        </div>
-        
-        {adminNavItems.map(item => (
-          <Link
-            key={item.path}
-            to={item.path}
-            className={`flex items-center px-3 py-3 rounded-md text-sm font-medium transition-colors ${
-              location.pathname === item.path 
-                ? 'bg-primary/10 text-primary' 
-                : 'text-foreground hover:bg-secondary/80'
-            }`}
-            onClick={onClose}
-          >
-            {item.icon}
-            {item.label}
-          </Link>
-        ))}
-      </>
-    );
-  }
-
+  const { pathname } = useLocation();
   return (
-    <Button
-      variant="ghost"
-      className="w-full justify-start px-3 py-3 mt-2"
-      onClick={handleAdminClick}
-    >
-      <Lock className="w-5 h-5 mr-3" />
-      Admin Login
-    </Button>
+    <div className="px-3 mt-5">
+      <p className="px-3 mb-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Admin</p>
+      {isAdmin ? items.map(({ path, label, icon: Icon }) => (
+        <Link key={path} to={path} className={mobileLinkClass(pathname === path)} onClick={onClose}>
+          <Icon className="w-[18px] h-[18px]" />{label}
+        </Link>
+      )) : (
+        <Link to="/admin-login" className={mobileLinkClass(false)} onClick={onClose}>
+          <Lock className="w-[18px] h-[18px]" />Admin sign in
+        </Link>
+      )}
+    </div>
   );
 };
 

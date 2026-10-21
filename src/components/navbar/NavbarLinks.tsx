@@ -62,7 +62,7 @@ export const NavbarLinks = ({ isAdmin }: NavbarLinksProps) => {
   ] : [];
 
   return (
-    <div className="hidden md:flex items-center space-x-1">
+    <div className="hidden xl:flex items-center gap-0.5">
       {navItems.map(item => (
         <Link
           key={item.path}

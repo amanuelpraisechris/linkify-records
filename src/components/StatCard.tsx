@@ -62,7 +62,7 @@ const StatCard = ({
       case 'success':
         return 'bg-success/10 border-success/20 text-success';
       case 'warning':
-        return 'bg-amber-500/10 border-amber-500/20 text-amber-500';
+        return 'bg-warning/10 border-warning/20 text-warning';
       case 'danger':
         return 'bg-destructive/10 border-destructive/20 text-destructive';
       case 'neutral':

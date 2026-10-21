@@ -20,30 +20,15 @@ const AdminHeader = () => {
   };
 
   return (
-    <header className="bg-white dark:bg-gray-800 shadow-md fixed top-16 left-0 right-0 z-20">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16 items-center">
-          <div className="flex items-center space-x-3">
-            <Shield className="h-7 w-7 text-primary" />
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Admin Dashboard</h1>
-              <p className="text-sm text-muted-foreground">Manage system settings and user accounts</p>
-            </div>
-          </div>
-          <div className="flex items-center space-x-4">
-            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Welcome, {profile?.full_name || 'Admin'}</span>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleLogout}
-              className="flex items-center gap-2"
-            >
-              <LogOut className="h-4 w-4" />
-              <span>Logout</span>
-            </Button>
-          </div>
-        </div>
+    <header className="flex items-start justify-between gap-3">
+      <div>
+        <p className="text-sm text-muted-foreground flex items-center gap-1.5"><Shield className="h-4 w-4 text-primary" />Admin</p>
+        <h1 className="text-2xl sm:text-3xl font-semibold mt-1">Welcome, {profile?.full_name?.split(' ')[0] || 'Admin'}</h1>
+        <p className="text-sm text-muted-foreground mt-1">Settings, people and reference lists.</p>
       </div>
+      <Button variant="ghost" size="sm" onClick={handleLogout} className="shrink-0">
+        <LogOut className="h-4 w-4 sm:mr-2" /><span className="hidden sm:inline">Exit admin</span>
+      </Button>
     </header>
   );
 };

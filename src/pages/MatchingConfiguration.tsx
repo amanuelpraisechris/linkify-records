@@ -1,50 +1,21 @@
-
-import React from 'react';
 import MatchingConfigAdmin from '@/components/admin/MatchingConfigAdmin';
 import { MatchingConfigProvider } from '@/contexts/MatchingConfigContext';
-import { Button } from '@/components/ui/button';
-import { useNavigate } from 'react-router-dom';
 import { Info } from 'lucide-react';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
-const MatchingConfiguration = () => {
-  const navigate = useNavigate();
-  
-  return (
-    <div className="container max-w-5xl mx-auto py-8 px-4">
-      <div className="text-center mb-6">
-        <h1 className="text-3xl font-bold mb-3 text-white">Matching Configuration</h1>
-        <p className="text-white/80 max-w-2xl mx-auto">
-          Configure and fine-tune the parameters used by the matching algorithm to identify potential duplicate records.
-        </p>
-      </div>
-      
-      <Alert className="mb-6 bg-amber-50 border-amber-200">
-        <Info className="h-4 w-4 text-amber-600" />
-        <AlertTitle className="text-amber-700">Gold Standard Matching</AlertTitle>
-        <AlertDescription className="text-amber-600">
-          The default configuration uses the Fellegi-Sunter probabilistic model. This approach calculates match weights using agreement (log2[m/u]) and disagreement (log2[(1-m)/(1-u)]) probabilities, combined with Jaro-Winkler string comparison for names.
-        </AlertDescription>
-      </Alert>
-      
-      <MatchingConfigProvider>
-        <MatchingConfigAdmin />
-      </MatchingConfigProvider>
-      
-      <div className="mt-8 flex justify-center">
-        <Button 
-          className="cta-btn"
-          onClick={() => navigate('/data-management')}
-        >
-          Return to Data Management
-        </Button>
-      </div>
-      
-      <div className="footer mt-12 text-center">
-        <p>Record Linkage Application • Powered by Medical Informatics</p>
-      </div>
+const MatchingConfiguration = () => (
+  <main className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-10 space-y-6">
+    <header>
+      <h1 className="text-2xl sm:text-3xl font-semibold">Matching settings</h1>
+      <p className="text-sm text-muted-foreground mt-1">How strictly clinic records are matched to HDSS records.</p>
+    </header>
+    <div className="flex gap-3 rounded-xl bg-accent p-4 text-sm text-accent-foreground">
+      <Info className="h-4 w-4 mt-0.5 shrink-0" />
+      <p>The recommended setting is <strong>Probabilistic</strong>: it weighs how often each detail agrees between true matches, so small spelling differences don't block a match.</p>
     </div>
-  );
-};
+    <MatchingConfigProvider>
+      <MatchingConfigAdmin />
+    </MatchingConfigProvider>
+  </main>
+);
 
 export default MatchingConfiguration;

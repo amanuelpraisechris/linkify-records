@@ -1,24 +1,20 @@
-
 import { Link } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { X, Link2 } from 'lucide-react';
+import { Link2 } from 'lucide-react';
 
 interface MobileNavigationHeaderProps {
   onClose: () => void;
 }
 
-const MobileNavigationHeader = ({ onClose }: MobileNavigationHeaderProps) => {
-  return (
-    <div className="flex items-center justify-between p-4 border-b">
-      <Link to="/" className="flex items-center space-x-2" onClick={onClose}>
-        <Link2 className="w-5 h-5 text-primary" />
-        <span className="font-bold text-lg">LinkRec</span>
-      </Link>
-      <Button variant="ghost" size="icon" onClick={onClose}>
-        <X className="h-5 w-5" />
-      </Button>
-    </div>
-  );
-};
+// The sheet supplies its own close button, so only the brand lives here.
+const MobileNavigationHeader = ({ onClose }: MobileNavigationHeaderProps) => (
+  <div className="flex items-center h-16 px-5 border-b">
+    <Link to="/" className="flex items-center gap-2" onClick={onClose}>
+      <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+        <Link2 className="w-4 h-4" />
+      </span>
+      <span className="font-display font-semibold text-lg">LinkRec</span>
+    </Link>
+  </div>
+);
 
 export default MobileNavigationHeader;
