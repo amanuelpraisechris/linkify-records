@@ -59,10 +59,22 @@ export interface Visit {
 }
 
 export interface ResidencyPeriod {
+  /** village/subVillage mirror tabia/kushet for matching compatibility */
   village: string;
   subVillage: string;
-  startYear: string;
-  endYear?: string;
+  startYear: string; // Gregorian year
+  endYear?: string;  // Gregorian year
+  woreda?: string;
+  tabia?: string;
+  kushet?: string;
+  houseNumber?: string;
+  insideHdss?: boolean;
+  outsidePlace?: string;
+  current?: boolean;
+  calendar?: 'EC' | 'GC';
+  moveReason?: string;
+  householdHead?: string;
+  gotLeader?: string;
   balozi?: {
     firstName?: string;
     middleName?: string;
