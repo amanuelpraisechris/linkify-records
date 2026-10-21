@@ -50,7 +50,7 @@ const LocationsAdmin = () => {
   const areaRows = (level: AdminArea['level']) => areas.filter(a => a.level === level);
 
   return (
-    <div className="container max-w-5xl py-8 space-y-6">
+    <div className="container max-w-5xl pt-24 pb-8 space-y-6">
       <div>
         <h1 className="text-2xl font-bold">Locations & Facilities</h1>
         <p className="text-muted-foreground">Lists used in clinic record entry. Names added by data collectors wait here for approval.</p>

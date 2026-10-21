@@ -1,3 +1,6 @@
 - Probabilistic matching lives in src/utils/matching/probabilistic (graded Fellegi-Sunter, blocking, prior-based probability); keep rules covered by src/utils/matching/__tests__ — scores feed consent/linkage decisions.
 - Match decisions are captured atomically by a database trigger into append-only history; UI history reads Supabase rather than local audit storage so collector identity and server time remain authoritative.
 - Persist decisions through databaseService.saveMatchResult; carry the returned persistenceId through completion callbacks to avoid recording the same save twice.
+- Facility and tabia/kushet lists come from Supabase tables health_facilities and admin_areas (woreda > tabia > kushet); collectors add pending names, admins (public.user_roles via has_role) approve — never hardcode location lists in components.
+- Tigray record entry stores tabia/kushet in both tabia/kushet and village/subVillage, and Ethiopian names as firstName=given, middleName=father, lastName=grandfather, so the matching engine and older records stay compatible.
+- Dates may be entered in the Ethiopian calendar but are always stored in Gregorian; conversion lives in src/utils/ethiopianCalendar.ts and is covered by tests.
