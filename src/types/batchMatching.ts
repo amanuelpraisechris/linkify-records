@@ -3,7 +3,14 @@
  * Automated matching for large datasets with configurable rules
  */
 
-import { MatchResult } from './index';
+import { Record } from './index';
+
+export interface MatchResult {
+  record: Record;
+  score: number;
+  matchedOn: string[];
+  fieldScores?: { [key: string]: number };
+}
 
 export type BatchMatchStatus =
   | 'pending'
