@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { PlusCircle, Trash2, Calendar } from 'lucide-react';
 import { useLocations } from '@/hooks/useLocations';
 import SearchablePicker from './SearchablePicker';
-import { toGregorian } from '@/utils/ethiopianCalendar';
+import { ethiopianYearToGregorian } from '@/utils/ethiopianCalendar';
 
 interface Props {
   residencyPeriods: ResidencyPeriod[];
@@ -45,7 +45,7 @@ const ResidencyTimelineSection = ({ residencyPeriods, onResidencyPeriodsChange, 
   }]);
 
   // Store Gregorian year; E.C. year Y begins Sept of Y+7.
-  const toGc = (y: string, cal?: string) => (cal === 'EC' && y ? String(toGregorian(Number(y), 1, 1).year) : y);
+  const toGc = (y: string, cal?: string) => (cal === 'EC' && y ? String(ethiopianYearToGregorian(Number(y))) : y);
 
   const yearSelect = (p: ResidencyPeriod, i: number, field: 'startYear' | 'endYear', label: string) => {
     const display = p.calendar === 'EC' ? (p as any)[`${field}Ec`] : p[field];
