@@ -69,7 +69,8 @@ export function useMatchSaving({
         });
         return null;
       }
-      fieldScores = selectedMatch.fieldScores;
+      const rank = [...currentMatch.potentialMatches].sort((a, b) => b.score - a.score).findIndex(m => m.record.id === matchId) + 1;
+      fieldScores = { ...(selectedMatch.fieldScores || {}), _rank: rank, _shown: currentMatch.potentialMatches.length };
       confidence = selectedMatch.score;
     }
 

@@ -112,6 +112,7 @@ export const fieldAgreement = (matches: MatchRow[]) => {
     if (typeof fs === 'string') { try { fs = JSON.parse(fs); } catch { fs = null; } }
     if (!fs || typeof fs !== 'object') continue;
     for (const [k, v] of Object.entries(fs)) {
+      if (k.startsWith('_')) continue;
       const num = typeof v === 'number' ? v : typeof v === 'object' && v ? Number((v as { score?: number }).score) : NaN;
       if (Number.isNaN(num)) continue;
       const o = t.get(k) || { agree: 0, n: 0 };
