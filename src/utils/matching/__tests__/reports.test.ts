@@ -34,3 +34,24 @@ describe('report metrics', () => {
     expect(JSON.stringify(matchExportRows(clinic, matches, false))).toContain('Abeba');
   });
 });
+
+import { cascade, repeatRate, rankDistribution } from '@/utils/reportMetrics';
+describe('Rentsch-style metrics', () => {
+  it('cascade gives each step as % of the step before', () => {
+    const c = cascade(clinic, matches);
+    expect(c.map(s => s.n)).toEqual([3, 3, 2, 2, 1]);
+    expect(c[4].pctOfPrev).toBe(50);
+  });
+  it('repeat rate counts extra visits by the same patient', () => {
+    const cl = [{ id: 'v1', patient_id: 'P' }, { id: 'v2', patient_id: 'P' }, { id: 'v3', patient_id: 'Q' }];
+    const ms = ['v1', 'v2', 'v3'].map((s, i) => ({ id: s, source_id: s, match_id: i < 2 ? 'H1' : 'H2', status: 'matched', confidence: 0.9, matched_by: 'x', matched_at: '2026-01-01' }));
+    const r = repeatRate(cl, ms);
+    expect(r.repeatVisits).toBe(1);
+    expect(r.linkedVisits).toBe(3);
+    expect(r.consistentPct).toBe(100);
+  });
+  it('rank distribution reads the saved candidate rank', () => {
+    const ms = [1, 3, 8, 0].map((r, i) => ({ id: String(i), source_id: String(i), status: 'matched', confidence: 0.9, matched_by: 'x', matched_at: '2026', field_scores: r ? { _rank: r } : {} }));
+    expect(rankDistribution(ms)).toEqual({ first: 1, top5: 1, beyond: 1, unknown: 1 });
+  });
+});
