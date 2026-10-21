@@ -12,7 +12,6 @@ interface RecordCardHeaderProps {
 const RecordCardHeader = ({ record, matchScore }: RecordCardHeaderProps) => {
   // Use the consistent utilities for displaying names with firstMiddleLast format
   const fullName = getFullName(record, 'firstMiddleLast');
-  const confidenceLevel = getConfidenceLevel(matchScore);
   
   // For debugging - log the birth date to see what format it's in
   if (process.env.NODE_ENV !== 'production') {
