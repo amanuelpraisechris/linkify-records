@@ -1,10 +1,10 @@
-
-import { useRecordData } from '@/contexts/record-data/RecordDataContext';
 import { SupportedLanguage } from '@/utils/languageUtils';
 import { Record } from '@/types';
-import { X } from 'lucide-react';
+import { X, Plus } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { MCH_CLINIC_ID_TYPES } from '@/utils/tigrayLabels';
 
 interface ClinicIdEntrySectionProps {
   clinicIds: Array<{ type: string; value: string }>;
@@ -13,78 +13,37 @@ interface ClinicIdEntrySectionProps {
   removeClinicId: (index: number) => void;
   onPatientFound: (record: Record) => void;
   inputLanguage: SupportedLanguage;
+  types?: string[];
+  title?: string;
 }
 
 const ClinicIdEntrySection = ({
-  clinicIds,
-  handleClinicIdChange,
-  addClinicId,
-  removeClinicId,
-  onPatientFound,
-  inputLanguage
-}: ClinicIdEntrySectionProps) => {
-  return (
-    <div className="bg-muted/20 p-4 rounded-lg">
-      <div className="flex justify-between items-center mb-2">
-        <label className="block text-sm font-medium">
-          {inputLanguage === 'latin' ? 'Clinic Identifiers' : 
-           inputLanguage === 'amharic' ? 'የክሊኒክ መለያዎች' : 'መለለዪ ክሊኒክ'}
-        </label>
-        <Button
-          type="button"
-          variant="link"
-          size="sm"
-          onClick={addClinicId}
-          className="text-xs text-primary"
-        >
-          + {inputLanguage === 'latin' ? 'Add Another' : 
-            inputLanguage === 'amharic' ? 'ሌላ ጨምር' : 'ካልእ ወስኽ'}
-        </Button>
-      </div>
-      
-      <div className="grid grid-cols-1 gap-2">
-        {clinicIds.map((id, index) => (
-          <div key={index} className="flex space-x-2">
-            <Input
-              type="text"
-              placeholder={
-                inputLanguage === 'latin' ? 'Identifier Type' : 
-                inputLanguage === 'amharic' ? 'የመለያ አይነት' : 'ዓይነት መለለዪ'
-              }
-              value={id.type}
-              onChange={(e) => handleClinicIdChange(index, 'type', e.target.value)}
-              className="w-24"
-              dir={inputLanguage === 'latin' ? 'ltr' : 'rtl'}
-            />
-            
-            <Input
-              type="text"
-              value={id.value}
-              onChange={(e) => handleClinicIdChange(index, 'value', e.target.value)}
-              className="flex-1"
-              placeholder={
-                inputLanguage === 'latin' ? 'Enter identifier value' : 
-                inputLanguage === 'amharic' ? 'የመለያ እሴት ያስገቡ' : 'ዋጋ መለለዪ ኣእቱ'
-              }
-              dir={inputLanguage === 'latin' ? 'ltr' : 'rtl'}
-            />
-            
-            {clinicIds.length > 1 && (
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                onClick={() => removeClinicId(index)}
-                className="text-destructive hover:bg-destructive/10 rounded-full"
-              >
-                <X className="w-4 h-4" />
-              </Button>
-            )}
-          </div>
-        ))}
-      </div>
+  clinicIds, handleClinicIdChange, addClinicId, removeClinicId, types = MCH_CLINIC_ID_TYPES, title = 'Clinic card numbers',
+}: ClinicIdEntrySectionProps) => (
+  <div className="space-y-2">
+    <div className="flex justify-between items-center">
+      <span className="text-sm font-medium">{title}</span>
+      <Button type="button" variant="ghost" size="sm" onClick={addClinicId} className="text-primary">
+        <Plus className="w-4 h-4 mr-1" /> Add another
+      </Button>
     </div>
-  );
-};
+    {clinicIds.map((id, index) => (
+      <div key={index} className="flex gap-2">
+        <Select value={types.includes(id.type) ? id.type : ''} onValueChange={v => handleClinicIdChange(index, 'type', v)}>
+          <SelectTrigger aria-label="Identifier type" className="w-52 h-11"><SelectValue placeholder="Type" /></SelectTrigger>
+          <SelectContent>{types.map(tp => <SelectItem key={tp} value={tp}>{tp}</SelectItem>)}</SelectContent>
+        </Select>
+        <Input aria-label={`${id.type || 'Identifier'} value`} value={id.value} className="flex-1 h-11 font-mono"
+          onChange={e => handleClinicIdChange(index, 'value', e.target.value)} placeholder="Number" />
+        {clinicIds.length > 1 && (
+          <Button type="button" variant="ghost" size="icon" aria-label="Remove identifier" onClick={() => removeClinicId(index)}
+            className="text-destructive hover:bg-destructive/10 h-11 w-11">
+            <X className="w-4 h-4" />
+          </Button>
+        )}
+      </div>
+    ))}
+  </div>
+);
 
 export default ClinicIdEntrySection;

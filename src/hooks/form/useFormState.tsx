@@ -15,9 +15,13 @@ export const useFormState = () => {
     telephone: '',
     yearMovedIn: '',
     neverInDSS: false,
-    balozi_first_name: '',
-    balozi_middle_name: '',
-    balozi_last_name: '',
+    woreda: 'Kilte Awlaelo',
+    tabia: '',
+    kushet: '',
+    houseNumber: '',
+    motherName: '',
+    householdHead: '',
+    visitType: '',
     oldest_member_first_name: '',
     oldest_member_middle_name: '',
     oldest_member_last_name: '',
@@ -29,16 +33,16 @@ export const useFormState = () => {
   const [birthDay, setBirthDay] = useState<string>('');
   
   const [identifiers, setIdentifiers] = useState<Array<{ type: string; value: string }>>([
-    { type: 'Health ID', value: '' }
+    { type: 'HDSS individual ID', value: '' }
   ]);
   
   const [clinicIds, setClinicIds] = useState<Array<{ type: string; value: string }>>([
-    { type: 'CTC ID', value: '' }
+    { type: 'MRN / Card no.', value: '' }
   ]);
   
   const [activeTab, setActiveTab] = useState('patient-registry');
   const [identifierType, setIdentifierType] = useState<'patient' | 'otherPerson'>('patient');
-  const [inputLanguage, setInputLanguage] = useState<SupportedLanguage>('latin');
+  const [inputLanguage, setInputLanguage] = useState<SupportedLanguage>('tigrinya');
   const [isRepeatPatient, setIsRepeatPatient] = useState(false);
   const [healthFacility, setHealthFacility] = useState<string>('');
   

@@ -14,6 +14,50 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_areas: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          level: string
+          name_en: string
+          name_ti: string | null
+          parent_id: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          level: string
+          name_en: string
+          name_ti?: string | null
+          parent_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          level?: string
+          name_en?: string
+          name_ti?: string | null
+          parent_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_areas_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "admin_areas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       clinic_records: {
         Row: {
           address: string | null
@@ -24,25 +68,34 @@ export type Database = {
           created_at: string | null
           district: string | null
           email: string | null
+          father_name: string | null
           first_name: string
+          grandfather_name: string | null
           health_facility: string | null
+          house_number: string | null
           id: string
           identifiers: Json | null
+          kushet: string | null
           last_name: string
           last_visit: string | null
           metadata: Json | null
           middle_name: string | null
+          mother_name: string | null
+          mother_record_id: string | null
           never_in_dss: boolean | null
           patient_id: string | null
           phone_number: string | null
           residency_timeline: Json | null
           sex: string | null
           sub_village: string | null
+          tabia: string | null
           telephone: string | null
           updated_at: string | null
           user_id: string | null
           village: string | null
+          visit_type: string | null
           visits: Json | null
+          woreda: string | null
           year_moved_in: string | null
         }
         Insert: {
@@ -54,25 +107,34 @@ export type Database = {
           created_at?: string | null
           district?: string | null
           email?: string | null
+          father_name?: string | null
           first_name: string
+          grandfather_name?: string | null
           health_facility?: string | null
+          house_number?: string | null
           id?: string
           identifiers?: Json | null
+          kushet?: string | null
           last_name: string
           last_visit?: string | null
           metadata?: Json | null
           middle_name?: string | null
+          mother_name?: string | null
+          mother_record_id?: string | null
           never_in_dss?: boolean | null
           patient_id?: string | null
           phone_number?: string | null
           residency_timeline?: Json | null
           sex?: string | null
           sub_village?: string | null
+          tabia?: string | null
           telephone?: string | null
           updated_at?: string | null
           user_id?: string | null
           village?: string | null
+          visit_type?: string | null
           visits?: Json | null
+          woreda?: string | null
           year_moved_in?: string | null
         }
         Update: {
@@ -84,25 +146,34 @@ export type Database = {
           created_at?: string | null
           district?: string | null
           email?: string | null
+          father_name?: string | null
           first_name?: string
+          grandfather_name?: string | null
           health_facility?: string | null
+          house_number?: string | null
           id?: string
           identifiers?: Json | null
+          kushet?: string | null
           last_name?: string
           last_visit?: string | null
           metadata?: Json | null
           middle_name?: string | null
+          mother_name?: string | null
+          mother_record_id?: string | null
           never_in_dss?: boolean | null
           patient_id?: string | null
           phone_number?: string | null
           residency_timeline?: Json | null
           sex?: string | null
           sub_village?: string | null
+          tabia?: string | null
           telephone?: string | null
           updated_at?: string | null
           user_id?: string | null
           village?: string | null
+          visit_type?: string | null
           visits?: Json | null
+          woreda?: string | null
           year_moved_in?: string | null
         }
         Relationships: []
@@ -117,15 +188,20 @@ export type Database = {
           created_at: string | null
           district: string | null
           email: string | null
+          father_name: string | null
           first_name: string
+          grandfather_name: string | null
+          house_number: string | null
           household_head: string | null
           household_members: string[] | null
           id: string
           identifiers: Json | null
+          kushet: string | null
           last_name: string
           metadata: Json | null
           middle_name: string | null
           mother_name: string | null
+          mother_record_id: string | null
           never_in_dss: boolean | null
           oldest_member_first_name: string | null
           oldest_member_last_name: string | null
@@ -134,10 +210,13 @@ export type Database = {
           phone_number: string | null
           sex: string | null
           sub_village: string | null
+          tabia: string | null
           telephone: string | null
           updated_at: string | null
           user_id: string | null
           village: string | null
+          visit_type: string | null
+          woreda: string | null
           year_moved_in: string | null
         }
         Insert: {
@@ -149,15 +228,20 @@ export type Database = {
           created_at?: string | null
           district?: string | null
           email?: string | null
+          father_name?: string | null
           first_name: string
+          grandfather_name?: string | null
+          house_number?: string | null
           household_head?: string | null
           household_members?: string[] | null
           id?: string
           identifiers?: Json | null
+          kushet?: string | null
           last_name: string
           metadata?: Json | null
           middle_name?: string | null
           mother_name?: string | null
+          mother_record_id?: string | null
           never_in_dss?: boolean | null
           oldest_member_first_name?: string | null
           oldest_member_last_name?: string | null
@@ -166,10 +250,13 @@ export type Database = {
           phone_number?: string | null
           sex?: string | null
           sub_village?: string | null
+          tabia?: string | null
           telephone?: string | null
           updated_at?: string | null
           user_id?: string | null
           village?: string | null
+          visit_type?: string | null
+          woreda?: string | null
           year_moved_in?: string | null
         }
         Update: {
@@ -181,15 +268,20 @@ export type Database = {
           created_at?: string | null
           district?: string | null
           email?: string | null
+          father_name?: string | null
           first_name?: string
+          grandfather_name?: string | null
+          house_number?: string | null
           household_head?: string | null
           household_members?: string[] | null
           id?: string
           identifiers?: Json | null
+          kushet?: string | null
           last_name?: string
           metadata?: Json | null
           middle_name?: string | null
           mother_name?: string | null
+          mother_record_id?: string | null
           never_in_dss?: boolean | null
           oldest_member_first_name?: string | null
           oldest_member_last_name?: string | null
@@ -198,11 +290,50 @@ export type Database = {
           phone_number?: string | null
           sex?: string | null
           sub_village?: string | null
+          tabia?: string | null
           telephone?: string | null
           updated_at?: string | null
           user_id?: string | null
           village?: string | null
+          visit_type?: string | null
+          woreda?: string | null
           year_moved_in?: string | null
+        }
+        Relationships: []
+      }
+      health_facilities: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          facility_type: string
+          id: string
+          name: string
+          name_ti: string | null
+          status: string
+          updated_at: string
+          woreda: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          facility_type?: string
+          id?: string
+          name: string
+          name_ti?: string | null
+          status?: string
+          updated_at?: string
+          woreda?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          facility_type?: string
+          id?: string
+          name?: string
+          name_ti?: string | null
+          status?: string
+          updated_at?: string
+          woreda?: string | null
         }
         Relationships: []
       }
@@ -544,15 +675,39 @@ export type Database = {
           },
         ]
       }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -679,6 +834,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "user"],
+    },
   },
 } as const

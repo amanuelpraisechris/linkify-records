@@ -53,17 +53,17 @@ const RecordEntryForm = ({ onRecordSubmit, onSaveForSearch }: RecordEntryFormPro
   } = useRecordForm({ onRecordSubmit, onSaveForSearch });
   
   return (
-    <div className="border rounded-xl shadow-subtle p-4 bg-white dark:bg-black">
+    <div className="rounded-xl p-1 bg-background">
       <FormHeader 
         isRepeatPatient={isRepeatPatient}
         inputLanguage={inputLanguage}
         onLanguageChange={(lang: SupportedLanguage) => setInputLanguage(lang)}
       />
       
-      <Alert className="mb-4 bg-amber-50 border-amber-300 dark:bg-amber-950/20">
-        <InfoIcon className="h-4 w-4 text-amber-600" />
-        <AlertDescription className="text-amber-700">
-          <strong>Data Use Notice:</strong> All personal identifiers are used for matching purposes.
+      <Alert className="mb-4 border-primary/30 bg-primary/5">
+        <InfoIcon className="h-4 w-4 text-primary" />
+        <AlertDescription className="text-foreground">
+          Personal identifiers are used only to find this person in the HDSS register.
         </AlertDescription>
       </Alert>
       

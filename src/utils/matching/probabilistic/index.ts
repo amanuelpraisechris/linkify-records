@@ -19,6 +19,9 @@ export interface ProbabilisticOptions {
 }
 
 const DEFAULT_PRIOR = 0.01;
+/** Mother's name m/u (MCH/ANC context): usually recorded consistently, rarely shared by chance. */
+const MOTHER_M = 0.85;
+const MOTHER_U = 0.02;
 
 const clean = (v?: string) => (v || '').trim().toLowerCase();
 
@@ -134,10 +137,15 @@ export const calculateProbabilisticMatch = (
     add('gender', 'Gender', calculateFieldWeight(M.gender, U.gender, ok), ok);
   }
 
-  const vil = compareName(record1.village, record2.village, language);
-  add('village', 'Village', gradedWeight(M.village, U.village, vil), vil === 'exact' || vil === 'close');
-  const sv = compareName(record1.subVillage, record2.subVillage, language);
-  add('subVillage', 'Sub-Village', gradedWeight(M.subVillage, U.subVillage, sv), sv === 'exact' || sv === 'close');
+  // Tabia (village) and Kushet/Got (sub-village); Tigray records may carry tabia/kushet directly
+  const vil = compareName(record1.tabia || record1.village, record2.tabia || record2.village, language);
+  add('village', 'Tabia', gradedWeight(M.village, U.village, vil), vil === 'exact' || vil === 'close');
+  const sv = compareName(record1.kushet || record1.subVillage, record2.kushet || record2.subVillage, language);
+  add('subVillage', 'Kushet', gradedWeight(M.subVillage, U.subVillage, sv), sv === 'exact' || sv === 'close');
+
+  // Mother's name (strong identifier in MCH/ANC linkage; neutral when missing)
+  const mom = compareName(record1.motherName, record2.motherName, language);
+  add('motherName', "Mother's Name", gradedWeight(MOTHER_M, MOTHER_U, mom), mom === "exact" || mom === "close");
 
   // Ten-cell leader / oldest household member
   const h1 = `${record1.oldest_member_first_name || ''} ${record1.oldest_member_last_name || ''}`.trim();

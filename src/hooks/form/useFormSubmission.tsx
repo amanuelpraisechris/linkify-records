@@ -55,10 +55,10 @@ export const useFormSubmission = ({
   const { toast } = useToast();
   
   const handleNextToLinkage = () => {
-    if (!formData.firstName || !formData.lastName || !birthYear) {
+    if (!formData.firstName || !(formData.middleName || formData.lastName) || !birthYear) {
       toast({
         title: "Missing Information",
-        description: "Please fill in at least first name, last name, and birth year before saving for search.",
+        description: "Please fill in at least given name, father's name, and birth year before saving for search.",
         variant: "destructive",
       });
       return;
@@ -108,7 +108,7 @@ export const useFormSubmission = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.firstName || !formData.lastName || !birthYear) {
+    if (!formData.firstName || !(formData.middleName || formData.lastName) || !birthYear) {
       toast({
         title: "Missing Information",
         description: "Please fill in all required fields.",

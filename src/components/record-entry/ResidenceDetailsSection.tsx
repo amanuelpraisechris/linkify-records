@@ -1,10 +1,9 @@
-
 import { Record } from '@/types';
 import { SupportedLanguage } from '@/utils/languageUtils';
-import ResidenceDetailsHeader from './ResidenceDetailsHeader';
+import { Input } from '@/components/ui/input';
+import { t } from '@/utils/tigrayLabels';
 import VillageInfoSection from './VillageInfoSection';
 import YearMovedInSection from './YearMovedInSection';
-import BaloziBioSection from './BaloziBioSection';
 import OldestMemberSection from './OldestMemberSection';
 
 interface ResidenceDetailsSectionProps {
@@ -14,48 +13,18 @@ interface ResidenceDetailsSectionProps {
   inputLanguage: SupportedLanguage;
 }
 
-const ResidenceDetailsSection = ({
-  formData,
-  handleChange,
-  handleCheckboxChange,
-  inputLanguage
-}: ResidenceDetailsSectionProps) => {
-  return (
-    <div className="bg-muted/20 p-4 rounded-lg">
-      <ResidenceDetailsHeader title="Residence Details" inputLanguage={inputLanguage} />
-      
-      <div className="grid grid-cols-6 gap-3 mb-4">
-        <div className="col-span-4">
-          <VillageInfoSection 
-            formData={formData}
-            handleChange={handleChange}
-            inputLanguage={inputLanguage}
-          />
-        </div>
-        
-        <div className="col-span-2">
-          <YearMovedInSection 
-            formData={formData}
-            handleChange={handleChange}
-            handleCheckboxChange={handleCheckboxChange}
-            inputLanguage={inputLanguage}
-          />
-        </div>
+const ResidenceDetailsSection = ({ formData, handleChange, handleCheckboxChange, inputLanguage }: ResidenceDetailsSectionProps) => (
+  <div className="space-y-5">
+    <VillageInfoSection formData={formData} handleChange={handleChange} inputLanguage={inputLanguage} />
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div>
+        <label className="block text-sm font-medium mb-1.5" htmlFor="householdHead">{t('householdHead', inputLanguage)}</label>
+        <Input id="householdHead" name="householdHead" value={formData.householdHead || ''} onChange={handleChange} className="h-11" />
       </div>
-      
-      <BaloziBioSection 
-        formData={formData}
-        handleChange={handleChange}
-        inputLanguage={inputLanguage}
-      />
-      
-      <OldestMemberSection 
-        formData={formData}
-        handleChange={handleChange}
-        inputLanguage={inputLanguage}
-      />
+      <YearMovedInSection formData={formData} handleChange={handleChange} handleCheckboxChange={handleCheckboxChange} inputLanguage={inputLanguage} />
     </div>
-  );
-};
+    <OldestMemberSection formData={formData} handleChange={handleChange} inputLanguage={inputLanguage} />
+  </div>
+);
 
 export default ResidenceDetailsSection;

@@ -4,7 +4,8 @@
  * Features: Side-by-side comparison, ranked matches, clear status indicators
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import CandidateReasonPills from './CandidateReasonPills';
 import { RecordMatch } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -54,19 +55,35 @@ const PIRLMatchingView = ({
   // Get top 20 matches (PIRL spec)
   const top20Matches = currentMatch.potentialMatches.slice(0, 20);
 
+  // Rapid-triage shortcuts: 1-9 select, M confirm, N no match, R review (ignored while typing)
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const tag = (e.target as HTMLElement)?.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || e.metaKey || e.ctrlKey || e.altKey || isLoading) return;
+      const n = parseInt(e.key);
+      if (n >= 1 && n <= 9 && top20Matches[n - 1]) { handleSelectMatch(top20Matches[n - 1].record.id); return; }
+      const k = e.key.toLowerCase();
+      if (k === 'm' && selectedMatchId) handleSaveSelectedMatch();
+      else if (k === 'n') handleMatch(null, 0, 'rejected');
+      else if (k === 'r') handleMatch(null, 0, 'manual-review');
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [top20Matches, selectedMatchId, isLoading, handleSelectMatch, handleSaveSelectedMatch, handleMatch]);
+
   return (
     <div className="space-y-6">
       {/* PIRL Header */}
-      <Card className="bg-gradient-to-r from-blue-50 to-green-50 dark:from-blue-950/20 dark:to-green-950/20 border-2">
+      <Card className="bg-primary/5 border-primary/20">
         <div className="p-6">
           <div className="flex items-center justify-between mb-4">
             <div>
               <h2 className="text-2xl font-bold text-foreground flex items-center gap-2">
-                <div className="w-3 h-3 bg-green-600 rounded-full animate-pulse"></div>
+                <div className="w-3 h-3 bg-primary rounded-full animate-pulse"></div>
                 Point-of-Contact Record Linkage
               </h2>
               <p className="text-muted-foreground mt-1">
-                Interactive matching session • Top {Math.min(top20Matches.length, 20)} candidates displayed
+                Top {Math.min(top20Matches.length, 20)} HDSS candidates • Keys: 1–9 select · M match · N no match · R review
               </p>
             </div>
             <div className="flex items-center gap-3">
@@ -106,10 +123,10 @@ const PIRLMatchingView = ({
       </Card>
 
       {/* Patient Record (Source) */}
-      <Card className="border-l-4 border-l-blue-600">
+      <Card className="border-l-4 border-l-primary">
         <div className="p-6">
           <div className="flex items-center gap-2 mb-4">
-            <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
+            <div className="w-2 h-2 bg-primary rounded-full"></div>
             <h3 className="text-lg font-semibold">Patient Record (Source)</h3>
             <Badge variant="secondary">New Visit</Badge>
           </div>
@@ -124,7 +141,7 @@ const PIRLMatchingView = ({
           <div className="p-6">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-green-600 rounded-full"></div>
+                <div className="w-2 h-2 bg-primary rounded-full"></div>
                 <h3 className="text-lg font-semibold">Ranked Matches from HDSS Database</h3>
               </div>
               {top20Matches.length > 0 && (
@@ -141,8 +158,8 @@ const PIRLMatchingView = ({
                     key={match.record.id}
                     className={`relative border-2 rounded-xl transition-all ${
                       selectedMatchId === match.record.id
-                        ? 'border-green-600 shadow-lg bg-green-50/50 dark:bg-green-950/20'
-                        : 'border-border hover:border-green-300 hover:shadow-md cursor-pointer'
+                        ? 'border-primary shadow-lg bg-primary/5'
+                        : 'border-border hover:border-primary/40 hover:shadow-md cursor-pointer'
                     }`}
                     onClick={() => handleSelectMatch(match.record.id)}
                   >
@@ -153,7 +170,7 @@ const PIRLMatchingView = ({
 
                     {/* Selected Indicator */}
                     {selectedMatchId === match.record.id && (
-                      <div className="absolute -top-2 -right-2 bg-green-600 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg flex items-center gap-1">
+                      <div className="absolute -top-2 -right-2 bg-primary text-primary-foreground px-3 py-1 rounded-full text-xs font-bold shadow-lg flex items-center gap-1">
                         <CheckCircle2 className="w-3 h-3" />
                         SELECTED
                       </div>
@@ -172,11 +189,12 @@ const PIRLMatchingView = ({
                         matchScore={match.score}
                         matchedOn={match.matchedOn}
                       />
+                      <div className="mt-3"><CandidateReasonPills fieldScores={match.fieldScores} /></div>
                     </div>
 
                     {/* Quick Actions for Selected */}
                     {selectedMatchId === match.record.id && (
-                      <div className="border-t bg-green-50/50 dark:bg-green-950/30 p-3 flex gap-2 justify-end">
+                      <div className="border-t bg-primary/5 p-3 flex gap-2 justify-end">
                         <Button
                           size="sm"
                           variant="outline"
@@ -196,7 +214,7 @@ const PIRLMatchingView = ({
                             handleSaveSelectedMatch();
                           }}
                           disabled={isLoading}
-                          className="bg-green-600 hover:bg-green-700 gap-2"
+                          className="gap-2"
                         >
                           <CheckCircle2 className="w-4 h-4" />
                           Confirm Match
@@ -258,7 +276,7 @@ const PIRLMatchingView = ({
       <Card>
         <div className="p-6">
           <h4 className="font-semibold mb-2 flex items-center gap-2">
-            <AlertTriangle className="w-4 h-4 text-yellow-600" />
+            <AlertTriangle className="w-4 h-4 text-muted-foreground" />
             Decision Reason (Optional)
           </h4>
           <Textarea
@@ -299,7 +317,7 @@ const PIRLMatchingView = ({
             <Button
               onClick={handleSaveSelectedMatch}
               disabled={!selectedMatchId || isLoading}
-              className="bg-green-600 hover:bg-green-700 px-6 py-3 text-base gap-2"
+              className="px-6 py-3 text-base gap-2"
               size="lg"
             >
               <CheckCircle2 className="w-5 h-5" />

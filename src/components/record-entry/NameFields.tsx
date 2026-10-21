@@ -1,7 +1,7 @@
-
 import { SupportedLanguage } from '@/utils/languageUtils';
 import { Input } from '@/components/ui/input';
 import { Record } from '@/types';
+import { t, LabelKey } from '@/utils/tigrayLabels';
 
 interface NameFieldsProps {
   formData: Partial<Record>;
@@ -9,63 +9,26 @@ interface NameFieldsProps {
   inputLanguage: SupportedLanguage;
 }
 
-const NameFields = ({
-  formData,
-  handleChange,
-  inputLanguage
-}: NameFieldsProps) => {
-  return (
-    <div className="grid grid-cols-6 gap-3">
-      <div className="col-span-2">
-        <label className="block text-sm font-medium mb-1">
-          {inputLanguage === 'latin' ? 'First name' : 
-          inputLanguage === 'amharic' ? 'መጠሪያ ስም' : 'ቀዳማይ ሽም'} 
-          <span className="text-destructive">*</span>
+/** Ethiopian naming: given name, father's name, grandfather's name (+ mother's name for MCH linkage). */
+const FIELDS: { name: string; label: LabelKey; required?: boolean }[] = [
+  { name: 'firstName', label: 'givenName', required: true },
+  { name: 'middleName', label: 'fatherName', required: true },
+  { name: 'lastName', label: 'grandfatherName' },
+  { name: 'motherName', label: 'motherName' },
+];
+
+const NameFields = ({ formData, handleChange, inputLanguage }: NameFieldsProps) => (
+  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    {FIELDS.map(f => (
+      <div key={f.name}>
+        <label htmlFor={f.name} className="block text-sm font-medium mb-1.5">
+          {t(f.label, inputLanguage)} {f.required && <span className="text-destructive">*</span>}
         </label>
-        <Input
-          type="text"
-          name="firstName"
-          value={formData.firstName || ''}
-          onChange={handleChange}
-          className="w-full"
-          required
-          dir={inputLanguage === 'latin' ? 'ltr' : 'rtl'}
-        />
+        <Input id={f.name} name={f.name} value={(formData as any)[f.name] || ''} onChange={handleChange}
+          className="h-11 text-base" required={f.required} autoComplete="off" />
       </div>
-      
-      <div className="col-span-2">
-        <label className="block text-sm font-medium mb-1">
-          {inputLanguage === 'latin' ? 'Middle name' : 
-          inputLanguage === 'amharic' ? 'የአባት ስም' : 'ማእከላይ ሽም'}
-        </label>
-        <Input
-          type="text"
-          name="middleName"
-          value={formData.middleName || ''}
-          onChange={handleChange}
-          className="w-full"
-          dir={inputLanguage === 'latin' ? 'ltr' : 'rtl'}
-        />
-      </div>
-      
-      <div className="col-span-2">
-        <label className="block text-sm font-medium mb-1">
-          {inputLanguage === 'latin' ? 'Last name' : 
-          inputLanguage === 'amharic' ? 'የአያት ስም' : 'ዳሓራይ ሽም'} 
-          <span className="text-destructive">*</span>
-        </label>
-        <Input
-          type="text"
-          name="lastName"
-          value={formData.lastName || ''}
-          onChange={handleChange}
-          className="w-full"
-          required
-          dir={inputLanguage === 'latin' ? 'ltr' : 'rtl'}
-        />
-      </div>
-    </div>
-  );
-};
+    ))}
+  </div>
+);
 
 export default NameFields;
