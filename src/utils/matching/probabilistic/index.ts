@@ -144,8 +144,8 @@ export const calculateProbabilisticMatch = (
   add('subVillage', 'Kushet', gradedWeight(M.subVillage, U.subVillage, sv), sv === 'exact' || sv === 'close');
 
   // Mother's name (strong identifier in MCH/ANC linkage; neutral when missing)
-  const mn = compareName(record1.motherName, record2.motherName, language);
-  add('motherName', "Mother's Name", gradedWeight(MOTHER_M, MOTHER_U, mn), mn === 'exact' || mn === 'close');
+  const mom = compareName(record1.motherName, record2.motherName, language);
+  add('motherName', "Mother's Name", gradedWeight(MOTHER_M, MOTHER_U, mom), mom === "exact" || mom === "close");
 
   // Ten-cell leader / oldest household member
   const h1 = `${record1.oldest_member_first_name || ''} ${record1.oldest_member_last_name || ''}`.trim();
