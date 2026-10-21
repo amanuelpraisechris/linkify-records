@@ -9,16 +9,17 @@ import {
   Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger,
 } from '@/components/ui/dialog';
 
-const shortcuts = [
-  { title: 'Clinic records', icon: Building2, path: '/data-management' },
-  { title: 'HDSS database', icon: Database, path: '/database' },
-  { title: 'Analytics', icon: BarChart3, path: '/analytics' },
-  { title: 'Data quality', icon: ShieldCheck, path: '/data-quality' },
+const allShortcuts = [
+  { title: 'Clinic records', icon: Building2, path: '/data-management', admin: false },
+  { title: 'HDSS database', icon: Database, path: '/database', admin: true },
+  { title: 'Analytics', icon: BarChart3, path: '/analytics', admin: false },
+  { title: 'Data quality', icon: ShieldCheck, path: '/data-quality', admin: false },
 ];
 
 const Index = () => {
   const [isLoading, setIsLoading] = useState(true);
-  const { profile } = useAuth();
+  const { profile, isAdmin } = useAuth();
+  const shortcuts = allShortcuts.filter(s => !s.admin || isAdmin);
 
   useEffect(() => {
     const t = setTimeout(() => setIsLoading(false), 600);
