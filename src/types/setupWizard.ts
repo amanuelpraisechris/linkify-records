@@ -3,7 +3,7 @@
  * First-run configuration and setup
  */
 
-import { MatchingConfig } from './matchingConfig';
+import { MatchingConfig } from '@/utils/matching/types';
 
 export type SetupStep =
   | 'welcome'

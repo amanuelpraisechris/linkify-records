@@ -14,7 +14,7 @@ import {
 import { Record, RecordMatch, MatchResult } from '@/types';
 import { calculateMatchScore } from '@/utils/matching/matchingCore';
 import { calculateProbabilisticMatch } from '@/utils/matching/probabilistic';
-import { MatchingConfig } from '@/types/matchingConfig';
+import { MatchingConfig } from '@/utils/matching/types';
 import { logAudit, logError } from './auditService';
 
 const BATCH_JOBS_STORAGE_KEY = 'batch_match_jobs';
@@ -494,8 +494,8 @@ export function generateBatchSummary(job: BatchMatchJob): BatchMatchSummary {
     : 0;
 
   // Calculate field match rates
-  const fieldMatchRates: Record<string, number> = {};
-  const fieldCounts: Record<string, { matched: number; total: number }> = {};
+  const fieldMatchRates: { [K in string]: number } = {};
+  const fieldCounts: { [K in string]: { matched: number; total: number } } = {};
 
   job.results.forEach(r => {
     if (r.metadata?.fieldScores) {

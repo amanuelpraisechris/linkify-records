@@ -133,12 +133,12 @@ export function generateDataQualityReport(
   const issuesByType = issues.reduce((acc, issue) => {
     acc[issue.type] = (acc[issue.type] || 0) + 1;
     return acc;
-  }, {} as Record<DataQualityIssueType, number>);
+  }, {} as { [K in DataQualityIssueType]: number });
 
   const issuesBySeverity = issues.reduce((acc, issue) => {
     acc[issue.severity] = (acc[issue.severity] || 0) + 1;
     return acc;
-  }, {} as Record<DataQualitySeverity, number>);
+  }, {} as { [K in DataQualitySeverity]: number });
 
   const completenessScore = calculateCompletenessScore(records, requiredFields);
   const consistencyScore = calculateConsistencyScore(records);

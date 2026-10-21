@@ -11,7 +11,7 @@ import {
   AutoMatchStrategy,
 } from '@/types/batchMatching';
 import { Record } from '@/types';
-import { MatchingConfig } from '@/types/matchingConfig';
+import { MatchingConfig } from '@/utils/matching/types';
 import {
   createBatchMatchJob,
   runBatchMatchJob,

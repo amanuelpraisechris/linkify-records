@@ -112,7 +112,7 @@ export interface DataSource {
   description?: string;
   recordCount: number;
   lastUpdated: string;
-  type: 'community' | 'facility' | 'imported';
+  type: 'community' | 'facility' | 'imported' | 'clinic';
 }
 
 export interface MatchingAlgorithm {

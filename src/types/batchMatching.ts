@@ -3,7 +3,7 @@
  * Automated matching for large datasets with configurable rules
  */
 
-import { MatchResult } from './matching';
+import { MatchResult } from './index';
 
 export type BatchMatchStatus =
   | 'pending'
