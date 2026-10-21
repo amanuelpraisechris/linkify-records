@@ -163,6 +163,8 @@ const App = () => {
                           } 
                         />
                         
+                        <Route path="/locations" element={<LocationsAdmin />} />
+
                         {/* Catch-all route */}
                         <Route path="*" element={<NotFound />} />
                       </Routes>

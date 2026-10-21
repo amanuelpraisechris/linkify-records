@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { SlidersHorizontal, Users, BarChart4, FileText } from 'lucide-react';
+import { SlidersHorizontal, Users, BarChart4, FileText, MapPin } from 'lucide-react';
 import AdminCard from './AdminCard';
 
 interface AdminCardGridProps {
@@ -29,6 +29,14 @@ const AdminCardGrid = ({ onTogglePanel }: AdminCardGridProps) => {
         onClick={() => onTogglePanel('algorithm')}
       />
       
+      <AdminCard
+        title="Locations & Facilities"
+        description="Add or approve health facilities, tabias and kushets"
+        icon={MapPin}
+        buttonText="Manage Lists"
+        onClick={() => navigate('/locations')}
+      />
+
       <AdminCard
         title="User Management"
         description="Manage system users and permissions"
