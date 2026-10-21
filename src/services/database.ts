@@ -3,8 +3,8 @@ import type { TablesInsert } from '@/integrations/supabase/types';
 import { supabase } from '@/integrations/supabase/client';
 import { Record, MatchResult } from '@/types';
 
-const COMMUNITY_COLUMNS = ['address','balozi_first_name','balozi_last_name','balozi_middle_name','birth_date','district','email','first_name','household_head','household_members','identifiers','last_name','metadata','middle_name','mother_name','never_in_dss','oldest_member_first_name','oldest_member_last_name','oldest_member_middle_name','patient_id','phone_number','sex','sub_village','telephone','user_id','village','year_moved_in'];
-const CLINIC_COLUMNS = ['address','birth_date','consent_date','consent_obtained','consent_type','district','email','first_name','health_facility','identifiers','last_name','last_visit','metadata','middle_name','never_in_dss','patient_id','phone_number','residency_timeline','sex','sub_village','telephone','user_id','village','visits','year_moved_in'];
+const COMMUNITY_COLUMNS = ['woreda','tabia','kushet','house_number','father_name','grandfather_name','visit_type','mother_record_id','address','balozi_first_name','balozi_last_name','balozi_middle_name','birth_date','district','email','first_name','household_head','household_members','identifiers','last_name','metadata','middle_name','mother_name','never_in_dss','oldest_member_first_name','oldest_member_last_name','oldest_member_middle_name','patient_id','phone_number','sex','sub_village','telephone','user_id','village','year_moved_in'];
+const CLINIC_COLUMNS = ['woreda','tabia','kushet','house_number','father_name','grandfather_name','visit_type','mother_record_id','mother_name','household_head','address','birth_date','consent_date','consent_obtained','consent_type','district','email','first_name','health_facility','identifiers','last_name','last_visit','metadata','middle_name','never_in_dss','patient_id','phone_number','residency_timeline','sex','sub_village','telephone','user_id','village','visits','year_moved_in'];
 
 /** Keep only columns that exist on the target table so inserts don't fail. */
 const pickColumns = (obj: { [key: string]: unknown }, cols: string[]) =>
@@ -37,6 +37,14 @@ export interface DatabaseRecord {
   oldest_member_middle_name?: string;
   oldest_member_last_name?: string;
   telephone?: string;
+  woreda?: string;
+  tabia?: string;
+  kushet?: string;
+  house_number?: string;
+  father_name?: string;
+  grandfather_name?: string;
+  visit_type?: string;
+  mother_record_id?: string;
   fuzzy_score?: number;
   matched_on?: string[];
   source_id?: string;
@@ -76,6 +84,14 @@ const convertRecordToDatabase = (record: Record, userId: string): Omit<DatabaseR
   oldest_member_middle_name: record.oldest_member_middle_name,
   oldest_member_last_name: record.oldest_member_last_name,
   telephone: record.telephone,
+  woreda: record.woreda,
+  tabia: record.tabia || record.village,
+  kushet: record.kushet || record.subVillage,
+  house_number: record.houseNumber,
+  father_name: record.middleName,
+  grandfather_name: record.lastName,
+  visit_type: record.visitType,
+  mother_record_id: record.motherRecordId,
   household_members: record.householdMembers,
   identifiers: record.identifiers || [],
   metadata: record.metadata || {},
@@ -108,6 +124,12 @@ const convertDatabaseToRecord = (dbRecord: DatabaseRecord): Record => ({
   oldest_member_middle_name: dbRecord.oldest_member_middle_name,
   oldest_member_last_name: dbRecord.oldest_member_last_name,
   telephone: dbRecord.telephone,
+  woreda: dbRecord.woreda,
+  tabia: dbRecord.tabia || dbRecord.village,
+  kushet: dbRecord.kushet || dbRecord.sub_village,
+  houseNumber: dbRecord.house_number,
+  visitType: dbRecord.visit_type,
+  motherRecordId: dbRecord.mother_record_id,
   householdMembers: dbRecord.household_members,
   identifiers: dbRecord.identifiers || [],
   metadata: dbRecord.metadata || {}
