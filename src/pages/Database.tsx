@@ -11,8 +11,9 @@ import DataLoader from '@/components/DataLoader';
 import RecordList from '@/components/RecordList';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Database as DatabaseIcon, Upload, RefreshCw, Trash2, CheckCircle2, AlertCircle } from 'lucide-react';
-import { generateKahdssDemoRecords } from '@/utils/kahdssDemoData';
+import { Database as DatabaseIcon, Upload, RefreshCw, Trash2, CheckCircle2, AlertCircle, FileDown } from 'lucide-react';
+import { generateKahdssDemoRecords, generateKahdssDemoCsv } from '@/utils/kahdssDemoData';
+import { saveAs } from 'file-saver';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 const Database = () => {
@@ -55,6 +56,18 @@ const Database = () => {
       toast({ title: 'Demo data loaded', description: '100 fake KAHDSS residents added for practice.' });
     } catch {
       toast({ title: 'Could not load demo data', description: 'Please sign in and try again.', variant: 'destructive' });
+    }
+  };
+
+  const handleDownloadDemo = () => {
+    try {
+      const csv = generateKahdssDemoCsv(100);
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      saveAs(blob, `kahdss_demo_records_${new Date().toISOString().split('T')[0]}.csv`);
+      toast({ title: 'Demo data downloaded', description: '100 fake KAHDSS residents saved as a CSV file.' });
+    } catch (error) {
+      console.error('Error downloading demo data:', error);
+      toast({ title: 'Download failed', description: 'Could not generate the demo CSV. Please try again.', variant: 'destructive' });
     }
   };
 
@@ -141,6 +154,11 @@ const Database = () => {
                   <Button onClick={handleLoadDemo} variant="outline" className="w-full">
                     <DatabaseIcon className="w-4 h-4 mr-2" />
                     Load 100 demo KAHDSS records
+                  </Button>
+
+                  <Button onClick={handleDownloadDemo} variant="outline" className="w-full">
+                    <FileDown className="w-4 h-4 mr-2" />
+                    Download demo data (CSV)
                   </Button>
 
                   {communityRecords.length > 0 && (
