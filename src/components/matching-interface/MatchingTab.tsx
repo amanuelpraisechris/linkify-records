@@ -249,11 +249,12 @@ const StandardMatchingView = ({
             <FileText className="w-5 h-5 text-muted-foreground" />
           </div>
           <div>
-            <h4 className="font-semibold">Clinical Notes & Documentation</h4>
+            <h4 className="font-semibold">Decision Reason (Optional)</h4>
             <p className="text-sm text-muted-foreground">Record any observations or verification details</p>
           </div>
         </div>
         <Textarea
+          aria-label="Decision reason (optional)"
           placeholder="Enter clinical notes, verification details, or any discrepancies observed during the matching process..."
           value={matchNotes}
           onChange={(e) => setMatchNotes(e.target.value)}

@@ -70,7 +70,7 @@ const RecordList = ({
     }
   };
 
-  const handleAssignMatch = (record: Record) => {
+  const handleAssignMatch = async (record: Record) => {
     const matchResult = {
       sourceId: record.sourceId || "unknown",
       matchId: record.id,
@@ -80,7 +80,12 @@ const RecordList = ({
       matchedAt: new Date().toISOString(),
     };
     
-    saveMatchResult(matchResult);
+    try {
+      await saveMatchResult(matchResult);
+    } catch {
+      toast({ title: 'Could not save match', description: 'Please try again.', variant: 'destructive' });
+      return;
+    }
     
     toast({
       title: "Match Assigned",

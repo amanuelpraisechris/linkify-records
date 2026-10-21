@@ -2,6 +2,7 @@
 import { RecordMatch, MatchResult } from '@/types';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import DecisionHistory from './DecisionHistory';
 
 interface HistoryTabProps {
   results: MatchResult[];
@@ -12,7 +13,8 @@ interface HistoryTabProps {
 const HistoryTab = ({ results, matchData, setActiveTab }: HistoryTabProps) => {
   return (
     <div className="bg-white dark:bg-black border rounded-xl p-6 shadow-subtle">
-      <h3 className="text-xl font-semibold mb-4">Match History</h3>
+      <DecisionHistory />
+      <h3 className="text-lg font-semibold mt-6 mb-4">This session</h3>
       {results.length > 0 ? (
         <div className="space-y-4">
           {results.map((result, index) => {

@@ -1,3 +1,4 @@
-- [ ] Persist match decisions with authenticated collector identity, timestamp, and optional reason.
-- [ ] Show saved audit history in candidate review screens.
-- [ ] Test decision mapping and verify available flows.
+- [x] Persist match decisions with authenticated collector identity, timestamp, and optional reason.
+- [x] Show saved audit history in candidate review screens.
+- [x] Test decision mapping, save failures, duplicate prevention, and signed-out preview.
+- [ ] Verify a signed-in decision and history readback — blocked by unavailable authenticated testing for external Supabase.

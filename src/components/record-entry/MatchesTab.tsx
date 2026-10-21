@@ -49,15 +49,15 @@ const MatchesTab = ({
       <NoMatchHandler
         record={submittedRecord}
         reason="no_suitable_match"
-        onSaveComplete={() => {
-          onMatchComplete({
+        onSaveComplete={async (notes) => {
+          await onMatchComplete({
             sourceId: submittedRecord.id,
             matchId: null,
             status: 'rejected',
             confidence: 0,
             matchedBy: 'system',
             matchedAt: new Date().toISOString(),
-            notes: 'No suitable matches found - saved for manual review'
+            notes
           });
         }}
         onReturnToEntry={() => setShowNoMatchHandler(false)}

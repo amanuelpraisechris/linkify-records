@@ -259,9 +259,10 @@ const PIRLMatchingView = ({
         <div className="p-6">
           <h4 className="font-semibold mb-2 flex items-center gap-2">
             <AlertTriangle className="w-4 h-4 text-yellow-600" />
-            Clinical Notes & Observations
+            Decision Reason (Optional)
           </h4>
           <Textarea
+            aria-label="Decision reason (optional)"
             placeholder="Document any discrepancies, verification steps, or important observations..."
             value={matchNotes}
             onChange={(e) => setMatchNotes(e.target.value)}
