@@ -6,6 +6,7 @@ export interface ClinicRow {
   never_in_dss?: boolean | null; consent_obtained?: boolean | null; consent_type?: string | null;
   first_name?: string | null; middle_name?: string | null; last_name?: string | null; mother_name?: string | null;
   kushet?: string | null; created_at?: string | null;
+  identifiers?: unknown; year_moved_in?: string | null; user_id?: string | null;
 }
 export interface MatchRow {
   id: string; source_id: string; match_id?: string | null; status: string; confidence: number;
@@ -178,3 +179,87 @@ export const matchExportRows = (
     return base;
   });
 };
+
+/** Rentsch/PIRL linkage cascade: each step as % of the step before. */
+export const cascade = (clinic: ClinicRow[], matches: MatchRow[]) => {
+  const latest = latestByRecord(matches);
+  const consented = clinic.filter(c => c.consent_obtained);
+  const residents = consented.filter(c => !c.never_in_dss);
+  const searched = residents.filter(c => decisionFor(c, latest));
+  const matched = searched.filter(c => decisionFor(c, latest)?.status === 'matched');
+  const steps = [['Attended', clinic.length], ['Consented', consented.length], ['Live in HDSS area', residents.length], ['Searched', searched.length], ['Matched', matched.length]] as const;
+  return steps.map(([step, n], i) => {
+    const prev = i ? steps[i - 1][1] : n;
+    return { step, n, pctOfPrev: prev ? Math.round((n / prev) * 1000) / 10 : 0 };
+  });
+};
+
+/** Repeat patients: HDSS people linked from more than one clinic visit, and whether every visit points to the same HDSS person. */
+export const repeatRate = (clinic: ClinicRow[], matches: MatchRow[]) => {
+  const latest = latestByRecord(matches);
+  const byPatient = new Map<string, Set<string>>();
+  const visits = new Map<string, number>();
+  for (const c of clinic) {
+    const d = decisionFor(c, latest);
+    if (d?.status !== 'matched' || !d.match_id) continue;
+    const key = c.patient_id || c.id;
+    visits.set(key, (visits.get(key) || 0) + 1);
+    (byPatient.get(key) || byPatient.set(key, new Set()).get(key)!).add(d.match_id);
+  }
+  const linkedVisits = [...visits.values()].reduce((a, b) => a + b, 0);
+  const repeatVisits = [...visits.values()].filter(v => v > 1).reduce((a, v) => a + v - 1, 0);
+  const repeaters = [...visits.entries()].filter(([, v]) => v > 1).map(([k]) => k);
+  const consistent = repeaters.filter(k => byPatient.get(k)!.size === 1).length;
+  return {
+    linkedVisits, repeatVisits,
+    repeatPct: linkedVisits ? Math.round((repeatVisits / linkedVisits) * 1000) / 10 : 0,
+    repeatPatients: repeaters.length,
+    consistentPct: repeaters.length ? Math.round((consistent / repeaters.length) * 1000) / 10 : 100,
+  };
+};
+
+const metaOf = (m: MatchRow): Record<string, unknown> => {
+  let fs = m.field_scores as unknown;
+  if (typeof fs === 'string') { try { fs = JSON.parse(fs); } catch { fs = null; } }
+  return fs && typeof fs === 'object' ? (fs as Record<string, unknown>) : {};
+};
+
+/** Rank of the confirmed candidate in the list shown (saved as _rank in field scores when known). */
+export const rankDistribution = (matches: MatchRow[]) => {
+  const out = { first: 0, top5: 0, beyond: 0, unknown: 0 };
+  for (const m of matches.filter(m => m.status === 'matched')) {
+    const r = Number(metaOf(m)._rank);
+    if (!r) out.unknown++; else if (r === 1) out.first++; else if (r <= 5) out.top5++; else out.beyond++;
+  }
+  return out;
+};
+
+const avg = (xs: number[]) => (xs.length ? Math.round((xs.reduce((a, b) => a + b, 0) / xs.length) * 10) / 10 : 0);
+/** Average score of confirmed vs rejected decisions, and share of review decisions later resolved. */
+export const scoreByDecision = (matches: MatchRow[]) => {
+  const latest = latestByRecord(matches);
+  const everReview = new Set(matches.filter(m => m.status !== 'matched' && m.status !== 'rejected').map(m => m.source_id));
+  const resolved = [...everReview].filter(id => ['matched', 'rejected'].includes(latest.get(id)?.status || '')).length;
+  const l = [...latest.values()];
+  return {
+    matchedAvg: avg(l.filter(m => m.status === 'matched').map(m => toPercent(m.confidence))),
+    rejectedAvg: avg(l.filter(m => m.status === 'rejected').map(m => toPercent(m.confidence))),
+    reviewTotal: everReview.size, reviewResolved: resolved,
+    reviewResolvedPct: everReview.size ? Math.round((resolved / everReview.size) * 1000) / 10 : 0,
+  };
+};
+
+const ID_KINDS: [string, RegExp][] = [['ANC no.', /anc/i], ['MCH card', /mch|road to health|card/i], ['Family folder', /family|folder|chis/i]];
+/** Share of clinic records carrying each clinic ID type. */
+export const idCompleteness = (clinic: ClinicRow[]) => ID_KINDS.map(([label, re]) => {
+  const n = clinic.filter(c => {
+    let ids = c.identifiers as unknown;
+    if (typeof ids === 'string') { try { ids = JSON.parse(ids); } catch { ids = []; } }
+    return Array.isArray(ids) && ids.some((i: { type?: string; value?: string }) => i?.value && re.test(i.type || ''));
+  }).length;
+  return { label, n, pct: clinic.length ? Math.round((n / clinic.length) * 100) : 0 };
+});
+
+/** Moved into the HDSS area within the last `years` years (counted separately, as in Rentsch et al.). */
+export const recentMovers = (clinic: ClinicRow[], years = 1, now = new Date()) =>
+  clinic.filter(c => { const y = parseInt(c.year_moved_in || '', 10); return y && now.getFullYear() - y < years + 1 && now.getFullYear() - y >= 0; }).length;

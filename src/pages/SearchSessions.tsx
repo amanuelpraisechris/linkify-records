@@ -24,8 +24,10 @@ import {
 import { Download, Search, XCircle, CheckCircle2, AlertCircle } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { saveAs } from 'file-saver';
+import { useAuth } from '@/contexts/auth';
 
 export default function SearchSessions() {
+  const { isAdmin } = useAuth();
   const [sessions, setSessions] = useState<any[]>([]);
   const [failedMatches, setFailedMatches] = useState<any[]>([]);
   const [stats, setStats] = useState<any>(null);
@@ -212,10 +214,10 @@ export default function SearchSessions() {
                     Records that could not be matched - export for further analysis
                   </CardDescription>
                 </div>
-                <Button onClick={handleExportFailed} disabled={failedMatches.length === 0}>
+                {isAdmin && <Button onClick={handleExportFailed} disabled={failedMatches.length === 0}>
                   <Download className="h-4 w-4 mr-2" />
                   Export to CSV
-                </Button>
+                </Button>}
               </div>
             </CardHeader>
             <CardContent>
