@@ -59,6 +59,18 @@ const Database = () => {
     }
   };
 
+  const handleDownloadDemo = () => {
+    try {
+      const csv = generateKahdssDemoCsv(100);
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      saveAs(blob, `kahdss_demo_records_${new Date().toISOString().split('T')[0]}.csv`);
+      toast({ title: 'Demo data downloaded', description: '100 fake KAHDSS residents saved as a CSV file.' });
+    } catch (error) {
+      console.error('Error downloading demo data:', error);
+      toast({ title: 'Download failed', description: 'Could not generate the demo CSV. Please try again.', variant: 'destructive' });
+    }
+  };
+
   const handleClearDatabase = async () => {
     if (!confirm(`Are you sure you want to clear the entire community database? This will remove ${communityRecords.length} records.`)) {
       return;
@@ -142,6 +154,11 @@ const Database = () => {
                   <Button onClick={handleLoadDemo} variant="outline" className="w-full">
                     <DatabaseIcon className="w-4 h-4 mr-2" />
                     Load 100 demo KAHDSS records
+                  </Button>
+
+                  <Button onClick={handleDownloadDemo} variant="outline" className="w-full">
+                    <FileDown className="w-4 h-4 mr-2" />
+                    Download demo data (CSV)
                   </Button>
 
                   {communityRecords.length > 0 && (
