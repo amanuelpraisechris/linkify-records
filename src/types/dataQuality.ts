@@ -36,8 +36,8 @@ export interface DataQualityReport {
   totalRecords: number;
   recordsWithIssues: number;
   issueCount: number;
-  issuesByType: Record<DataQualityIssueType, number>;
-  issuesBySeverity: Record<DataQualitySeverity, number>;
+  issuesByType: { [K in DataQualityIssueType]: number };
+  issuesBySeverity: { [K in DataQualitySeverity]: number };
   completenessScore: number; // 0-100
   consistencyScore: number; // 0-100
   validityScore: number; // 0-100

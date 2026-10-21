@@ -12,7 +12,8 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
 
 export default function BatchMatching() {
-  const { matchingConfig, algorithmType } = useMatchingConfig();
+  const { config: matchingConfig } = useMatchingConfig();
+  const algorithmType = matchingConfig.algorithmType;
   const [sourceRecords, setSourceRecords] = useState<Record[]>([]);
   const [targetRecords, setTargetRecords] = useState<Record[]>([]);
   const [isLoading, setIsLoading] = useState(true);

@@ -1,6 +1,14 @@
+import type { TablesInsert } from '@/integrations/supabase/types';
 
 import { supabase } from '@/integrations/supabase/client';
 import { Record, MatchResult } from '@/types';
+
+const COMMUNITY_COLUMNS = ['address','balozi_first_name','balozi_last_name','balozi_middle_name','birth_date','district','email','first_name','household_head','household_members','identifiers','last_name','metadata','middle_name','mother_name','never_in_dss','oldest_member_first_name','oldest_member_last_name','oldest_member_middle_name','patient_id','phone_number','sex','sub_village','telephone','user_id','village','year_moved_in'];
+const CLINIC_COLUMNS = ['address','birth_date','consent_date','consent_obtained','consent_type','district','email','first_name','health_facility','identifiers','last_name','last_visit','metadata','middle_name','never_in_dss','patient_id','phone_number','residency_timeline','sex','sub_village','telephone','user_id','village','visits','year_moved_in'];
+
+/** Keep only columns that exist on the target table so inserts don't fail. */
+const pickColumns = (obj: { [key: string]: unknown }, cols: string[]) =>
+  Object.fromEntries(Object.entries(obj).filter(([k, v]) => cols.includes(k) && v !== undefined));
 
 export interface DatabaseRecord {
   id: string;
@@ -125,7 +133,9 @@ export const databaseService = {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error('User not authenticated');
 
-    const dbRecords = records.map(record => convertRecordToDatabase(record, user.id));
+    const dbRecords = records.map(record =>
+      pickColumns(convertRecordToDatabase(record, user.id) as any, COMMUNITY_COLUMNS) as TablesInsert<'community_records'>
+    );
     
     const { error } = await supabase
       .from('community_records')
@@ -176,7 +186,7 @@ export const databaseService = {
     
     const { error } = await supabase
       .from('clinic_records')
-      .insert(dbRecord);
+      .insert(pickColumns(dbRecord as any, CLINIC_COLUMNS) as TablesInsert<'clinic_records'>);
     
     if (error) {
       console.error('Error inserting clinic record:', error);

@@ -3,7 +3,14 @@
  * Automated matching for large datasets with configurable rules
  */
 
-import { MatchResult } from './matching';
+import { Record } from './index';
+
+export interface MatchResult {
+  record: Record;
+  score: number;
+  matchedOn: string[];
+  fieldScores?: { [key: string]: number };
+}
 
 export type BatchMatchStatus =
   | 'pending'
@@ -83,7 +90,7 @@ export interface BatchMatchResult {
   // Metadata
   metadata?: {
     algorithmUsed?: 'deterministic' | 'probabilistic';
-    fieldScores?: Record<string, number>;
+    fieldScores?: { [K in string]: number };
     [key: string]: any;
   };
 }
@@ -122,7 +129,7 @@ export interface BatchMatchSummary {
       medium: number; // 60-79%
       low: number; // < 60%
     };
-    fieldMatchRates: Record<string, number>; // % of records where field matched
+    fieldMatchRates: { [K in string]: number }; // % of records where field matched
   };
 
   // Actions to take

@@ -96,7 +96,7 @@ export interface BulkOperation {
   recordIds: string[];
   parameters?: {
     exportFormat?: 'csv' | 'json' | 'excel';
-    updateFields?: Record<string, any>;
+    updateFields?: { [K in string]: any };
     tags?: string[];
   };
 }

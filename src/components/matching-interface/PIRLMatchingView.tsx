@@ -13,6 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import SideBySideComparison from './SideBySideComparison';
 import RecordCard from '../RecordCard';
+import MatchBandBadge from './MatchBandBadge';
 import {
   CheckCircle2,
   XCircle,
@@ -160,12 +161,7 @@ const PIRLMatchingView = ({
 
                     {/* Confidence Score */}
                     <div className="absolute top-4 right-4 z-10">
-                      <Badge
-                        variant={match.score >= 80 ? 'default' : match.score >= 60 ? 'secondary' : 'destructive'}
-                        className="text-base font-bold px-3 py-1"
-                      >
-                        {match.score}% Match
-                      </Badge>
+                      <MatchBandBadge score={match.score} />
                     </div>
 
                     {/* Record Content */}
