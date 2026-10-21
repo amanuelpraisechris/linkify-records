@@ -1,6 +1,9 @@
-
 import { SupportedLanguage } from '@/utils/languageUtils';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { t } from '@/utils/tigrayLabels';
+import { useLocations } from '@/hooks/useLocations';
+import { locationsService } from '@/services/locationsService';
+import { useToast } from '@/hooks/use-toast';
+import SearchablePicker from './SearchablePicker';
 
 interface HealthFacilitySectionProps {
   healthFacility: string;
@@ -8,51 +11,32 @@ interface HealthFacilitySectionProps {
   inputLanguage: SupportedLanguage;
 }
 
-const HealthFacilitySection = ({
-  healthFacility,
-  handleHealthFacilityChange,
-  inputLanguage
-}: HealthFacilitySectionProps) => {
-  const facilityOptions = [
-    {value: 'Central Hospital', label: {
-      latin: 'Central Hospital',
-      amharic: 'ማዕከላዊ ሆስፒታል',
-      tigrinya: 'ማእከላይ ሆስፒታል'
-    }},
-    {value: 'Community Clinic', label: {
-      latin: 'Community Clinic',
-      amharic: 'የህብረተሰብ ክሊኒክ',
-      tigrinya: 'ናይ ማሕበረሰብ ክሊኒክ'
-    }},
-    {value: 'Rural Health Center', label: {
-      latin: 'Rural Health Center',
-      amharic: 'የገጠር ጤና ጣቢያ',
-      tigrinya: 'ናይ ገጠር ጥዕና ማእከል'
-    }}
-  ];
+const HealthFacilitySection = ({ healthFacility, handleHealthFacilityChange, inputLanguage: l }: HealthFacilitySectionProps) => {
+  const { facilities, isAdmin, refresh } = useLocations();
+  const { toast } = useToast();
+
+  const addNew = async (name: string) => {
+    try {
+      await locationsService.addFacility({ name, woreda: 'Kilte Awlaelo' }, isAdmin);
+      refresh();
+      handleHealthFacilityChange(name);
+      if (!isAdmin) toast({ title: 'Facility added', description: 'Saved for this record; an admin will approve it for the list.' });
+    } catch (e: any) {
+      toast({ title: 'Could not add facility', description: e.message, variant: 'destructive' });
+    }
+  };
 
   return (
-    <div className="bg-muted/20 p-4 rounded-lg mb-4">
-      <label className="block text-sm font-medium mb-2">
-        {inputLanguage === 'latin' ? 'Health Facility' : 
-         inputLanguage === 'amharic' ? 'የጤና ተቋም' : 'ትካል ጥዕና'}
-      </label>
-      
-      <Select value={healthFacility} onValueChange={handleHealthFacilityChange}>
-        <SelectTrigger className="w-full">
-          <SelectValue placeholder={
-            inputLanguage === 'latin' ? 'Select health facility' : 
-            inputLanguage === 'amharic' ? 'የጤና ተቋም ይምረጡ' : 'ትካል ጥዕና ምረጽ'
-          } />
-        </SelectTrigger>
-        <SelectContent>
-          {facilityOptions.map(option => (
-            <SelectItem key={option.value} value={option.value}>
-              {option.label[inputLanguage]}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+    <div>
+      <label className="block text-sm font-medium mb-1.5">{t('facility', l)}</label>
+      <SearchablePicker
+        ariaLabel={t('facility', l)}
+        value={healthFacility}
+        onChange={handleHealthFacilityChange}
+        onAddNew={addNew}
+        options={facilities.map(f => ({ value: f.name, label: l === 'latin' || !f.name_ti ? f.name : f.name_ti, hint: f.facility_type, pending: f.status === 'pending' }))}
+        placeholder={t('select', l)} searchPlaceholder={t('search', l)} addLabel={t('addNew', l)} pendingLabel={t('pending', l)}
+      />
     </div>
   );
 };
