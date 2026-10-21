@@ -239,7 +239,7 @@ const SimplifiedRecordEntry = () => {
         <Card className="mb-6">
           <CardHeader>
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
+              <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center">
                 <span className="font-semibold">3</span>
               </div>
               <div>
