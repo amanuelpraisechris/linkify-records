@@ -129,6 +129,20 @@ const ConsentWorkflowTab = ({
 
   const types = ['written', 'verbal', 'previous'] as const;
 
+  const runLookup = async () => {
+    setSearching(true);
+    setResults(await findPriorConsent(lookup));
+    setSearched(true);
+    setSearching(false);
+  };
+
+  const adopt = (p: PriorConsent) => {
+    setConsentType('previous');
+    if (p.consentDate) setConsentDate(p.consentDate.split('T')[0]);
+    setConsentGiven(true);
+    setAdopted(p.id);
+  };
+
   return (
     <div className="mx-auto max-w-xl space-y-6">
       <div className="flex items-start gap-3">
@@ -140,6 +154,39 @@ const ConsentWorkflowTab = ({
           <p className="text-sm text-muted-foreground">{getLocalizedText('dataUseDescription')}</p>
         </div>
       </div>
+
+      <div className="space-y-2 rounded-xl border p-4">
+        <p className="text-sm font-medium">Returning patient? Check for consent on file</p>
+        <div className="flex gap-2">
+          <Input
+            value={lookup}
+            onChange={e => { setLookup(e.target.value); setSearched(false); }}
+            onKeyDown={e => { if (e.key === 'Enter') runLookup(); }}
+            placeholder="Card / MRN, ANC no., phone or given name"
+          />
+          <Button type="button" variant="secondary" onClick={runLookup} disabled={lookup.trim().length < 3 || searching}>
+            {searching ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
+          </Button>
+        </div>
+        {searched && results.length === 0 && (
+          <p className="text-xs text-muted-foreground">No previous consent found — record new consent below.</p>
+        )}
+        {results.map(p => (
+          <div key={p.id} className="flex items-center justify-between gap-3 rounded-lg bg-primary/5 p-3 text-sm">
+            <div>
+              <p className="font-medium">{p.name}</p>
+              <p className="text-xs text-muted-foreground">
+                {[p.patientId, p.facility].filter(Boolean).join(' · ')}
+                {p.consentDate && ` · consent ${new Date(p.consentDate).toLocaleDateString()} (${p.consentType ?? 'written'})`}
+              </p>
+            </div>
+            <Button type="button" size="sm" variant={adopted === p.id ? 'default' : 'outline'} onClick={() => adopt(p)}>
+              {adopted === p.id ? <><Check className="mr-1 h-3 w-3" />Using</> : 'Use on-file consent'}
+            </Button>
+          </div>
+        ))}
+      </div>
+
 
       <div className="space-y-2">
         <p className="text-sm font-medium">{getLocalizedText('consentTypes')}</p>
