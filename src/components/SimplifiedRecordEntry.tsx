@@ -26,6 +26,7 @@ import RecordEntryForm from './RecordEntryForm';
 import PIRLMatchingView from './matching-interface/PIRLMatchingView';
 import MatchedRecordsViewer from './MatchedRecordsViewer';
 import { useMatchesState } from '@/hooks/useMatchesState';
+import DecisionHistory from './matching-interface/DecisionHistory';
 
 const SimplifiedRecordEntry = () => {
   const { communityRecords, clinicRecords, matchResults } = useRecordData();
@@ -79,7 +80,7 @@ const SimplifiedRecordEntry = () => {
     setSelectedMatchId(matchId);
   };
 
-  const handleSaveMatch = () => {
+  const handleSaveMatch = async () => {
     if (!selectedMatchId || !submittedRecord) return;
 
     setIsMatching(true);
@@ -95,42 +96,41 @@ const SimplifiedRecordEntry = () => {
       notes: matchNotes
     };
 
-    handleMatchComplete(result);
-
-    setTimeout(() => {
+    try {
+      await handleMatchComplete(result);
       setIsMatching(false);
       setSelectedMatchId(null);
       setMatchNotes('');
-      setCurrentStep('entry');
-
-      toast({
-        title: "Match Saved Successfully",
-        description: "Record has been linked and saved with timestamp.",
-      });
-    }, 500);
+      setCurrentStep('consent');
+      setConsentCollapsed(false);
+    } catch {
+      toast({ title: 'Could not save decision', description: 'Your selection and reason have been kept. Please try again.', variant: 'destructive' });
+    } finally { setIsMatching(false); }
   };
 
-  const handleNoMatch = () => {
+  const handleNoMatch = async (status: 'rejected' | 'manual-review' = 'rejected') => {
     if (!submittedRecord) return;
 
     const result: MatchResult = {
       sourceId: submittedRecord.id,
-      matchId: null,
-      status: 'rejected',
+      matchId: status === 'manual-review' ? selectedMatchId : null,
+      status,
       confidence: 0,
       matchedBy: 'user',
       matchedAt: new Date().toISOString(),
-      notes: matchNotes || 'No suitable match found - saved for manual review'
+      notes: matchNotes
     };
 
-    handleMatchComplete(result);
-    setCurrentStep('entry');
-
-    toast({
-      title: "No Match Recorded",
-      description: "Record saved for manual review.",
-      variant: "destructive"
-    });
+    setIsMatching(true);
+    try {
+      await handleMatchComplete(result);
+      setSelectedMatchId(null);
+      setMatchNotes('');
+      setCurrentStep('consent');
+      setConsentCollapsed(false);
+    } catch {
+      toast({ title: 'Could not save decision', description: 'Your reason has been kept. Please try again.', variant: 'destructive' });
+    } finally { setIsMatching(false); }
   };
 
   return (
@@ -273,6 +273,8 @@ const SimplifiedRecordEntry = () => {
                 handleMatch={(matchId, confidence, status) => {
                   if (status === 'rejected') {
                     handleNoMatch();
+                  } else if (status === 'manual-review') {
+                    handleNoMatch('manual-review');
                   }
                 }}
               />
@@ -284,7 +286,8 @@ const SimplifiedRecordEntry = () => {
                   No records in the HDSS database match this patient's information.
                 </p>
                 <Button
-                  onClick={handleNoMatch}
+                  onClick={() => handleNoMatch('manual-review')}
+                  disabled={isMatching}
                   variant="destructive"
                 >
                   Save for Manual Review
@@ -296,6 +299,7 @@ const SimplifiedRecordEntry = () => {
       )}
 
       {/* Matched Records Section */}
+      <div className="mb-6"><DecisionHistory key={matchResults.length} /></div>
       <MatchedRecordsViewer
         matchResults={matchResults || []}
         sourceRecords={clinicRecords || []}

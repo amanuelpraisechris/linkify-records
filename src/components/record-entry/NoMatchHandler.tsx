@@ -12,7 +12,7 @@ import { useToast } from '@/components/ui/use-toast';
 interface NoMatchHandlerProps {
   record: Record;
   reason: 'no_suitable_match' | 'low_confidence' | 'manual_review_required';
-  onSaveComplete: () => void;
+  onSaveComplete: (notes: string) => void | Promise<void>;
   onReturnToEntry: () => void;
 }
 
@@ -35,7 +35,7 @@ const NoMatchHandler = ({ record, reason, onSaveComplete, onReturnToEntry }: NoM
         description: "The patient record has been saved and flagged for manual review.",
       });
       
-      onSaveComplete();
+      await onSaveComplete(notes);
     } catch (error) {
       console.error('Error saving unmatched record:', error);
       toast({
