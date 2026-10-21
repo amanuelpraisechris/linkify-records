@@ -1,6 +1,6 @@
 /**
  * Matched Records Viewer
- * Shows all successfully matched records with export functionality
+ * Shows matched records (view only; exports happen in admin Reports)
  */
 
 import { useState, useEffect } from 'react';
@@ -8,8 +8,7 @@ import { MatchResult, Record } from '@/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Download, CheckCircle2, FileText, Calendar, User, ArrowRight } from 'lucide-react';
-import { saveAs } from 'file-saver';
+import { CheckCircle2, FileText, Calendar, User, ArrowRight } from 'lucide-react';
 import { useAuth } from '@/contexts/auth';
 
 interface MatchedRecordsViewerProps {
@@ -39,77 +38,6 @@ const MatchedRecordsViewer = ({ matchResults, sourceRecords, targetRecords }: Ma
     setMatchedRecords(successful);
   }, [matchResults, sourceRecords, targetRecords]);
 
-  const handleExportCSV = () => {
-    if (matchedRecords.length === 0) return;
-
-    // CSV headers
-    const headers = [
-      'Match Date',
-      'Clinic Patient Name',
-      'Clinic Patient Sex',
-      'Clinic Patient Birth Date',
-      'HDSS Match Name',
-      'HDSS Match Sex',
-      'HDSS Match Birth Date',
-      'Confidence Score',
-      'Matched By',
-      'Notes'
-    ];
-
-    // CSV rows
-    const rows = matchedRecords.map(({ matchResult, sourceRecord, targetRecord }) => [
-      new Date(matchResult.matchedAt).toLocaleString(),
-      `${sourceRecord?.firstName || ''} ${sourceRecord?.lastName || ''}`.trim(),
-      sourceRecord?.sex || '',
-      sourceRecord?.birthDate || '',
-      `${targetRecord?.firstName || ''} ${targetRecord?.lastName || ''}`.trim(),
-      targetRecord?.sex || '',
-      targetRecord?.birthDate || '',
-      matchResult.confidence || 0,
-      matchResult.matchedBy || '',
-      matchResult.notes || ''
-    ]);
-
-    // Create CSV content
-    const csvContent = [
-      headers.join(','),
-      ...rows.map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
-    ].join('\n');
-
-    // Download
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    saveAs(blob, `matched_records_${new Date().toISOString().split('T')[0]}.csv`);
-  };
-
-  const handleExportJSON = () => {
-    if (matchedRecords.length === 0) return;
-
-    const exportData = matchedRecords.map(({ matchResult, sourceRecord, targetRecord }) => ({
-      matchDate: matchResult.matchedAt,
-      clinicPatient: {
-        id: sourceRecord?.id,
-        name: `${sourceRecord?.firstName || ''} ${sourceRecord?.lastName || ''}`.trim(),
-        sex: sourceRecord?.sex,
-        birthDate: sourceRecord?.birthDate,
-        village: sourceRecord?.village
-      },
-      hdssMatch: {
-        id: targetRecord?.id,
-        name: `${targetRecord?.firstName || ''} ${targetRecord?.lastName || ''}`.trim(),
-        sex: targetRecord?.sex,
-        birthDate: targetRecord?.birthDate,
-        village: targetRecord?.village
-      },
-      confidence: matchResult.confidence,
-      matchedBy: matchResult.matchedBy,
-      notes: matchResult.notes
-    }));
-
-    const jsonContent = JSON.stringify(exportData, null, 2);
-    const blob = new Blob([jsonContent], { type: 'application/json' });
-    saveAs(blob, `matched_records_${new Date().toISOString().split('T')[0]}.json`);
-  };
-
   return (
     <Card className="mt-6">
       <CardHeader>
@@ -123,26 +51,6 @@ const MatchedRecordsViewer = ({ matchResults, sourceRecords, targetRecords }: Ma
               All successfully matched clinic records with HDSS database entries
             </CardDescription>
           </div>
-          {isAdmin && <div className="flex gap-2">
-            <Button
-              onClick={handleExportCSV}
-              disabled={matchedRecords.length === 0}
-              variant="outline"
-              size="sm"
-            >
-              <Download className="w-4 h-4 mr-2" />
-              Export CSV
-            </Button>
-            <Button
-              onClick={handleExportJSON}
-              disabled={matchedRecords.length === 0}
-              variant="outline"
-              size="sm"
-            >
-              <Download className="w-4 h-4 mr-2" />
-              Export JSON
-            </Button>
-          </div>}
         </div>
       </CardHeader>
       <CardContent>
@@ -237,7 +145,7 @@ const MatchedRecordsViewer = ({ matchResults, sourceRecords, targetRecords }: Ma
               Total matched: <strong className="text-foreground">{matchedRecords.length}</strong> record(s)
             </div>
             <div>
-              {isAdmin ? 'Export available in CSV or JSON format' : 'Exports are available to admins only'}
+              {isAdmin ? 'Confidential: export from Reports > Export (logged, de-identified)' : 'Confidential: exports are done by admins only'}
             </div>
           </div>
         )}
