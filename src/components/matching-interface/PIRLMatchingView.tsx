@@ -317,7 +317,7 @@ const PIRLMatchingView = ({
             <Button
               onClick={handleSaveSelectedMatch}
               disabled={!selectedMatchId || isLoading}
-              className="bg-green-600 hover:bg-green-700 px-6 py-3 text-base gap-2"
+              className="px-6 py-3 text-base gap-2"
               size="lg"
             >
               <CheckCircle2 className="w-5 h-5" />
