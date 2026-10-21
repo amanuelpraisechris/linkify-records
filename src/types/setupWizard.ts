@@ -119,7 +119,7 @@ export const USE_CASE_TEMPLATES: UseCaseTemplate[] = [
         phoneNumber: 20,
         oldestHouseholdMember: 15
       },
-      thresholds: {
+      threshold: {
         high: 85,
         medium: 65,
         low: 45
@@ -154,7 +154,7 @@ export const USE_CASE_TEMPLATES: UseCaseTemplate[] = [
         phoneNumber: 15,
         oldestHouseholdMember: 20
       },
-      thresholds: {
+      threshold: {
         high: 80,
         medium: 60,
         low: 40
@@ -189,7 +189,7 @@ export const USE_CASE_TEMPLATES: UseCaseTemplate[] = [
         phoneNumber: 25,
         oldestHouseholdMember: 10
       },
-      thresholds: {
+      threshold: {
         high: 90,
         medium: 70,
         low: 50
