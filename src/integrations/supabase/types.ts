@@ -301,6 +301,33 @@ export type Database = {
         }
         Relationships: []
       }
+      export_log: {
+        Row: {
+          created_at: string
+          export_type: string
+          filters: Json
+          id: string
+          row_count: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          export_type: string
+          filters?: Json
+          id?: string
+          row_count?: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          export_type?: string
+          filters?: Json
+          id?: string
+          row_count?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       health_facilities: {
         Row: {
           created_at: string
