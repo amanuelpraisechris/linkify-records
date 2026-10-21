@@ -64,3 +64,54 @@ export function generateKahdssDemoRecords(count = 100): Record[] {
     } as Record;
   });
 }
+
+/**
+ * Build a CSV of the fake demo census so admins can download a sample
+ * dataset without importing it into the live database.
+ */
+export function generateKahdssDemoCsv(count = 100): string {
+  const records = generateKahdssDemoRecords(count);
+  const headers = [
+    'HDSSIndividualID',
+    'HDSSHouseholdID',
+    'GivenName',
+    'FathersName',
+    'GrandfathersName',
+    'MothersName',
+    'Sex',
+    'BirthDateGregorian',
+    'Woreda',
+    'Tabia',
+    'Kushet',
+    'HouseNumber',
+    'YearMovedIn',
+    'Telephone',
+    'HouseholdHead'
+  ].join(',');
+
+  const escape = (value: string) => `"${String(value ?? '').replace(/"/g, '""')}"`;
+
+  const rows = records.map(record => {
+    const individualId = record.identifiers?.find(i => i.type === 'HDSS Individual ID')?.value ?? record.patientId ?? '';
+    const householdId = record.identifiers?.find(i => i.type === 'HDSS Household ID')?.value ?? '';
+    return [
+      individualId,
+      householdId,
+      record.firstName,
+      record.middleName ?? record.father_name ?? '',
+      record.lastName ?? record.grandfather_name ?? '',
+      record.motherName ?? '',
+      record.sex,
+      record.birthDate,
+      record.woreda ?? record.district ?? '',
+      record.tabia ?? record.village ?? '',
+      record.kushet ?? record.subVillage ?? '',
+      record.houseNumber ?? '',
+      record.yearMovedIn ?? '',
+      record.telephone ?? '',
+      record.householdHead ?? ''
+    ].map(escape).join(',');
+  });
+
+  return [headers, ...rows].join('\n');
+}
