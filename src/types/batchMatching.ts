@@ -90,7 +90,7 @@ export interface BatchMatchResult {
   // Metadata
   metadata?: {
     algorithmUsed?: 'deterministic' | 'probabilistic';
-    fieldScores?: Record<string, number>;
+    fieldScores?: { [K in string]: number };
     [key: string]: any;
   };
 }
@@ -129,7 +129,7 @@ export interface BatchMatchSummary {
       medium: number; // 60-79%
       low: number; // < 60%
     };
-    fieldMatchRates: Record<string, number>; // % of records where field matched
+    fieldMatchRates: { [K in string]: number }; // % of records where field matched
   };
 
   // Actions to take

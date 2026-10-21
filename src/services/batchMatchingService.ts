@@ -504,7 +504,7 @@ export function generateBatchSummary(job: BatchMatchJob): BatchMatchSummary {
           fieldCounts[field] = { matched: 0, total: 0 };
         }
         fieldCounts[field].total++;
-        if (score >= 80) {
+        if (Number(score) >= 80) {
           fieldCounts[field].matched++;
         }
       });
