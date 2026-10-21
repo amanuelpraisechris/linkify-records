@@ -1,0 +1,3 @@
+- [ ] Persist match decisions with authenticated collector identity, timestamp, and optional reason.
+- [ ] Show saved audit history in candidate review screens.
+- [ ] Test decision mapping and verify available flows.
