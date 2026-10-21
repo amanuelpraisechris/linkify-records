@@ -20,6 +20,7 @@ import AdminDashboard from "./components/admin/AdminDashboard";
 import MatchingConfigAdmin from "./components/admin/MatchingConfigAdmin";
 import ProtectedRoute from "./components/admin/ProtectedRoute";
 import Reports from "./pages/Reports";
+import ClinicIntake from "./pages/ClinicIntake";
 import BatchMatching from "./pages/BatchMatching";
 import AuditLogs from "./pages/AuditLogs";
 import EnhancedAnalytics from "./pages/EnhancedAnalytics";
@@ -90,6 +91,10 @@ const App = () => {
                               <RecordEntry />
                             </ProtectedRoute>
                           }
+                        />
+                        <Route
+                          path="/clinic-intake"
+                          element={<ProtectedRoute adminOnly><ClinicIntake /></ProtectedRoute>}
                         />
                         <Route
                           path="/reports"

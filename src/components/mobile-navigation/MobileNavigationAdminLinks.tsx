@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Shield, SlidersHorizontal, MapPin, FileText, Lock, Database } from 'lucide-react';
+import { Shield, SlidersHorizontal, MapPin, FileText, Lock, Database, ClipboardList } from 'lucide-react';
 import { mobileLinkClass } from './MobileNavigationLinks';
 
 interface MobileNavigationAdminLinksProps {
@@ -10,6 +10,7 @@ interface MobileNavigationAdminLinksProps {
 const items = [
   { path: '/admin-dashboard', label: 'Admin dashboard', icon: Shield },
   { path: '/matching-configuration', label: 'Matching settings', icon: SlidersHorizontal },
+  { path: '/clinic-intake', label: 'Clinic intake', icon: ClipboardList },
   { path: '/database', label: 'HDSS database', icon: Database },
   { path: '/locations', label: 'Locations & facilities', icon: MapPin },
   { path: '/audit-logs', label: 'Audit logs', icon: FileText },

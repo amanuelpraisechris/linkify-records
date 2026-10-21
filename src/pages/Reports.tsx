@@ -268,6 +268,7 @@ const Reports = () => {
             <RateTable title="By tabia" rows={m.byTabia} />
             <RateTable title="By facility" rows={m.byFacility} />
             <RateTable title="By visit type" rows={m.byVisit} />
+            <RateTable title="By collector" rows={m.byCollector} />
           </TabsContent>
 
           <TabsContent value="collectors" className="print:block">
