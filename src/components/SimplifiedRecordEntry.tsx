@@ -134,23 +134,18 @@ const SimplifiedRecordEntry = () => {
   };
 
   return (
-    <div className="container mx-auto py-8 px-4 max-w-7xl">
-      {/* Page Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2 flex items-center gap-2">
-          <Search className="w-8 h-8 text-primary" />
-          Interactive Record Linkage
-        </h1>
-        <p className="text-muted-foreground">
-          Simple workflow: Obtain consent → Enter patient data → Match with HDSS → Save
-        </p>
+    <div className="container mx-auto py-6 px-4 max-w-4xl">
+      <div className="mb-6">
+        <p className="text-xs font-medium uppercase tracking-widest text-primary">Search HDSS</p>
+        <h1 className="font-display text-2xl sm:text-3xl font-semibold tracking-tight">Link a clinic visit</h1>
+        <p className="text-sm text-muted-foreground mt-1">Consent · Patient details · Review matches</p>
       </div>
 
       {/* Database Status */}
       {communityRecords.length === 0 && (
-        <Alert className="mb-6 border-yellow-600 bg-yellow-50 dark:bg-yellow-950">
-          <AlertCircle className="h-4 w-4 text-yellow-600" />
-          <AlertDescription className="text-yellow-800 dark:text-yellow-300">
+        <Alert className="mb-6 border-accent bg-accent/10">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
             <strong>Warning:</strong> Community database not loaded. Please load the HDSS database before matching records.
           </AlertDescription>
         </Alert>
@@ -165,12 +160,12 @@ const SimplifiedRecordEntry = () => {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                consentData?.consentGiven ? 'bg-green-600' : 'bg-primary'
+                'bg-primary text-primary-foreground'
               }`}>
                 {consentData?.consentGiven ? (
-                  <CheckCircle2 className="w-5 h-5 text-white" />
+                  <CheckCircle2 className="w-5 h-5" />
                 ) : (
-                  <span className="text-white font-bold">1</span>
+                  <span className="font-semibold">1</span>
                 )}
               </div>
               <div>
@@ -205,12 +200,12 @@ const SimplifiedRecordEntry = () => {
         <CardHeader>
           <div className="flex items-center gap-3">
             <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-              submittedRecord ? 'bg-green-600' : currentStep === 'entry' ? 'bg-primary' : 'bg-muted'
+              submittedRecord || currentStep === 'entry' ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
             }`}>
               {submittedRecord ? (
-                <CheckCircle2 className="w-5 h-5 text-white" />
+                <CheckCircle2 className="w-5 h-5" />
               ) : (
-                <span className="text-white font-bold">2</span>
+                <span className="font-semibold">2</span>
               )}
             </div>
             <div>
@@ -244,8 +239,8 @@ const SimplifiedRecordEntry = () => {
         <Card className="mb-6">
           <CardHeader>
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
-                <span className="text-white font-bold">3</span>
+              <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center">
+                <span className="font-semibold">3</span>
               </div>
               <div>
                 <CardTitle>Match with HDSS Database</CardTitle>

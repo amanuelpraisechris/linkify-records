@@ -1,101 +1,67 @@
-
-import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Database, Building2, Search, Zap, FileText, BarChart3, ShieldCheck, History } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { ChevronDown } from 'lucide-react';
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
+  DropdownMenuSeparator, DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 interface NavbarLinksProps {
   isAdmin: boolean;
 }
 
+const primary = [
+  { path: '/', label: 'Home' },
+  { path: '/record-entry', label: 'Search' },
+  { path: '/data-management', label: 'Clinic records' },
+  { path: '/search-sessions', label: 'Sessions' },
+];
+
+const more = [
+  { group: 'Work', items: [{ path: '/batch-matching', label: 'Batch match' }] },
+  { group: 'Insights', items: [{ path: '/analytics', label: 'Analytics' }, { path: '/data-quality', label: 'Data quality' }] },
+];
+
+const admin = { group: 'Admin', items: [
+  { path: '/clinic-intake', label: 'Clinic intake' },
+  { path: '/reports', label: 'Reports & export' },
+  { path: '/database', label: 'HDSS database' },
+  { path: '/audit-logs', label: 'Audit logs' },
+] };
+
 export const NavbarLinks = ({ isAdmin }: NavbarLinksProps) => {
-  const location = useLocation();
+  const { pathname } = useLocation();
+  const navigate = useNavigate();
+  const groups = isAdmin ? [...more, admin] : more;
+  const moreActive = groups.some(g => g.items.some(i => i.path === pathname));
 
-  const navItems = [
-    {
-      path: '/',
-      label: 'Dashboard',
-      icon: <LayoutDashboard className="w-4 h-4 mr-1.5" />
-    },
-    {
-      path: '/data-management',
-      label: 'Clinic Records',
-      icon: <Building2 className="w-4 h-4 mr-1.5" />
-    },
-    {
-      path: '/record-entry',
-      label: 'Search',
-      icon: <Search className="w-4 h-4 mr-1.5" />
-    },
-    {
-      path: '/batch-matching',
-      label: 'Batch Match',
-      icon: <Zap className="w-4 h-4 mr-1.5" />
-    },
-    {
-      path: '/analytics',
-      label: 'Analytics',
-      icon: <BarChart3 className="w-4 h-4 mr-1.5" />
-    },
-    {
-      path: '/data-quality',
-      label: 'Data Quality',
-      icon: <ShieldCheck className="w-4 h-4 mr-1.5" />
-    },
-    {
-      path: '/search-sessions',
-      label: 'Sessions',
-      icon: <History className="w-4 h-4 mr-1.5" />
-    }
-  ];
-
-  // Admin-only navigation items
-  const adminNavItems = isAdmin ? [
-    {
-      path: '/clinic-intake',
-      label: 'Clinic Intake',
-      icon: <FileText className="w-4 h-4 mr-1.5" />
-    },
-    {
-      path: '/database',
-      label: 'HDSS Database',
-      icon: <Database className="w-4 h-4 mr-1.5" />
-    },
-    {
-      path: '/audit-logs',
-      label: 'Audit Logs',
-      icon: <FileText className="w-4 h-4 mr-1.5" />
-    }
-  ] : [];
+  const cls = (active: boolean) =>
+    `px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+      active ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-secondary'
+    }`;
 
   return (
-    <div className="hidden xl:flex items-center gap-0.5">
-      {navItems.map(item => (
-        <Link
-          key={item.path}
-          to={item.path}
-          className={`px-3 py-2 rounded-md text-sm font-medium hover:bg-secondary transition-all flex items-center ${
-            location.pathname === item.path
-              ? 'bg-primary/10 text-primary'
-              : 'text-foreground'
-          }`}
-        >
-          {item.icon}
+    <div className="hidden lg:flex items-center gap-1 rounded-full border bg-card/60 p-1">
+      {primary.map(item => (
+        <Link key={item.path} to={item.path} className={cls(pathname === item.path)}>
           {item.label}
         </Link>
       ))}
-      {adminNavItems.map(item => (
-        <Link
-          key={item.path}
-          to={item.path}
-          className={`px-3 py-2 rounded-md text-sm font-medium hover:bg-secondary transition-all flex items-center ${
-            location.pathname === item.path
-              ? 'bg-primary/10 text-primary'
-              : 'text-foreground'
-          }`}
-        >
-          {item.icon}
-          {item.label}
-        </Link>
-      ))}
+      <DropdownMenu>
+        <DropdownMenuTrigger className={`${cls(moreActive)} flex items-center gap-1 outline-none`}>
+          More <ChevronDown className="h-3.5 w-3.5" />
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-52">
+          {groups.map((g, gi) => (
+            <div key={g.group}>
+              {gi > 0 && <DropdownMenuSeparator />}
+              <DropdownMenuLabel className="text-xs uppercase tracking-wide text-muted-foreground">{g.group}</DropdownMenuLabel>
+              {g.items.map(i => (
+                <DropdownMenuItem key={i.path} onSelect={() => navigate(i.path)}>{i.label}</DropdownMenuItem>
+              ))}
+            </div>
+          ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
     </div>
   );
 };
