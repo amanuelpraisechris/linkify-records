@@ -78,7 +78,7 @@ const App = () => {
                         <Route
                           path="/database"
                           element={
-                            <ProtectedRoute>
+                            <ProtectedRoute adminOnly>
                               <Database />
                             </ProtectedRoute>
                           }

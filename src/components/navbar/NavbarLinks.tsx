@@ -16,11 +16,6 @@ export const NavbarLinks = ({ isAdmin }: NavbarLinksProps) => {
       icon: <LayoutDashboard className="w-4 h-4 mr-1.5" />
     },
     {
-      path: '/database',
-      label: 'Database',
-      icon: <Database className="w-4 h-4 mr-1.5" />
-    },
-    {
       path: '/data-management',
       label: 'Clinic Records',
       icon: <Building2 className="w-4 h-4 mr-1.5" />
@@ -54,6 +49,11 @@ export const NavbarLinks = ({ isAdmin }: NavbarLinksProps) => {
 
   // Admin-only navigation items
   const adminNavItems = isAdmin ? [
+    {
+      path: '/database',
+      label: 'HDSS Database',
+      icon: <Database className="w-4 h-4 mr-1.5" />
+    },
     {
       path: '/audit-logs',
       label: 'Audit Logs',

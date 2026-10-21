@@ -17,7 +17,6 @@ const groups = [
     { path: '/', label: 'Dashboard', icon: LayoutDashboard },
     { path: '/record-entry', label: 'New record & search', icon: FilePlus2 },
     { path: '/data-management', label: 'Clinic records', icon: Building2 },
-    { path: '/database', label: 'HDSS database', icon: Database },
   ]},
   { title: 'Insights', items: [
     { path: '/batch-matching', label: 'Batch match', icon: Zap },
