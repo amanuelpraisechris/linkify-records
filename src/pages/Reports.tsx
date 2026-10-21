@@ -14,6 +14,7 @@ import { loadReportData, logExport, ReportData } from '@/services/reportsService
 import {
   ageGroup, bandCounts, collectorActivity, completeness, fieldAgreement, histogram,
   matchExportRows, pseudoId, rateBy, summarize, toCSV, latestByRecord,
+  cascade, repeatRate, rankDistribution, scoreByDecision, idCompleteness, recentMovers,
 } from '@/utils/reportMetrics';
 
 const ALL = '__all';
@@ -95,6 +96,13 @@ const Reports = () => {
       byVisit: rateBy(filtered.clinic, filtered.matches, c => c.visit_type || ''),
       collectors: collectorActivity(filtered.history),
       complete: completeness(filtered.clinic),
+      cascade: cascade(filtered.clinic, filtered.matches),
+      repeat: repeatRate(filtered.clinic, filtered.matches),
+      rank: rankDistribution(filtered.matches),
+      scores: scoreByDecision(filtered.matches),
+      ids: idCompleteness(filtered.clinic),
+      movers: recentMovers(filtered.clinic),
+      byCollector: rateBy(filtered.clinic, filtered.matches, c => filtered.history.find(h => h.source_id === c.id)?.collector_name || ''),
     };
   }, [filtered]);
 
@@ -115,6 +123,16 @@ const Reports = () => {
       ...([['sex', m.bySex], ['age_group', m.byAge], ['tabia', m.byTabia], ['facility', m.byFacility], ['visit_type', m.byVisit]] as const)
         .flatMap(([sec, rs]) => rs.map(r => ({ section: `match_rate_by_${sec}`, group: r.group, n: r.n, matched: r.matched, rate_pct: r.rate }))),
       ...m.fields.map(f => ({ section: 'field_agreement', group: f.field, n: f.n, matched: '', rate_pct: f.rate })),
+      ...m.cascade.map(c => ({ section: 'cascade', group: c.step, n: c.n, matched: '', rate_pct: c.pctOfPrev })),
+      { section: 'repeat_patients', group: 'repeat_visits', n: m.repeat.repeatVisits, matched: m.repeat.linkedVisits, rate_pct: m.repeat.repeatPct },
+      { section: 'repeat_patients', group: 'consistent_links', n: m.repeat.repeatPatients, matched: '', rate_pct: m.repeat.consistentPct },
+      ...Object.entries(m.rank).map(([k, v]) => ({ section: 'confirmed_candidate_rank', group: k, n: v, matched: '', rate_pct: '' })),
+      { section: 'score_by_decision', group: 'matched_avg', n: '', matched: '', rate_pct: m.scores.matchedAvg },
+      { section: 'score_by_decision', group: 'rejected_avg', n: '', matched: '', rate_pct: m.scores.rejectedAvg },
+      { section: 'review_resolved', group: 'all', n: m.scores.reviewTotal, matched: m.scores.reviewResolved, rate_pct: m.scores.reviewResolvedPct },
+      { section: 'recent_movers', group: 'moved_in_last_year', n: m.movers, matched: '', rate_pct: '' },
+      ...m.byCollector.map(r => ({ section: 'match_rate_by_collector', group: r.group, n: r.n, matched: r.matched, rate_pct: r.rate })),
+      ...m.ids.map(i => ({ section: 'clinic_id_completeness', group: i.label, n: i.n, matched: '', rate_pct: i.pct })),
       { section: 'data_completeness', group: 'all', n: m.s.total, matched: '', rate_pct: m.complete },
     ];
     download(toCSV(rows), `linkage_metrics_${stamp}.csv`);
@@ -183,6 +201,30 @@ const Reports = () => {
               <Stat label="Not yet decided" value={m.s.pending} />
             </div>
             <Card className="break-inside-avoid">
+              <CardHeader className="pb-2"><CardTitle className="text-base">Linkage cascade</CardTitle>
+                <CardDescription>Each step as a share of the step before (Rentsch et al. 2015; PIRL).</CardDescription></CardHeader>
+              <CardContent className="space-y-2">
+                {m.cascade.map(c => (
+                  <div key={c.step} className="text-sm">
+                    <div className="flex justify-between"><span>{c.step}</span><span className="text-muted-foreground">{c.n} · {c.pctOfPrev}%</span></div>
+                    <Progress value={c.pctOfPrev} className="h-1.5" />
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+            <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+              <Stat label="Moved in last year" value={m.movers} hint="Counted separately" />
+              <Stat label="Repeat visits" value={`${m.repeat.repeatPct}%`} hint={`${m.repeat.repeatVisits} of ${m.repeat.linkedVisits} linked visits`} />
+              <Stat label="Repeat links consistent" value={`${m.repeat.consistentPct}%`} hint={`${m.repeat.repeatPatients} repeat patients`} />
+              <Stat label="Reviews resolved" value={`${m.scores.reviewResolvedPct}%`} hint={`${m.scores.reviewResolved} of ${m.scores.reviewTotal}`} />
+            </div>
+            <Card className="break-inside-avoid">
+              <CardHeader className="pb-2"><CardTitle className="text-base">Clinic ID completeness</CardTitle></CardHeader>
+              <CardContent className="space-y-2">
+                {m.ids.map(i => (<div key={i.label} className="text-sm"><div className="flex justify-between"><span>{i.label}</span><span className="text-muted-foreground">{i.n} · {i.pct}%</span></div><Progress value={i.pct} className="h-1.5" /></div>))}
+              </CardContent>
+            </Card>
+            <Card className="break-inside-avoid">
               <CardHeader className="pb-2"><CardTitle className="text-base">Data completeness</CardTitle>
                 <CardDescription>Share of key linkage fields filled in (names, sex, birth date, tabia, kushet, mother's name, facility).</CardDescription></CardHeader>
               <CardContent><Progress value={m.complete} /><p className="mt-2 text-sm font-medium">{m.complete}%</p></CardContent>
@@ -194,6 +236,12 @@ const Reports = () => {
               <Stat label="High confidence" value={m.bands.high} hint="≥ 80%" />
               <Stat label="Needs review" value={m.bands.review} hint="40–79%" />
               <Stat label="No match" value={m.bands['no-match']} hint="< 40%" />
+            </div>
+            <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+              <Stat label="Avg score, confirmed" value={`${m.scores.matchedAvg}%`} />
+              <Stat label="Avg score, rejected" value={`${m.scores.rejectedAvg}%`} />
+              <Stat label="Confirmed was 1st" value={m.rank.first} hint={`${m.rank.top5} in 2–5 · ${m.rank.beyond} beyond`} />
+              <Stat label="Rank not recorded" value={m.rank.unknown} hint="Older decisions" />
             </div>
             <Card className="break-inside-avoid">
               <CardHeader className="pb-2"><CardTitle className="text-base">Score distribution</CardTitle></CardHeader>
@@ -220,6 +268,7 @@ const Reports = () => {
             <RateTable title="By tabia" rows={m.byTabia} />
             <RateTable title="By facility" rows={m.byFacility} />
             <RateTable title="By visit type" rows={m.byVisit} />
+            <RateTable title="By collector" rows={m.byCollector} />
           </TabsContent>
 
           <TabsContent value="collectors" className="print:block">

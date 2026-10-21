@@ -50,6 +50,11 @@ export const NavbarLinks = ({ isAdmin }: NavbarLinksProps) => {
   // Admin-only navigation items
   const adminNavItems = isAdmin ? [
     {
+      path: '/clinic-intake',
+      label: 'Clinic Intake',
+      icon: <FileText className="w-4 h-4 mr-1.5" />
+    },
+    {
       path: '/database',
       label: 'HDSS Database',
       icon: <Database className="w-4 h-4 mr-1.5" />

@@ -5,3 +5,4 @@
 - Tigray record entry stores tabia/kushet in both tabia/kushet and village/subVillage, and Ethiopian names as firstName=given, middleName=father, lastName=grandfather, so the matching engine and older records stay compatible.
 - Dates may be entered in the Ethiopian calendar but are always stored in Gregorian; conversion lives in src/utils/ethiopianCalendar.ts and is covered by tests.
 - Report metrics and research exports are pure functions in src/utils/reportMetrics.ts (tested) fed by src/services/reportsService.ts; exports default to de-identified coded IDs and each export is logged in export_log — keeps reporting auditable and privacy-preserving.
+- Data exports (CSV/JSON of clinic or match records) render only for admins; collectors may view their own matches but never export — keeps identifiable data under controlled, logged access.

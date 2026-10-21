@@ -23,7 +23,7 @@ async function fetchAll<T>(table: 'clinic_records' | 'match_results' | 'match_de
 
 export const loadReportData = async (from?: string, to?: string): Promise<ReportData> => {
   const [clinic, matches, history] = await Promise.all([
-    fetchAll<ClinicRow>('clinic_records', 'id,patient_id,sex,birth_date,tabia,village,kushet,health_facility,visit_type,never_in_dss,consent_obtained,consent_type,first_name,middle_name,last_name,mother_name,created_at', from, to),
+    fetchAll<ClinicRow>('clinic_records', 'id,patient_id,sex,birth_date,tabia,village,kushet,health_facility,visit_type,never_in_dss,consent_obtained,consent_type,first_name,middle_name,last_name,mother_name,identifiers,year_moved_in,user_id,created_at', from, to),
     fetchAll<MatchRow>('match_results', 'id,source_id,match_id,status,confidence,matched_by,matched_at,notes,field_scores,user_id', from, to, 'matched_at'),
     fetchAll<ReportData['history'][number]>('match_decision_history', 'id,source_id,candidate_id,decision,reason,collector_name,created_at', from, to),
   ]);

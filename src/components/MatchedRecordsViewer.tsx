@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Download, CheckCircle2, FileText, Calendar, User, ArrowRight } from 'lucide-react';
 import { saveAs } from 'file-saver';
+import { useAuth } from '@/contexts/auth';
 
 interface MatchedRecordsViewerProps {
   matchResults: MatchResult[];
@@ -23,6 +24,7 @@ const MatchedRecordsViewer = ({ matchResults, sourceRecords, targetRecords }: Ma
     sourceRecord: Record | undefined;
     targetRecord: Record | undefined;
   }>>([]);
+  const { isAdmin } = useAuth();
 
   useEffect(() => {
     // Filter only successfully matched records
@@ -121,7 +123,7 @@ const MatchedRecordsViewer = ({ matchResults, sourceRecords, targetRecords }: Ma
               All successfully matched clinic records with HDSS database entries
             </CardDescription>
           </div>
-          <div className="flex gap-2">
+          {isAdmin && <div className="flex gap-2">
             <Button
               onClick={handleExportCSV}
               disabled={matchedRecords.length === 0}
@@ -140,7 +142,7 @@ const MatchedRecordsViewer = ({ matchResults, sourceRecords, targetRecords }: Ma
               <Download className="w-4 h-4 mr-2" />
               Export JSON
             </Button>
-          </div>
+          </div>}
         </div>
       </CardHeader>
       <CardContent>
@@ -224,7 +226,7 @@ const MatchedRecordsViewer = ({ matchResults, sourceRecords, targetRecords }: Ma
             <CheckCircle2 className="w-16 h-16 mx-auto mb-4 opacity-20" />
             <p className="text-lg font-medium mb-2">No Matched Records Yet</p>
             <p className="text-sm">
-              Successfully matched records will appear here with export options.
+              Successfully matched records will appear here.
             </p>
           </div>
         )}
@@ -235,7 +237,7 @@ const MatchedRecordsViewer = ({ matchResults, sourceRecords, targetRecords }: Ma
               Total matched: <strong className="text-foreground">{matchedRecords.length}</strong> record(s)
             </div>
             <div>
-              Export available in CSV or JSON format
+              {isAdmin ? 'Export available in CSV or JSON format' : 'Exports are available to admins only'}
             </div>
           </div>
         )}
