@@ -1,10 +1,12 @@
 
-import { useState, useEffect } from 'react';
-import { Check, Shield } from 'lucide-react';
+import { useState } from 'react';
+import { Check, Shield, Search, Loader2 } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { SupportedLanguage } from '@/utils/languageUtils';
 import { useToast } from '@/components/ui/use-toast';
+import { findPriorConsent, PriorConsent } from '@/services/consentLookup';
 
 interface ConsentWorkflowTabProps {
   inputLanguage: SupportedLanguage;
@@ -26,6 +28,11 @@ const ConsentWorkflowTab = ({
   const [consentType, setConsentType] = useState<'written' | 'verbal' | 'previous'>('written');
   const [showConsentAlert, setShowConsentAlert] = useState(false);
   const [consentDate, setConsentDate] = useState(new Date().toISOString().split('T')[0]);
+  const [lookup, setLookup] = useState('');
+  const [results, setResults] = useState<PriorConsent[]>([]);
+  const [searching, setSearching] = useState(false);
+  const [searched, setSearched] = useState(false);
+  const [adopted, setAdopted] = useState<string | null>(null);
 
   const handleConsentChange = (checked: boolean) => {
     setConsentGiven(checked);
