@@ -1,10 +1,8 @@
 
 import { useState, useEffect } from 'react';
-import { AlertCircle, Check, Info, Shield } from 'lucide-react';
+import { Check, Shield } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { SupportedLanguage } from '@/utils/languageUtils';
 import { useToast } from '@/components/ui/use-toast';
 
@@ -129,121 +127,61 @@ const ConsentWorkflowTab = ({
     return texts[inputLanguage][key] || texts.latin[key];
   };
 
+  const types = ['written', 'verbal', 'previous'] as const;
+
   return (
-    <div className="space-y-6">
-      <div className="text-center mb-6">
-        <div className="flex items-center justify-center mb-4">
-          <Shield className="h-12 w-12 text-blue-600" />
+    <div className="mx-auto max-w-xl space-y-6">
+      <div className="flex items-start gap-3">
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+          <Shield className="h-5 w-5" />
+        </span>
+        <div>
+          <h2 className="font-display text-xl font-semibold">{getLocalizedText('title')}</h2>
+          <p className="text-sm text-muted-foreground">{getLocalizedText('dataUseDescription')}</p>
         </div>
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-          {getLocalizedText('title')}
-        </h2>
-        <p className="text-gray-600 dark:text-gray-400 mt-2">
-          {getLocalizedText('subtitle')}
-        </p>
       </div>
 
-      <Alert className="bg-blue-50 border-blue-300 dark:bg-blue-950/20">
-        <Info className="h-4 w-4 text-blue-600" />
-        <AlertTitle className="text-blue-800 dark:text-blue-200">
-          {getLocalizedText('dataUseNotice')}
-        </AlertTitle>
-        <AlertDescription className="text-blue-700 dark:text-blue-300">
-          {getLocalizedText('dataUseDescription')}
-        </AlertDescription>
-      </Alert>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>{getLocalizedText('consentTypes')}</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-3">
-            {(['written', 'verbal', 'previous'] as const).map((type) => (
-              <div key={type} className="flex items-center space-x-2">
-                <input
-                  type="radio"
-                  id={type}
-                  name="consentType"
-                  value={type}
-                  checked={consentType === type}
-                  onChange={(e) => setConsentType(e.target.value as typeof consentType)}
-                  className="w-4 h-4 text-blue-600"
-                />
-                <label htmlFor={type} className="text-sm font-medium cursor-pointer">
-                  {getLocalizedText(type)}
-                </label>
-              </div>
-            ))}
-          </div>
-
-          <div className="mt-4">
-            <label htmlFor="consentDate" className="block text-sm font-medium mb-2">
-              {getLocalizedText('consentDate')}
-            </label>
-            <input
-              type="date"
-              id="consentDate"
-              value={consentDate}
-              onChange={(e) => setConsentDate(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-        </CardContent>
-      </Card>
-
-      <Alert className="bg-amber-50 border-amber-300 dark:bg-amber-950/20">
-        <Shield className="h-4 w-4 text-amber-600" />
-        <AlertTitle className="text-amber-800 dark:text-amber-200">
-          {getLocalizedText('privacyNotice')}
-        </AlertTitle>
-        <AlertDescription className="text-amber-700 dark:text-amber-300">
-          {getLocalizedText('privacyDescription')}
-        </AlertDescription>
-      </Alert>
-
-      {showConsentAlert && (
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>{getLocalizedText('consentRequired')}</AlertTitle>
-          <AlertDescription>
-            {getLocalizedText('consentRequiredMsg')}
-          </AlertDescription>
-        </Alert>
-      )}
-
-      <div className="bg-muted/20 p-4 rounded-md border">
-        <div className="flex items-center space-x-2">
-          <Checkbox 
-            id="patient-consent" 
-            checked={consentGiven}
-            onCheckedChange={(checked) => handleConsentChange(checked as boolean)}
-          />
-          <label
-            htmlFor="patient-consent"
-            className="text-sm font-medium leading-none cursor-pointer"
-          >
-            {getLocalizedText('consentCheckbox')}
-          </label>
+      <div className="space-y-2">
+        <p className="text-sm font-medium">{getLocalizedText('consentTypes')}</p>
+        <div className="grid gap-2 sm:grid-cols-3">
+          {types.map(type => (
+            <button
+              key={type}
+              type="button"
+              onClick={() => setConsentType(type)}
+              className={`rounded-xl border p-3 text-left text-sm transition-colors ${
+                consentType === type ? 'border-primary bg-primary/5 text-foreground ring-1 ring-primary' : 'text-muted-foreground hover:bg-secondary'
+              }`}
+            >
+              {getLocalizedText(type)}
+            </button>
+          ))}
         </div>
-        
-        {consentGiven && (
-          <div className="mt-3 text-sm text-green-600 dark:text-green-400 flex items-center">
-            <Check className="w-4 h-4 mr-2" />
-            {getLocalizedText('consentConfirmed')}
-          </div>
-        )}
       </div>
 
-      <div className="flex justify-center pt-4">
-        <Button 
-          onClick={handleProceed}
-          disabled={!consentGiven}
-          className="px-8 py-2"
-        >
-          {getLocalizedText('proceedButton')}
-        </Button>
+      <div className="space-y-2">
+        <label htmlFor="consentDate" className="text-sm font-medium">{getLocalizedText('consentDate')}</label>
+        <input
+          type="date"
+          id="consentDate"
+          value={consentDate}
+          onChange={(e) => setConsentDate(e.target.value)}
+          className="flex h-10 w-full rounded-md border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+        />
       </div>
+
+      <label htmlFor="patient-consent" className={`flex cursor-pointer items-start gap-3 rounded-xl border p-4 transition-colors ${consentGiven ? 'border-primary bg-primary/5' : showConsentAlert ? 'border-destructive' : ''}`}>
+        <Checkbox id="patient-consent" checked={consentGiven} onCheckedChange={(c) => handleConsentChange(c as boolean)} className="mt-0.5" />
+        <span className="text-sm">
+          {getLocalizedText('consentCheckbox')}
+          <span className="mt-1 block text-xs text-muted-foreground">{getLocalizedText('privacyDescription')}</span>
+        </span>
+      </label>
+
+      <Button onClick={handleProceed} disabled={!consentGiven} size="lg" className="w-full">
+        {consentGiven && <Check className="mr-2 h-4 w-4" />}
+        {getLocalizedText('proceedButton')}
+      </Button>
     </div>
   );
 };
