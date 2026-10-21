@@ -48,7 +48,7 @@ const Index = () => {
           </span>
           <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
         </Link>
-        <Link to="/record-entry?tab=search"
+        <Link to="/record-entry"
           className="group flex items-center gap-4 rounded-2xl border bg-card p-5 shadow-soft transition-transform hover:-translate-y-0.5">
           <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-accent text-accent-foreground">
             <Search className="h-6 w-6" />
