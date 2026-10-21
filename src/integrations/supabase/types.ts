@@ -233,6 +233,42 @@ export type Database = {
         }
         Relationships: []
       }
+      match_decision_history: {
+        Row: {
+          candidate_id: string | null
+          collector_name: string
+          created_at: string
+          decision: string
+          id: string
+          match_result_id: string
+          reason: string | null
+          source_id: string
+          user_id: string
+        }
+        Insert: {
+          candidate_id?: string | null
+          collector_name: string
+          created_at?: string
+          decision: string
+          id?: string
+          match_result_id: string
+          reason?: string | null
+          source_id: string
+          user_id: string
+        }
+        Update: {
+          candidate_id?: string | null
+          collector_name?: string
+          created_at?: string
+          decision?: string
+          id?: string
+          match_result_id?: string
+          reason?: string | null
+          source_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       match_results: {
         Row: {
           confidence: number
