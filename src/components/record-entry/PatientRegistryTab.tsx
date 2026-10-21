@@ -42,6 +42,7 @@ interface PatientRegistryTabProps {
   inputLanguage: SupportedLanguage;
   handlePatientFound: (record: Record) => void;
   handleNextToLinkage: () => void;
+  showSaveForLater?: boolean;
   handleSubmit: (e: React.FormEvent) => void;
   healthFacility: string;
   handleHealthFacilityChange: (value: string) => void;
@@ -135,7 +136,7 @@ const PatientRegistryTab = (p: PatientRegistryTabProps) => {
             <ArrowLeft className="w-4 h-4 mr-2" /> Back
           </Button>
           <div className="flex gap-2">
-            <Button type="button" variant="outline" className="hidden sm:inline-flex" onClick={p.handleNextToLinkage}>Save for later search</Button>
+            {p.showSaveForLater && <Button type="button" variant="outline" className="hidden sm:inline-flex" onClick={p.handleNextToLinkage}>Save for later search</Button>}
             {last ? (
               <Button type="button" size="lg" onClick={p.handleSubmit}>
                 <Search className="w-4 h-4 mr-2" /> Find HDSS matches
