@@ -12,7 +12,8 @@ import RecordList from '@/components/RecordList';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Database as DatabaseIcon, Upload, RefreshCw, Trash2, CheckCircle2, AlertCircle } from 'lucide-react';
-import { generateKahdssDemoRecords } from '@/utils/kahdssDemoData';
+import { generateKahdssDemoRecords, generateKahdssDemoCsv } from '@/utils/kahdssDemoData';
+import { saveAs } from 'file-saver';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 const Database = () => {
