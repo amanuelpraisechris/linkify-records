@@ -137,6 +137,18 @@ export const useMatchesState = () => {
       
       // Add the clinic record to our records list
       await addRecord(recordWithConsent, 'clinic');
+
+      // Persist the visit with its consent so admins and the returning-patient lookup see it
+      try {
+        await databaseService.insertClinicRecord(recordWithConsent);
+      } catch (error) {
+        console.error('Error saving clinic record:', error);
+        toast({
+          title: "Not saved to the database",
+          description: "This visit could not be saved online. Please check your connection and sign-in.",
+          variant: "destructive"
+        });
+      }
       
       // Prepare record with source ID for matching
       const recordWithSource = {
