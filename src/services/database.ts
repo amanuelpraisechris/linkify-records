@@ -5,6 +5,7 @@ import { Record, MatchResult } from '@/types';
 
 const COMMUNITY_COLUMNS = ['woreda','tabia','kushet','house_number','father_name','grandfather_name','visit_type','mother_record_id','address','balozi_first_name','balozi_last_name','balozi_middle_name','birth_date','district','email','first_name','household_head','household_members','identifiers','last_name','metadata','middle_name','mother_name','never_in_dss','oldest_member_first_name','oldest_member_last_name','oldest_member_middle_name','patient_id','phone_number','sex','sub_village','telephone','user_id','village','year_moved_in'];
 const CLINIC_COLUMNS = ['woreda','tabia','kushet','house_number','father_name','grandfather_name','visit_type','mother_record_id','mother_name','household_head','address','birth_date','consent_date','consent_obtained','consent_type','district','email','first_name','health_facility','identifiers','last_name','last_visit','metadata','middle_name','never_in_dss','patient_id','phone_number','residency_timeline','sex','sub_village','telephone','user_id','village','visits','year_moved_in'];
+const savedClinicRecordIds = new Set<string>();
 
 /** Keep only columns that exist on the target table so inserts don't fail. */
 const pickColumns = (obj: { [key: string]: unknown }, cols: string[]) =>
@@ -197,18 +198,25 @@ export const databaseService = {
   },
 
   async insertClinicRecord(record: Record): Promise<void> {
+    // Same visit may reach here from submit and from the no-match save; store it once.
+    if (record.id && savedClinicRecordIds.has(record.id)) return;
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error('User not authenticated');
 
+    const r = record as Record & { consentObtained?: boolean; consentDate?: string; consentType?: string };
     const dbRecord = {
       ...convertRecordToDatabase(record, user.id),
       visits: JSON.stringify(record.visits || []),
-      residency_timeline: JSON.stringify(record.residencyTimeline || [])
+      residency_timeline: JSON.stringify(record.residencyTimeline || []),
+      consent_obtained: !!r.consentObtained,
+      consent_date: r.consentDate ? new Date(r.consentDate).toISOString() : null,
+      consent_type: r.consentType ?? null,
     };
     
     const { error } = await supabase
       .from('clinic_records')
       .insert(pickColumns(dbRecord as any, CLINIC_COLUMNS) as TablesInsert<'clinic_records'>);
+    if (!error && record.id) savedClinicRecordIds.add(record.id);
     
     if (error) {
       console.error('Error inserting clinic record:', error);
